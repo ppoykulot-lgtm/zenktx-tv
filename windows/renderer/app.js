@@ -403,7 +403,8 @@ function cleanupPlayer() {
 }
 
 function play(channel) {
-  state.queue = state.visible.slice();
+  const inGuide = state.visible.some((c) => c.key === channel.key);
+  state.queue = inGuide ? state.visible.slice() : [channel];
   state.index = Math.max(0, state.queue.findIndex((c) => c.key === channel.key));
   beginPlayback();
 }
@@ -424,20 +425,46 @@ function beginPlayback() {
   $('playerError').classList.remove('on');
   $('pchip').style.opacity = '1';
   $('pchipName').textContent = channel.name;
-  $('pchipMeta').textContent = `CH ${state.index + 1} / ${state.queue.length} · ${channel.category.toUpperCase()}`;
+  const meta = `CH ${state.index + 1} / ${state.queue.length} · ${(channel.category || 'LIVE').toUpperCase()}`;
+  $('pchipMeta').textContent = 'CONNECTING…';
   setImage($('pchipLogo'), channel.logo);
 
   const video = $('video');
   video.muted = false;
+  video.addEventListener('playing', function firstFrame() {
+    if (state.queue[state.index]?.key === channel.key) $('pchipMeta').textContent = meta;
+  }, { once: true });
 
   if (channel.streamType === 'mpd' && window.dashjs) {
-    state.dash = window.dashjs.MediaPlayer().create();
-    state.dash.initialize(video, channel.url, true);      state.dash.on('error', (event) => {
-        window.__zenkLastStreamError = `dash: ${event.error?.message || 'stream error'}`;
-        fail(`DASH: ${event.error?.message || 'stream error'}`, 'DASH_ERROR');
-      });
+    const dash = window.dashjs.MediaPlayer().create();
+    state.dash = dash;
+    // The stock dash.js settings hold a 12 second buffer before the first
+    // frame and keep scheduling while paused, which is most of the wait on a
+    // live link. Ask for a 2 second start buffer and a shorter target instead.
+    dash.updateSettings({
+      streaming: {
+        buffer: { initialBufferLevel: 2, stableBufferTime: 8, bufferTimeAtTopQuality: 20 },
+        scheduling: { scheduleWhilePaused: false },
+      },
+    });
+    dash.initialize(video, channel.url, true);
+    dash.on('error', (event) => {
+      const raw = event.error?.message || 'stream error';
+      window.__zenkLastStreamError = `dash: ${raw}`;
+      fail(describeDashError(raw), describeDashCode(raw));
+      // dash.js keeps re-attempting a failed stream (a DRM refusal repeats for
+      // about ten seconds). Nothing about the manifest changes in that time,
+      // so the message would arrive late for no gain — stop on the first one.
+      setTimeout(() => {
+        if (state.dash !== dash) return;
+        state.dash = null;
+        try { dash.reset(); } catch (error) { /* already torn down */ }
+      }, 0);
+    });
   } else if (channel.streamType === 'hls' && window.Hls && window.Hls.isSupported()) {
-    const hls = new window.Hls({ enableWorker: true, lowLatencyMode: true, backBufferLength: 30 });
+    const hls = new window.Hls({
+      enableWorker: true, backBufferLength: 30, maxBufferLength: 20, startFragPrefetch: true,
+    });
     state.hls = hls;
     hls.loadSource(channel.url);
     hls.attachMedia(video);
@@ -459,6 +486,25 @@ function beginPlayback() {
 }
 
 let showChipTimer = 0;
+
+// dash.js reports raw MSE/EME text ("DRM: KeySystem Access Denied", "index.mpd
+// is not available"). Neither is something the viewer can fix, so say what it
+// actually means instead of pasting the engine's sentence.
+function describeDashError(raw) {
+  if (/key\s*system|drm|eme|content protection/i.test(raw)) {
+    return 'This channel is DRM-protected (Widevine). Android and Chrome carry the decoder; this Windows build does not, so this one cannot play here. Try another channel.';
+  }
+  if (/not available|40[134]|gone|forbidden|manifest/i.test(raw)) {
+    return 'The channel link has expired or is blocked. These free providers rotate their addresses, so the same channel often works again later.';
+  }
+  return `DASH: ${raw}`;
+}
+
+function describeDashCode(raw) {
+  if (/key\s*system|drm|eme|content protection/i.test(raw)) return 'DRM_PROTECTED';
+  if (/not available|40[134]|gone|forbidden|manifest/i.test(raw)) return 'LINK_EXPIRED';
+  return 'DASH_ERROR';
+}
 
 function describeHlsError(data, code) {
   if (code) {
