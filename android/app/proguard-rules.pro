@@ -1,0 +1,2 @@
+-keep class ph.zenktx.tv.** { *; }
+-dontwarn org.jetbrains.annotations.**

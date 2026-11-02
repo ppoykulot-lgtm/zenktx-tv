@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chipText"
+    android:layout_width="wrap_content"
+    android:layout_height="34dp"
+    android:layout_marginEnd="8dp"
+    android:background="@drawable/bg_chip"
+    android:focusable="true"
+    android:gravity="center"
+    android:letterSpacing="0.06"
+    android:minWidth="78dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:textColor="#B9C6DE"
+    android:textSize="10.5sp"
+    android:textStyle="bold" />

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZENKTX TV STREAM — Design Samples</title>
+<style>
+  :root{
+    --bg:#060911;
+    --bg2:#0A1020;
+    --surface:#111A2B;
+    --surface2:#16213A;
+    --line:rgba(255,255,255,.08);
+    --mint:#35E7C0;
+    --mint-soft:rgba(53,231,192,.14);
+    --blue:#5B8CFF;
+    --text:#F2F5FF;
+    --muted:#8B98B4;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    overflow:hidden;
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(91,140,255,.16), transparent 60%),
+      radial-gradient(900px 600px at 8% 110%, rgba(53,231,192,.10), transparent 60%),
+      linear-gradient(180deg,#070C17 0%, #05070D 100%);
+  }
+
+  /* ---------- shared chrome ---------- */
+  .topbar{
+    position:absolute;top:0;left:0;right:0;
+    height:96px;
+    display:flex;align-items:center;gap:28px;
+    padding:0 64px;
+    z-index:40;
+    background:linear-gradient(180deg, rgba(4,7,13,.92) 0%, rgba(4,7,13,0) 100%);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand svg{width:44px;height:44px;display:block}
+  .brand .word{display:flex;flex-direction:column;line-height:1}
+  .brand .word b{font-size:22px;letter-spacing:3px;font-weight:800}
+  .brand .word span{font-size:10px;letter-spacing:4.2px;color:var(--mint);margin-top:5px;font-weight:600}
+
+  .switcher{
+    margin-left:auto;
+    display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--line);
+    padding:8px;border-radius:999px;
+  }
+  .switcher .lbl{
+    font-size:11px;letter-spacing:2.4px;color:var(--muted);
+    padding:0 12px 0 14px;font-weight:600;
+  }
+  .switcher button{
+    font:inherit;
+    border:1px solid transparent;
+    background:transparent;
+    color:var(--muted);
+    font-size:13px;font-weight:700;letter-spacing:.6px;
+    padding:10px 18px;border-radius:999px;
+    cursor:pointer;
+    transition:background .18s ease,color .18s ease,transform .18s ease,border-color .18s ease;
+  }
+  .switcher button[data-focus].is-focused{
+    background:var(--mint-soft);
+    border-color:rgba(53,231,192,.55);
+    color:var(--text);
+    transform:scale(1.04);
+  }
+  .switcher button.active{background:#fff;color:#08101F}
+
+  .clock{
+    margin-left:26px;font-variant-numeric:tabular-nums;
+    font-size:15px;color:var(--muted);letter-spacing:1px;
+  }
+
+  .hintbar{
+    position:absolute;bottom:0;left:0;right:0;height:64px;
+    display:flex;align-items:center;gap:26px;padding:0 64px;
+    font-size:12.5px;color:var(--muted);letter-spacing:.4px;
+    background:linear-gradient(0deg, rgba(3,5,10,.95), rgba(3,5,10,0));
+    z-index:40;
+  }
+  .hintbar kbd{
+    font:inherit;font-size:11px;font-weight:700;
+    color:#C9D4EA;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.10);
+    border-bottom-width:2px;
+    border-radius:7px;padding:4px 9px;margin-right:7px;
+  }
+  .hintbar .sp{flex:1}
+  .hintbar .dev{display:flex;align-items:center;gap:9px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint)}
+
+  /* ---------- focus ---------- */
+  [data-focus]{outline:none;transition:transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s ease, background .22s ease, border-color .22s ease}
+  .ring{position:relative}
+
+  /* ============ DESIGN A — AURORA (hero + rows) ============ */
+  .a-wrap{position:absolute;inset:0;padding:104px 0 70px;display:flex}
+  .a-rail{
+    width:96px;flex:0 0 96px;display:flex;flex-direction:column;
+    align-items:center;gap:14px;padding:16px 0 8px;
+  }
+  .a-rail .ico{
+    width:60px;height:60px;border-radius:18px;
+    display:grid;place-items:center;
+    color:var(--muted);
+    background:transparent;border:1px solid transparent;
+    font-size:22px;
+  }
+  .a-rail .ico.is-focused{
+    background:var(--mint-soft);border-color:rgba(53,231,192,.45);color:#DFFFF7;
+    transform:scale(1.06);box-shadow:0 14px 34px rgba(53,231,192,.16)
+  }
+  .a-rail .ico.on{color:#EAF3FF;background:rgba(255,255,255,.05)}
+
+  .a-body{flex:1;min-width:0;padding-right:56px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+  .a-body::-webkit-scrollbar{display:none}
+
+  .a-hero{
+    position:relative;margin:0 0 26px 0;
+    height:326px;border-radius:26px;overflow:hidden;
+    border:1px solid rgba(255,255,255,.07);
+    background:
+      radial-gradient(700px 320px at 82% 20%, rgba(91,140,255,.30), transparent 62%),
+      linear-gradient(102deg,#101C33 0%, #0C1526 60%, #0A1220 100%);
+    display:flex;align-items:center;padding:0 54px;gap:44px;
+  }
+  .a-hero:before{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,.028) 0 2px, transparent 2px 9px);
+    opacity:.5;pointer-events:none;
+  }
+  .a-hero .logo{
+    width:132px;height:132px;flex:0 0 132px;border-radius:26px;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);
+    display:grid;place-items:center;overflow:hidden;z-index:2;
+  }
+  .a-hero .logo img{width:100%;height:100%;object-fit:contain;padding:14px}
+  .a-hero .info{position:relative;z-index:2;min-width:0;flex:1}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:800;letter-spacing:2.2px;
+    color:#04120F;background:var(--mint);
+    padding:7px 12px;border-radius:7px;
+  }
+  .a-hero h1{font-size:50px;font-weight:800;letter-spacing:-.8px;margin:16px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .a-hero .meta{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:14.5px;letter-spacing:.4px}
+  .a-hero .meta i{width:4px;height:4px;border-radius:50%;background:#3D4A63;display:inline-block}
+  .a-hero .actions{display:flex;gap:14px;margin-top:26px}
+  .btn{
+    display:inline-flex;align-items:center;gap:11px;
+    font-size:15px;font-weight:700;letter-spacing:.3px;
+    padding:15px 26px;border-radius:13px;border:1px solid transparent;
+    background:rgba(255,255,255,.08);color:var(--text);cursor:pointer;
+    transition:all .2s ease;
+  }
+  .btn.primary{background:#fff;color:#08101F}
+  .btn.is-focused{transform:scale(1.045);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  .btn.primary.is-focused{box-shadow:0 16px 44px rgba(255,255,255,.22)}
+  .btn:not(.primary).is-focused{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.28)}
+  .a-hero .hstats{
+    position:absolute;right:54px;top:44px;display:flex;gap:38px;z-index:2;text-align:right;
+  }
+  .a-hero .hstats div{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .a-hero .hstats b{font-size:26px;font-weight:800;letter-spacing:-.5px;color:#EAF1FF}
+  .a-hero .hstats span{font-size:9.5px;letter-spacing:2.2px;color:#6E7E9C;font-weight:700}
+  .a-hero .art{
+    position:absolute;right:-40px;top:-30px;bottom:-30px;width:460px;
+    background:radial-gradient(closest-side, rgba(53,231,192,.22), transparent 70%);
+    filter:blur(6px);pointer-events:none;
+  }
+
+  .a-row{margin:0 0 30px}
+  .a-row .rt{display:flex;align-items:baseline;gap:14px;margin:0 4px 14px}
+  .a-row .rt h3{font-size:19px;font-weight:700;letter-spacing:.2px}
+  .a-row .rt span{font-size:12.5px;color:var(--muted);letter-spacing:.8px;font-weight:600}
+  .a-strip{display:flex;gap:16px;padding:6px 4px 10px;overflow-x:auto;scrollbar-width:none}
+  .a-strip::-webkit-scrollbar{display:none}
+
+  .card{
+    flex:0 0 250px;width:250px;border-radius:16px;overflow:hidden;
+    background:var(--surface);border:1px solid var(--line);
+    cursor:pointer;position:relative;
+  }
+  .card .thumb{
+    height:140px;position:relative;
+    background:linear-gradient(150deg,#152238,#0D1526);
+    display:grid;place-items:center;overflow:hidden;
+  }
+  .card .thumb img{width:100px;height:100px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
+  .card .thumb .badtag{
+    position:absolute;left:10px;top:10px;font-size:9.5px;font-weight:800;letter-spacing:1.4px;
+    background:rgba(4,8,16,.72);color:#BFE9DF;padding:5px 8px;border-radius:6px;
+    border:1px solid rgba(53,231,192,.28);
+  }
+  .card .live{
+    position:absolute;right:10px;top:10px;display:flex;align-items:center;gap:6px;
+    font-size:9.5px;font-weight:800;letter-spacing:1.4px;color:#FF8B8B;
+    background:rgba(4,8,16,.72);padding:5px 8px;border-radius:6px;
+  }
+  .card .live b{width:6px;height:6px;border-radius:50%;background:#FF5C5C;display:block}
+  .card .cbody{padding:13px 14px 15px}
+  .card .cbody .nm{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .cbody .cat{font-size:11.5px;color:var(--muted);margin-top:5px;letter-spacing:.6px}
+  .card.is-focused{
+    transform:translateY(-6px) scale(1.045);
+    border-color:rgba(53,231,192,.62);
+    box-shadow:0 22px 50px rgba(0,0,0,.62), 0 0 0 2px rgba(53,231,192,.35);
+    z-index:5;
+  }
+  .card.is-focused .thumb{background:linear-gradient(150deg,#1B3050,#0E1A2E)}
+
+  /* ============ DESIGN B — GUIDE GRID ============ */
+  .b-wrap{position:absolute;inset:0;padding:100px 56px 70px;display:flex;flex-direction:column}
+  .b-chips{display:flex;gap:10px;margin-bottom:22px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:4px}
+  .b-chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;font-size:13.5px;font-weight:700;letter-spacing:.5px;
+    padding:12px 22px;border-radius:11px;
+    background:rgba(255,255,255,.045);border:1px solid var(--line);color:#B9C6DE;
+    cursor:pointer;white-space:nowrap;
+  }
+  .chip.is-focused{background:rgba(53,231,192,.16);border-color:rgba(53,231,192,.6);color:#EAFFF9;transform:translateY(-2px)}
+  .chip.active{background:#F2F5FF;color:#08101F;border-color:#F2F5FF}
+
+  .b-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#243149 transparent;padding:2px 2px 6px}
+  .b-scroll::-webkit-scrollbar{width:6px}
+  .b-scroll::-webkit-scrollbar-thumb{background:#243149;border-radius:9px}
+  .b-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+  .tile{
+    border-radius:13px;background:rgba(255,255,255,.035);border:1px solid var(--line);
+    padding:16px 12px 13px;display:flex;flex-direction:column;align-items:center;gap:10px;
+    cursor:pointer;min-height:132px;justify-content:center;
+  }
+  .tile img{width:66px;height:66px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
+  .tile .nm{font-size:12px;font-weight:600;color:#C7D2E6;text-align:center;line-height:1.35;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+  .tile.is-focused{
+    background:rgba(53,231,192,.10);border-color:rgba(53,231,192,.65);
+    transform:translateY(-3px) scale(1.05);
+    box-shadow:0 18px 40px rgba(0,0,0,.55), 0 0 0 2px rgba(53,231,192,.3);z-index:3;
+  }
+  .tile.is-focused .nm{color:#F4F9FF}
+
+  .b-detail{
+    margin-top:18px;height:112px;flex:0 0 112px;border-radius:18px;
+    border:1px solid var(--line);
+    background:linear-gradient(100deg, rgba(22,33,58,.9), rgba(12,18,32,.9));
+    display:flex;align-items:center;gap:22px;padding:0 26px;
+  }
+  .b-detail .dl{
+    width:88px;height:88px;border-radius:14px;background:rgba(255,255,255,.05);
+    display:grid;place-items:center;overflow:hidden;flex:0 0 88px;border:1px solid var(--line);
+  }
+  .b-detail .dl img{width:74px;height:74px;object-fit:contain}
+  .b-detail h2{font-size:24px;font-weight:800;letter-spacing:-.3px}
+  .b-detail .mrow{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-top:8px}
+  .b-detail .tagline{
+    display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:1.6px;
+    color:#9BFFE9;background:rgba(53,231,192,.12);border:1px solid rgba(53,231,192,.3);
+    padding:4px 9px;border-radius:6px;margin-right:8px;
+  }
+  .b-detail .sp{flex:1}
+  .b-detail .btn{padding:12px 22px;font-size:14px}
+
+  /* ============ DESIGN C — SIDEBAR SPOTLIGHT ============ */
+  .c-wrap{position:absolute;inset:0;display:flex;padding:0}
+  .c-side{
+    width:268px;flex:0 0 268px;padding:104px 20px 12px;margin-bottom:76px;
+    display:flex;flex-direction:column;gap:6px;
+    border-right:1px solid rgba(255,255,255,.055);
+    background:linear-gradient(180deg, rgba(11,18,32,.6), rgba(6,10,18,.2));
+    overflow-y:auto;scrollbar-width:none;
+  }
+  .c-side::-webkit-scrollbar{display:none}
+  .c-side .nav{
+    display:flex;align-items:center;gap:14px;
+    padding:15px 16px;border-radius:12px;font-size:15px;font-weight:600;color:#9BA8C2;
+    cursor:pointer;border:1px solid transparent;
+  }
+  .c-side .nav .ic{width:22px;text-align:center;font-size:17px;opacity:.9}
+  .c-side .nav.is-focused{background:rgba(53,231,192,.13);border-color:rgba(53,231,192,.42);color:#F2F5FF;transform:translateX(4px)}
+  .c-side .nav.on{color:#F2F5FF;background:rgba(255,255,255,.045)}
+  .c-side .nav.on .ic{color:var(--mint)}
+  .c-side .sec{margin:26px 0 8px;padding:0 16px;font-size:10.5px;letter-spacing:2.4px;color:#5E6C88;font-weight:700}
+
+  .c-main{flex:1;min-width:0;display:flex;padding:100px 52px 76px 40px;gap:34px}
+  .c-spot{flex:1.55;min-width:0;display:flex;flex-direction:column}
+  .c-prev{
+    position:relative;flex:1;border-radius:24px;overflow:hidden;
+    border:1px solid var(--line);
+    background:
+      radial-gradient(700px 420px at 72% 30%, rgba(91,140,255,.28), transparent 66%),
+      linear-gradient(160deg,#111E36,#080E1B 75%);
+    display:grid;place-items:center;
+  }
+  .c-prev:after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:56%;
+    background:linear-gradient(0deg, rgba(4,7,14,.96), transparent);
+  }
+  .c-prev .biglogo{
+    width:210px;height:210px;display:grid;place-items:center;position:relative;z-index:1;
+  }
+  .c-prev .biglogo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 20px 44px rgba(0,0,0,.6))}
+  .c-prev .now{
+    position:absolute;left:0;right:0;bottom:0;padding:34px 38px;z-index:2;
+  }
+  .c-prev .now .kick{font-size:10.5px;font-weight:800;letter-spacing:2.6px;color:var(--mint);margin-bottom:12px}
+  .c-prev .now h1{font-size:42px;font-weight:800;letter-spacing:-.8px;line-height:1.05;margin-bottom:12px}
+  .c-prev .now p{font-size:14px;color:#9EACC6;line-height:1.6;max-width:640px}
+  .c-prev .now .actions{display:flex;gap:12px;margin-top:22px}
+  .c-prog{
+    margin-top:20px;display:flex;align-items:center;gap:16px;
+    font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  .c-prog .bar{flex:1;height:5px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+  .c-prog .bar i{display:block;height:100%;width:46%;background:linear-gradient(90deg,var(--mint),var(--blue));border-radius:9px}
+
+  .c-listwrap{flex:1;min-width:0;display:flex;flex-direction:column}
+  .c-listwrap .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:0 4px}
+  .c-listwrap .hd h3{font-size:16px;font-weight:700;letter-spacing:.3px}
+  .c-listwrap .hd span{font-size:11.5px;color:#61708D;letter-spacing:1.4px;font-weight:700}
+  .c-list{flex:1;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:8px;padding:2px}
+  .c-list::-webkit-scrollbar{display:none}
+  .crow{
+    display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:13px;
+    border:1px solid transparent;cursor:pointer;background:rgba(255,255,255,.022);
+  }
+  .crow img{width:42px;height:42px;object-fit:contain;flex:0 0 42px}
+  .crow .t{min-width:0;flex:1}
+  .crow .t .n{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .t .g{font-size:11px;color:#6C7B99;margin-top:4px;letter-spacing:.5px}
+  .crow .num{font-size:11px;color:#4C5A76;font-weight:700;font-variant-numeric:tabular-nums}
+  .crow.is-focused{
+    background:rgba(53,231,192,.10);border-color:rgba(53,231,192,.55);
+    transform:translateX(-4px);box-shadow:0 10px 26px rgba(0,0,0,.4);
+  }
+  .crow.is-focused .t .n{color:#F2F5FF}
+
+  /* ---------- player overlay ---------- */
+  .player{
+    position:absolute;inset:0;z-index:90;display:none;
+    background:#000;
+  }
+  .player.show{display:block;animation:fade .28s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .player .fill{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(900px 520px at 50% 42%, rgba(53,231,192,.10), transparent 68%),
+      linear-gradient(140deg,#0B1424,#05080F);
+    display:grid;place-items:center;
+  }
+  .player .fill .mark{width:190px;height:190px;opacity:.9}
+  .player .fill .mark img{width:100%;height:100%;object-fit:contain}
+  .player .fill .pulse{
+    position:absolute;width:190px;height:190px;border-radius:50%;
+    border:2px solid rgba(53,231,192,.35);animation:pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse{0%{transform:scale(.9);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+  .player .ov{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+    padding:56px 64px;
+    background:linear-gradient(180deg, rgba(0,0,0,.75) 0%, transparent 26%, transparent 62%, rgba(0,0,0,.9) 100%);
+  }
+  .player .ov .phead{display:flex;align-items:center;gap:16px}
+  .player .ov .phead img{width:52px;height:52px;object-fit:contain}
+  .player .ov .phead h2{font-size:26px;font-weight:800}
+  .player .ov .phead .sub{font-size:12px;color:#93A1BC;letter-spacing:1.4px;margin-top:6px;font-weight:700}
+  .player .ov .pbot .bar{height:5px;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden;margin-bottom:22px}
+  .player .ov .pbot .bar i{display:block;height:100%;width:38%;background:var(--mint)}
+  .player .ov .pbot .ctrl{display:flex;align-items:center;gap:26px;font-size:13px;color:#C4CEE2}
+  .player .ov .pbot .ctrl .key{
+    font-size:11px;font-weight:700;color:#C9D4EA;background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:5px 10px;margin-right:8px;
+  }
+  .player .ov .pbot .ctrl .sp{flex:1}
+
+  /* ---------- misc ---------- */
+  .loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:14px;letter-spacing:2px}
+  .fallback{
+    width:100%;height:100%;display:grid;place-items:center;
+    font-size:26px;font-weight:800;color:#5C6C8C;letter-spacing:1px;
+    background:linear-gradient(150deg,#16233A,#0C1524);
+  }
+  .toast{
+    position:absolute;bottom:84px;left:50%;transform:translateX(-50%);
+    background:rgba(10,16,28,.96);border:1px solid rgba(53,231,192,.35);
+    color:#DFFFF7;font-size:13px;font-weight:600;letter-spacing:.6px;
+    padding:13px 22px;border-radius:12px;z-index:95;
+    opacity:0;transition:opacity .25s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ *  ZENKTX TV STREAM — design samples
+ *  10-foot UI, remote-first. Keys: arrows = move, Enter = select,
+ *  Backspace/Esc = back, 1/2/3 = switch design.
+ * ------------------------------------------------------------------ */
+
+const state = {
+  channels: [],
+  variant: 'B',   // chosen design: B · Guide
+  focus: null,
+  catFilter: 'All',
+  side: 0,
+  player: null,
+};
+
+const CATS = ['All','News','Sports','Movies','Kids','Entertainment','Documentary','Music','International'];
+
+/* ---------- helpers ---------- */
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const initials = name => (name || '?').replace(/[^A-Za-z0-9 ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || 'TV';
+
+function logoNode(ch, cls=''){
+  const wrap = el('span', cls);
+  if (ch.logo){
+    const img = el('img');
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    img.src = ch.logo;
+    img.alt = ch.name;
+    img.onerror = () => { wrap.innerHTML = ''; wrap.appendChild(el('span','fallback', esc(initials(ch.name)))); };
+    wrap.appendChild(img);
+  } else {
+    wrap.appendChild(el('span','fallback', esc(initials(ch.name))));
+  }
+  return wrap;
+}
+
+function byCat(cat){ return cat === 'All' ? state.channels : state.channels.filter(c => c.category === cat); }
+function pickFeatured(){
+  const pref = ['TV5','A2Z','GMA 7','ABS-CBN','Kapamilya','PBA','NBA TV'];
+  for (const p of pref){
+    const hit = state.channels.find(c => c.name.toLowerCase().includes(p.toLowerCase()) && c.logo);
+    if (hit) return hit;
+  }
+  return state.channels.find(c => c.logo) || state.channels[0];
+}
+function mockProgram(ch){
+  const map = {
+    News:['Balita Ngayon','Morning Report','Late Night News'],
+    Sports:['Live Game','Sports Center','Matchday'],
+    Movies:['Feature Film','Cinema Block','Movie Night'],
+    Kids:['Cartoon Time','Kids Club','Toon Marathon'],
+    Music:['Music Countdown','Live Sessions','Hit List'],
+    Documentary:['Wild Earth','Deep Dive','Explorers'],
+    Entertainment:['Variety Show','Talk & Tell','Prime Time'],
+    International:['World Report','Global Live','International Desk'],
+  };
+  const list = map[ch.category] || ['Now Playing'];
+  return list[ch.id % list.length];
+}
+
+/* ---------- icons (inline, render the same on every TV) ---------- */
+const svg = (d, extra='') => `<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
+const ICONS = {
+  live:  svg('<circle cx="12" cy="12" r="3.1"/><path d="M6.4 6.4a7.9 7.9 0 0 0 0 11.2M17.6 6.4a7.9 7.9 0 0 1 0 11.2"/>'),
+  guide: svg('<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3 9.6h18M8.6 9.6V19"/>'),
+  star:  svg('<path d="M12 3.8l2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 17.1l-5.2 2.7 1-5.75-4.2-4.1 5.8-.85z"/>'),
+  film:  svg('<rect x="3" y="4.5" width="18" height="15" rx="2.2"/><path d="M7.5 4.5v15M16.5 4.5v15"/>'),
+  music: svg('<circle cx="7" cy="17.2" r="2.4"/><circle cx="18" cy="15.2" r="2.4"/><path d="M9.4 17.2V7.2l11-2.2v10.2"/>'),
+  gear:  svg('<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/>'),
+  dot:   svg('<circle cx="12" cy="12" r="4.5" fill="currentColor" stroke="none"/>'),
+};
+
+/* ---------- chrome ---------- */
+function topbar(){
+  const b = el('div','topbar');
+  b.innerHTML = `
+    <div class="brand">
+      <svg viewBox="0 0 512 512" aria-hidden="true">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#59FFD8"/><stop offset="1" stop-color="#1FBFD9"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7BA6FF"/><stop offset="1" stop-color="#4B6BFF"/>
+          </linearGradient>
+        </defs>
+        <rect width="512" height="512" rx="118" fill="#0A1020"/>
+        <g stroke="url(#g1)" stroke-linecap="round" fill="none" opacity=".5">
+          <path d="M382 138a92 92 0 0 1 0 130" stroke-width="13"/>
+          <path d="M412 108a134 134 0 0 1 0 190" stroke-width="11" opacity=".6"/>
+        </g>
+        <rect x="112" y="168" width="230" height="52" rx="26" fill="url(#g1)"/>
+        <rect x="112" y="292" width="176" height="52" rx="26" fill="url(#g2)"/>
+        <path d="M300 168 L196 344" stroke="url(#g1)" stroke-width="52" stroke-linecap="round" fill="none" opacity=".92"/>
+        <path d="M322 296 L372 322 L322 348 Z" fill="#F2F5FF"/>
+        <rect x="112" y="378" width="288" height="16" rx="8" fill="#F2F5FF" opacity=".16"/>
+      </svg>
+      <div class="word"><b>ZENKTX</b><span>TV STREAM</span></div>
+    </div>
+  `;
+  const sw = el('div','switcher');
+  sw.appendChild(el('div','lbl','DESIGN'));
+  [['A','Aurora'],['B','Guide'],['C','Spotlight']].forEach(([k,label])=>{
+    const btn = el('button', state.variant===k ? 'active':'', `${k} · ${label}`);
+    btn.dataset.focus = '';
+    btn.dataset.action = 'variant';
+    btn.dataset.value = k;
+    sw.appendChild(btn);
+  });
+  b.appendChild(sw);
+  const c = el('div','clock','');
+  c.id = 'clock';
+  b.appendChild(c);
+  return b;
+}
+
+function hintbar(){
+  const h = el('div','hintbar');
+  h.innerHTML = `
+    <span><kbd>◀</kbd><kbd>▶</kbd><kbd>▲</kbd><kbd>▼</kbd> Move</span>
+    <span><kbd>OK</kbd> Select / Play</span>
+    <span><kbd>BACK</kbd> Return</span>
+    <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Switch design</span>
+    <span class="sp"></span>
+    <span class="dev"><span class="dot"></span> Android TV · 1920×1080 · D-pad ready</span>
+  `;
+  return h;
+}
+
+/* ================= DESIGN A — AURORA ================= */
+function renderA(root){
+  const wrap = el('div','a-wrap');
+
+  const rail = el('div','a-rail');
+  const railItems = [[ICONS.live,'Live'],[ICONS.guide,'Guide'],[ICONS.star,'Favorites'],[ICONS.film,'Movies'],[ICONS.music,'Music'],[ICONS.gear,'Settings']];
+  railItems.forEach(([ic,label],i)=>{
+    const it = el('div','ico'+(i===0?' on':''), ic);
+    it.dataset.focus=''; it.dataset.action='nav'; it.dataset.value=label;
+    it.title = label;
+    rail.appendChild(it);
+  });
+  wrap.appendChild(rail);
+
+  const body = el('div','a-body');
+  const feat = pickFeatured();
+
+  const hero = el('div','a-hero');
+  const art = el('div','art'); hero.appendChild(art);
+  const hl = el('div','logo'); hl.appendChild(logoNode(feat)); hero.appendChild(hl);
+  const hi = el('div','info');
+  hi.appendChild(el('span','pill','LIVE NOW'));
+  hi.appendChild(el('h1',null,esc(feat.name)));
+  const meta = el('div','meta');
+  meta.innerHTML = `<span>${esc(feat.category)}</span><i></i><span>${esc(feat.quality)}</span><i></i><span>${esc(mockProgram(feat))}</span>`;
+  hi.appendChild(meta);
+  const act = el('div','actions');
+  const play = el('button','btn primary','▶  Watch Now');
+  play.dataset.focus=''; play.dataset.action='play'; play.dataset.id=feat.id;
+  const fav = el('button','btn','＋  Add to Favorites');
+  fav.dataset.focus=''; fav.dataset.action='fav'; fav.dataset.id=feat.id;
+  act.append(play,fav); hi.appendChild(act);
+  hero.appendChild(hi);
+
+  const stats = el('div','hstats');
+  stats.innerHTML = `
+    <div><b>${state.channels.length}</b><span>CHANNELS</span></div>
+    <div><b>${new Set(state.channels.map(c=>c.category)).size}</b><span>CATEGORIES</span></div>
+    <div><b>${state.channels.filter(c=>c.isFilipino).length}</b><span>PINOY</span></div>`;
+  hero.appendChild(stats);
+
+  body.appendChild(hero);
+
+  const rows = [
+    ['Live Now', state.channels.filter(c=>c.isFilipino).slice(0,14)],
+    ['Pinoy Channels', state.channels.filter(c=>c.isFilipino).slice(14,30)],
+    ['Sports', byCat('Sports').slice(0,14)],
+    ['Movies', byCat('Movies').slice(0,14)],
+    ['Kids', byCat('Kids').slice(0,14)],
+    ['Documentary', byCat('Documentary').slice(0,14)],
+  ];
+
+  rows.forEach(([title, list])=>{
+    if (!list.length) return;
+    const row = el('div','a-row');
+    const rt = el('div','rt');
+    rt.innerHTML = `<h3>${esc(title)}</h3><span>${list.length} channels</span>`;
+    row.appendChild(rt);
+    const strip = el('div','a-strip');
+    list.forEach(ch=>{
+      const card = el('div','card');
+      card.dataset.focus=''; card.dataset.action='play'; card.dataset.id=ch.id;
+      card.dataset.channel=ch.id;
+      const thumb = el('div','thumb');
+      thumb.appendChild(logoNode(ch));
+      thumb.appendChild(el('div','badtag', esc(ch.category.toUpperCase())));
+      thumb.appendChild(el('div','live','<b></b>LIVE'));
+      card.appendChild(thumb);
+      const cb = el('div','cbody');
+      cb.appendChild(el('div','nm', esc(ch.name)));
+      cb.appendChild(el('div','cat', esc(mockProgram(ch))));
+      card.appendChild(cb);
+      strip.appendChild(card);
+    });
+    row.appendChild(strip);
+    body.appendChild(row);
+  });
+
+  wrap.appendChild(body);
+  root.appendChild(wrap);
+}
+
+/* ================= DESIGN B — GUIDE GRID ================= */
+function renderB(root){
+  const wrap = el('div','b-wrap');
+
+  const chips = el('div','b-chips');
+  CATS.forEach(cat=>{
+    const c = el('div','chip'+(state.catFilter===cat?' active':''), esc(cat));
+    c.dataset.focus=''; c.dataset.action='cat'; c.dataset.value=cat;
+    chips.appendChild(c);
+  });
+  wrap.appendChild(chips);
+
+  const scroll = el('div','b-scroll');
+  const grid = el('div','b-grid');
+  const list = byCat(state.catFilter).slice(0, 240);
+  list.forEach(ch=>{
+    const t = el('div','tile');
+    t.dataset.focus=''; t.dataset.action='select'; t.dataset.id=ch.id; t.dataset.channel=ch.id;
+    t.appendChild(logoNode(ch));
+    t.appendChild(el('div','nm', esc(ch.name)));
+    grid.appendChild(t);
+  });
+  scroll.appendChild(grid);
+  wrap.appendChild(scroll);
+
+  const detail = el('div','b-detail');
+  detail.id = 'b-detail';
+  wrap.appendChild(detail);
+
+  root.appendChild(wrap);
+  updateBDetail(list[0] || state.channels[0]);
+}
+
+function updateBDetail(ch){
+  const d = document.getElementById('b-detail');
+  if (!d || !ch) return;
+  d.innerHTML = '';
+  const dl = el('div','dl'); dl.appendChild(logoNode(ch)); d.appendChild(dl);
+  const info = el('div');
+  info.innerHTML = `
+    <h2>${esc(ch.name)}</h2>
+    <div class="mrow"><span class="tagline">${esc(ch.category.toUpperCase())}</span>
+      <span>${esc(mockProgram(ch))}</span><span>·</span><span>${esc(ch.quality)}</span><span>·</span>
+      <span>${esc(ch.streamType.toUpperCase())}</span></div>`;
+  d.appendChild(info);
+  d.appendChild(el('div','sp'));
+  const b = el('button','btn primary','▶  Watch');
+  b.dataset.focus=''; b.dataset.action='play'; b.dataset.id=ch.id;
+  d.appendChild(b);
+}
+
+/* ================= DESIGN C — SPOTLIGHT ================= */
+function renderC(root){
+  const wrap = el('div','c-wrap');
+
+  const side = el('div','c-side');
+  const navs = [[ICONS.live,'Live TV'],[ICONS.guide,'Guide'],[ICONS.film,'Movies'],[ICONS.music,'Music'],[ICONS.star,'Favorites'],[ICONS.gear,'Settings']];
+  navs.forEach(([ic,label],i)=>{
+    const n = el('div','nav'+(i===0?' on':''), `<span class="ic">${ic}</span><span>${esc(label)}</span>`);
+    n.dataset.focus=''; n.dataset.action='nav'; n.dataset.value=label;
+    side.appendChild(n);
+  });
+  side.appendChild(el('div','sec','CATEGORIES'));
+  CATS.filter(c=>c!=='All').forEach(cat=>{
+    const n = el('div','nav',`<span class="ic">${ICONS.dot}</span><span>${esc(cat)}</span>`);
+    n.dataset.focus=''; n.dataset.action='cat'; n.dataset.value=cat;
+    side.appendChild(n);
+  });
+  wrap.appendChild(side);
+
+  const main = el('div','c-main');
+
+  const spot = el('div','c-spot');
+  const prev = el('div','c-prev');
+  const big = el('div','biglogo'); big.id='c-biglogo';
+  prev.appendChild(big);
+  const now = el('div','now');
+  now.innerHTML = `
+    <div class="kick">NOW PLAYING</div>
+    <h1 id="c-title">—</h1>
+    <p id="c-desc">—</p>
+    <div class="actions">
+      <button class="btn primary" data-focus data-action="play" id="c-play">▶  Watch Now</button>
+      <button class="btn" data-focus data-action="fav">＋  Favorite</button>
+    </div>`;
+  prev.appendChild(now);
+  spot.appendChild(prev);
+  const prog = el('div','c-prog');
+  prog.innerHTML = `<span>08:00</span><span class="bar"><i></i></span><span>09:00</span><span>·</span><span id="c-prog-name">—</span>`;
+  spot.appendChild(prog);
+  main.appendChild(spot);
+
+  const listwrap = el('div','c-listwrap');
+  const hd = el('div','hd');
+  hd.innerHTML = `<h3>Channels</h3><span id="c-count"></span>`;
+  listwrap.appendChild(hd);
+  const clist = el('div','c-list');
+  clist.id='c-list';
+  listwrap.appendChild(clist);
+  main.appendChild(listwrap);
+
+  wrap.appendChild(main);
+  root.appendChild(wrap);
+
+  fillCList();
+}
+
+function fillCList(){
+  const clist = document.getElementById('c-list');
+  const cat = state.catFilter === 'All' ? null : state.catFilter;
+  const list = (cat ? byCat(cat) : state.channels).slice(0, 300);
+  document.getElementById('c-count').textContent = list.length + ' CH';
+  clist.innerHTML = '';
+  list.forEach((ch,i)=>{
+    const r = el('div','crow');
+    r.dataset.focus=''; r.dataset.action='hover'; r.dataset.id=ch.id; r.dataset.channel=ch.id;
+    r.appendChild(logoNode(ch));
+    const t = el('div','t');
+    t.appendChild(el('div','n', esc(ch.name)));
+    t.appendChild(el('div','g', esc(mockProgram(ch))));
+    r.appendChild(t);
+    r.appendChild(el('div','num', String(i+1).padStart(2,'0')));
+    clist.appendChild(r);
+  });
+  updateCSpot(list[0]);
+}
+
+function updateCSpot(ch){
+  if (!ch) return;
+  const big = document.getElementById('c-biglogo');
+  if (big){ big.innerHTML=''; big.appendChild(logoNode(ch)); }
+  const t = document.getElementById('c-title'); if (t) t.textContent = ch.name;
+  const d = document.getElementById('c-desc');
+  if (d) d.textContent = `${ch.category} · ${ch.quality} · ${ch.streamType.toUpperCase()} streams live around the clock.`;
+  const p = document.getElementById('c-prog-name'); if (p) p.textContent = mockProgram(ch);
+  const pl = document.getElementById('c-play'); if (pl) pl.dataset.id = ch.id;
+}
+
+/* ---------- player ---------- */
+function openPlayer(ch){
+  state.player = ch;
+  const p = el('div','player show');
+  p.id = 'player';
+  p.innerHTML = `
+    <div class="fill">
+      <div class="pulse"></div>
+      <div class="mark" id="p-mark"></div>
+    </div>
+    <div class="ov">
+      <div class="phead" id="p-head"></div>
+      <div class="pbot">
+        <div class="bar"><i></i></div>
+        <div class="ctrl">
+          <span><span class="key">BACK</span>Exit</span>
+          <span><span class="key">OK</span>Pause</span>
+          <span><span class="key">▲</span>Channel info</span>
+          <span class="sp"></span>
+          <span>${esc(ch.streamType.toUpperCase())} · ${esc(ch.quality)} · AUTO</span>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('stage').appendChild(p);
+  const mk = document.getElementById('p-mark'); mk.appendChild(logoNode(ch));
+  const head = document.getElementById('p-head');
+  head.appendChild(logoNode(ch));
+  const h = el('div');
+  h.innerHTML = `<h2>${esc(ch.name)}</h2><div class="sub">LIVE · ${esc(ch.category.toUpperCase())} · ${esc(mockProgram(ch))}</div>`;
+  head.appendChild(h);
+}
+
+function closePlayer(){
+  const p = document.getElementById('player');
+  if (p) p.remove();
+  state.player = null;
+  refocusFirst();
+}
+
+/* ---------- spatial navigation ---------- */
+function focusables(){
+  return [...document.querySelectorAll('[data-focus]')].filter(n => n.offsetParent !== null);
+}
+function setFocus(node, scroll=true){
+  if (!node) return;
+  if (state.focus) state.focus.classList.remove('is-focused');
+  state.focus = node;
+  node.classList.add('is-focused');
+  if (scroll) {
+    try { node.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); } catch(e){}
+  }
+  const chId = node.dataset.channel;
+  if (chId && state.variant === 'B') updateBDetail(state.channels.find(c=>String(c.id)===String(chId)));
+  if (chId && state.variant === 'C') updateCSpot(state.channels.find(c=>String(c.id)===String(chId)));
+}
+function refocusFirst(){
+  const items = focusables();
+  if (!items.length) return;
+  const preferred = items.find(n => n.dataset.action === 'variant' && n.dataset.value === state.variant)
+    || items.find(n => n.dataset.action === 'variant')
+    || items[0];
+  setFocus(preferred, false);
+}
+function move(dir){
+  const items = focusables();
+  if (!items.length) return;
+  if (!state.focus || !items.includes(state.focus)) { setFocus(items[0]); return; }
+  const r0 = state.focus.getBoundingClientRect();
+  const cx = r0.left + r0.width/2, cy = r0.top + r0.height/2;
+  let best = null, bestScore = Infinity;
+  for (const n of items){
+    if (n === state.focus) continue;
+    const r = n.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    const ex = r.left + r.width/2, ey = r.top + r.height/2;
+    const dx = ex - cx, dy = ey - cy;
+    let primary, secondary;
+    if (dir === 'left'){ if (dx > -10) continue; primary = -dx; secondary = Math.abs(dy); }
+    else if (dir === 'right'){ if (dx < 10) continue; primary = dx; secondary = Math.abs(dy); }
+    else if (dir === 'up'){ if (dy > -10) continue; primary = -dy; secondary = Math.abs(dx); }
+    else { if (dy < 10) continue; primary = dy; secondary = Math.abs(dx); }
+    const score = primary + secondary * 2.4;
+    if (score < bestScore){ bestScore = score; best = n; }
+  }
+  if (best) setFocus(best);
+}
+
+/* ---------- actions ---------- */
+function activate(node){
+  const a = node.dataset.action;
+  const ch = state.channels.find(c => String(c.id) === String(node.dataset.id));
+  if (a === 'variant') switchVariant(node.dataset.value);
+  else if (a === 'cat'){ state.catFilter = node.dataset.value; render(); refocusFirst(); }
+  else if (a === 'play' && ch) openPlayer(ch);
+  else if (a === 'select' && ch) openPlayer(ch);
+  else if (a === 'fav' && ch) toast(`${ch.name} added to Favorites`);
+  else if (a === 'nav') toast(`${node.dataset.value} — coming in the full build`);
+  else if (a === 'hover' && ch) openPlayer(ch);
+}
+
+let toastTimer = null;
+function toast(msg){
+  let t = document.querySelector('.toast');
+  if (!t){ t = el('div','toast'); document.getElementById('stage').appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1900);
+}
+
+/* ---------- render ---------- */
+function switchVariant(v){
+  if (!v || v === state.variant) return;
+  state.variant = v;
+  render();
+  refocusFirst();
+  toast(`Design ${v} — ${({A:'Aurora (hero + rows)',B:'Guide (EPG grid)',C:'Spotlight (sidebar)'})[v]}`);
+}
+
+function render(){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '';
+  stage.appendChild(topbar());
+  const screen = el('div');
+  screen.style.position = 'absolute';
+  screen.style.inset = '0';
+  stage.appendChild(screen);
+  if (state.variant === 'A') renderA(screen);
+  else if (state.variant === 'B') renderB(screen);
+  else renderC(screen);
+  stage.appendChild(hintbar());
+  state.focus = null;
+  tickClock();
+}
+
+function tickClock(){
+  const c = document.getElementById('clock');
+  if (!c) return;
+  const d = new Date();
+  c.textContent = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+/* ---------- input ---------- */
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (state.player){
+    if (k === 'Escape' || k === 'Backspace' || k === 'Enter' || k === ' ') { e.preventDefault(); closePlayer(); }
+    return;
+  }
+  const map = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down' };
+  if (map[k]) { e.preventDefault(); move(map[k]); return; }
+  if (k === 'Enter' || k === ' ') { e.preventDefault(); if (state.focus) activate(state.focus); return; }
+  if (k === '1') switchVariant('A');
+  if (k === '2') switchVariant('B');
+  if (k === '3') switchVariant('C');
+});
+
+document.addEventListener('click', e => {
+  const n = e.target.closest('[data-focus]');
+  if (!n) return;
+  if (state.focus !== n) setFocus(n, false);
+  activate(n);
+});
+document.addEventListener('mouseover', e => {
+  const n = e.target.closest('[data-focus]');
+  if (n) setFocus(n, false);
+});
+
+/* ---------- boot ---------- */
+async function boot(){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '<div class="loading">LOADING CHANNELS…</div>';
+  try {
+    const res = await fetch('../data/channels.json', {cache:'no-store'});
+    const data = await res.json();
+    state.channels = data.channels || [];
+    document.body.dataset.count = state.channels.length;
+  } catch (err) {
+    stage.innerHTML = '<div class="loading">Could not load ../data/channels.json</div>';
+    return;
+  }
+  render();
+  refocusFirst();
+  setInterval(tickClock, 10000);
+}
+boot();
+</script>
+</body>
+</html>
