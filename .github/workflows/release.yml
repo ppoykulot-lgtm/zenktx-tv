@@ -55,15 +55,27 @@ jobs:
             echo "certSha256=$CERT_SHA256"
           } > android/keystore.properties
 
+      # The tag is "v1.1.0" but the asset names must be "1.1.0" so the landing
+      # page and the in-app updater can find them. versionCode is derived from
+      # the version (1.1.0 -> 10100) so it always increases across releases.
       - name: Build TV + mobile release APKs
         working-directory: android
+        env:
+          RAW_VERSION: ${{ env.VERSION }}
         run: |
+          VERSION="${RAW_VERSION#v}"
+          IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
+          CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+          echo "Building $VERSION (versionCode $CODE)"
           ./gradlew --no-daemon assembleTvRelease assembleMobileRelease \
             -PversionName="$VERSION" \
-            -PversionCode="${{ github.run_number }}"
+            -PversionCode="$CODE"
 
       - name: Collect artifacts
+        env:
+          RAW_VERSION: ${{ env.VERSION }}
         run: |
+          VERSION="${RAW_VERSION#v}"
           mkdir -p out
           cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${VERSION}.apk"
           cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${VERSION}.apk"
@@ -118,6 +130,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve version
+        id: v
+        run: echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -131,18 +147,18 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          name: ZENKTX TV Stream ${{ env.VERSION }}
-          tag_name: ${{ github.ref_name }}
+          name: ZENKTX TV Stream ${{ steps.v.outputs.version }}
+          tag_name: v${{ steps.v.outputs.version }}
           draft: false
           generate_release_notes: false
           body: |
-            ## ZENKTX TV Stream ${{ env.VERSION }}
+            ## ZENKTX TV Stream ${{ steps.v.outputs.version }}
 
             | Platform | Asset |
             | --- | --- |
-            | Android TV (7.0+) | `ZENKTX-TV-${{ env.VERSION }}.apk` |
-            | Android Mobile (7.0+) | `ZENKTX-Mobile-${{ env.VERSION }}.apk` |
-            | Windows 10/11 x86_64 | `ZENKTX-Setup-${{ env.VERSION }}.exe` |
+            | Android TV (7.0+) | `ZENKTX-TV-${{ steps.v.outputs.version }}.apk` |
+            | Android Mobile (7.0+) | `ZENKTX-Mobile-${{ steps.v.outputs.version }}.apk` |
+            | Windows 10/11 x86_64 | `ZENKTX-Setup-${{ steps.v.outputs.version }}.exe` |
 
             The in-app updater reads this release and offers the APK matching the device.
             Every APK is signed with the ZENKTX release certificate.
