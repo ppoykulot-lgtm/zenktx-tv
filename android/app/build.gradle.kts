@@ -25,7 +25,7 @@ android {
         versionName = (findProperty("versionName") as String?) ?: "1.1.0"
 
         buildConfigField("String", "CERT_SHA256", "\"${keystoreProps.getProperty("certSha256", "")}\"")
-        buildConfigField("String", "GITHUB_REPO", "\"zenktx/zenktx-tv\"")
+        buildConfigField("String", "GITHUB_REPO", "\"ppoykulot-lgtm/zenktx-tv\"")
         vectorDrawables.useSupportLibrary = true
     }
 
