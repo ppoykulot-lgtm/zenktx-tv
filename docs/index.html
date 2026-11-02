@@ -161,7 +161,8 @@
   .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .dl {
     background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    padding: 22px; gap: 14px;
+    display: grid; grid-row: span 5; grid-template-rows: subgrid;
   }
   .dl:hover { border-color: #2c3c5c; }
   .dl-top { display: flex; align-items: flex-start; gap: 12px; }
@@ -188,6 +189,22 @@
   .warn { color: #e2a33d; margin-left: auto; }
   .dl-foot { font-size: 10.5px; color: #6e7c99; display: flex; justify-content: space-between; align-items: center; }
   .ok { color: var(--mint); }
+
+  /* faq */
+  .faq { display: grid; gap: 10px; max-width: 860px; }
+  .faq details {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 18px; transition: border-color .18s;
+  }
+  .faq details[open] { border-color: #2c3c5c; }
+  .faq summary {
+    cursor: pointer; list-style: none; font-size: 14.5px; font-weight: 600; color: var(--text);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--mint); font-size: 17px; line-height: 1; }
+  .faq details[open] summary::after { content: "–"; }
+  .faq p { margin: 10px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.65; }
   @media (max-width: 980px) { .downloads { grid-template-columns: 1fr; } }
 
   /* install */
@@ -260,13 +277,13 @@
       <span><b>ZENKTX</b><small>TV STREAM</small></span>
     </a>
     <nav class="nav-links">
-      <a href="#overview">Overview</a>
       <a href="#features">Features</a>
       <a href="#downloads">Downloads</a>
       <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
       <a href="#changelog">Changelog</a>
     </nav>
-    <a class="nav-cta" id="navDownload" href="#downloads">Download</a>
+    <a class="nav-cta" id="navDownload" href="#downloads">Get the app</a>
   </div>
 </header>
 
@@ -314,10 +331,10 @@
   </section>
 
   <!-- OVERVIEW -->
-  <section id="overview" class="alt">
+  <section id="features" class="alt">
     <div class="wrap">
       <div class="section-head">
-        <div class="kicker">Overview</div>
+        <div class="kicker">Features</div>
         <h2>Built around a remote, not a mouse.</h2>
         <p>
           Every screen is reachable with the D-pad. The guide view keeps the channel
@@ -325,7 +342,7 @@
           channels never feels like scrolling a website.
         </p>
       </div>
-      <div class="features" id="features">
+      <div class="features">
         <article class="feature">
           <div class="ico">📺</div>
           <h3>Made for Android TV</h3>
@@ -519,6 +536,56 @@
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section id="faq" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Common questions</div>
+        <h2>Answers before you ask.</h2>
+        <p>The warnings you will meet on a sideloaded app, and what each one actually means.</p>
+      </div>
+
+      <div class="faq">
+        <details>
+          <summary>Why does Windows say the publisher is unverified?</summary>
+          <p>The executables are not signed with a paid publisher certificate yet, so SmartScreen
+            shows an unrecognised-app warning. Choose <code>More info → Run anyway</code>. The APKs
+            are a different case: they are signed, and the app verifies that signature on every
+            update.</p>
+        </details>
+        <details>
+          <summary>Android blocks the install — what do I allow?</summary>
+          <p>Android requires per-app permission to install files. On a phone, allow
+            <code>Install unknown apps</code> for Chrome or your file manager when prompted. On a TV,
+            open <code>Settings → Apps → Security &amp; restrictions → Install unknown apps</code> and
+            allow your browser or downloader.</p>
+        </details>
+        <details>
+          <summary>Why is there no Play Store or Microsoft Store listing?</summary>
+          <p>Both stores restrict apps that play third-party stream lists. ZENKTX ships as a direct
+            download instead, which also means no store account and no store cut.</p>
+        </details>
+        <details>
+          <summary>How do updates arrive?</summary>
+          <p>The app checks GitHub Releases on launch and can download a newer APK itself, then hands
+            it to the system installer. On Windows, download the new installer and run it over the old
+            copy — settings and favourites stay in place.</p>
+        </details>
+        <details>
+          <summary>How many channels, and where do they come from?</summary>
+          <p>The bundled list carries 485 channels, and 128 Philippine channels are detected
+            automatically so they get their own filter chip. You can also point the app at any M3U or
+            ZENKTX JSON playlist of your own.</p>
+        </details>
+        <details>
+          <summary>Do I need an account or a subscription?</summary>
+          <p>No sign-in, no subscription. All settings, favourites and logos are stored on your own
+            device; the only network calls are for the playlists and for update checks.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <!-- CHANGELOG -->
   <section id="changelog">
     <div class="wrap">
@@ -612,9 +679,6 @@
     el.href = `https://github.com/${REPO}`;
     el.rel = "noopener";
   });
-  const nav = document.getElementById("navDownload");
-  if (nav) nav.href = BASE + ASSETS.tv;
-
   // File sizes come from the release itself so they never go stale.
   const fmtSize = (bytes) =>
     bytes >= 1048576
