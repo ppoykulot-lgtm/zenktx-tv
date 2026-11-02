@@ -613,7 +613,8 @@
     tab.addEventListener("click", () => {
       tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
       document.querySelectorAll("[data-panel]").forEach((panel) => {
-        panel.toggleAttribute("data-active", panel.dataset.panel === tab.dataset.tab);
+        if (panel.dataset.panel === tab.dataset.tab) panel.setAttribute("data-active", "true");
+        else panel.removeAttribute("data-active");
       });
     });
   });
