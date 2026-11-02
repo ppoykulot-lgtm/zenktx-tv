@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' file: https: http: data: blob:; media-src 'self' file: https: http: blob:; connect-src 'self' https: http: blob: data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>ZENKTX TV Stream</title>
+  <link rel="icon" href="../assets/icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <img src="../assets/icon.png" alt="" />
+        <div><b>ZENKTX</b><small>TV STREAM</small></div>
+      </div>
+      <input class="search" id="search" type="search" placeholder="Search channels…  (Ctrl+F)" />
+      <div class="spacer"></div>
+      <div class="meta" id="count">— CHANNELS</div>
+      <button class="btn" id="playlistsBtn">Playlists</button>
+      <button class="btn" id="githubBtn">GitHub Sync</button>
+      <button class="btn mint" id="updateBtn">Check updates</button>
+    </header>
+
+    <div class="body">
+      <aside id="chips"></aside>
+      <main id="scroller">
+        <div class="grid" id="grid"></div>
+        <div class="empty" id="empty" hidden></div>
+      </main>
+    </div>
+
+    <div class="detail">
+      <img id="detailLogo" alt="" />
+      <div class="info">
+        <h2 id="detailName">Pick a channel</h2>
+        <div class="sub" id="detailMeta"></div>
+      </div>
+      <button class="btn" id="favBtn" title="Toggle favourite">☆</button>
+      <button class="btn mint" id="watchBtn">▶ Watch</button>
+    </div>
+  </div>
+
+  <!-- player -->
+  <div class="player" id="player">
+    <video id="video" playsinline></video>
+    <div class="pchip" id="pchip">
+      <img id="pchipLogo" alt="" />
+      <div><b id="pchipName">—</b><small id="pchipMeta"></small></div>
+    </div>
+
+    <div class="panel" id="playerError">
+      <div class="kicker">CHANNEL UNAVAILABLE</div>
+      <h3 id="errTitle">—</h3>
+      <p id="errBody"></p>
+      <code id="errCode">STREAM</code>
+      <div class="row">
+        <button class="btn mint" id="retryBtn">↻ Retry</button>
+        <button class="btn" id="nextBtn">Next channel ▶</button>
+        <button class="btn" id="closeBtn">← Back</button>
+      </div>
+    </div>
+
+    <div class="pcontrols">
+      <button class="btn" id="ppBtn">⏸ Pause</button>
+      <span class="live">LIVE</span>
+      <div class="spacer"></div>
+      <button class="btn" id="chUp">CH ▲</button>
+      <button class="btn" id="chDown">CH ▼</button>
+      <button class="btn" id="exitBtn">✕ Close</button>
+    </div>
+  </div>
+
+  <!-- context menu -->
+  <div class="menu" id="menu"></div>
+
+  <!-- playlists dialog -->
+  <dialog id="dlgPlaylists">
+    <h3>Playlists</h3>
+    <p>Add any M3U / M3U8 or ZENKTX JSON URL. The bundled list is always available.</p>
+    <div class="list" id="playlistList"></div>
+    <div class="row">
+      <button class="btn" id="addPlaylistBtn">＋ Add playlist</button>
+      <button class="btn mint" id="closePlaylists">Done</button>
+    </div>
+  </dialog>
+
+  <!-- github dialog -->
+  <dialog id="dlgGithub">
+    <h3>GitHub Sync</h3>
+    <p>Point at a repository file, then pull it here or push your current list back.</p>
+    <div class="field"><label>Owner</label><input id="ghOwner" placeholder="zenktx" /></div>
+    <div class="field"><label>Repository</label><input id="ghRepo" placeholder="zenktx-tv" /></div>
+    <div class="field"><label>Path</label><input id="ghPath" placeholder="channels.m3u" /></div>
+    <div class="field"><label>Branch</label><input id="ghBranch" placeholder="main" /></div>
+    <div class="field"><label>Token (only needed to push)</label><input id="ghToken" type="password" placeholder="github_pat_…" /></div>
+    <div class="row">
+      <button class="btn" id="ghPull">↓ Pull</button>
+      <button class="btn" id="ghPush">↑ Push</button>
+      <button class="btn mint" id="closeGithub">Done</button>
+    </div>
+  </dialog>
+
+  <!-- generic prompt -->
+  <dialog id="dlgPrompt">
+    <h3 id="promptTitle">—</h3>
+    <p id="promptHint"></p>
+    <div class="field"><input id="promptInput" /></div>
+    <div class="row">
+      <button class="btn" id="promptCancel">Cancel</button>
+      <button class="btn mint" id="promptOk">Save</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="vendor/hls.min.js"></script>
+  <script src="vendor/dash.all.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

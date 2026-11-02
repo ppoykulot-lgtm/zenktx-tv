@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#060911</color>
+    <color name="surface">#111A2B</color>
+    <color name="surface_alt">#16213A</color>
+    <color name="line">#1E2A42</color>
+    <color name="mint">#35E7C0</color>
+    <color name="blue">#5B8CFF</color>
+    <color name="text">#F2F5FF</color>
+    <color name="muted">#8B98B4</color>
+    <color name="btn_primary_text">#08101F</color>
+    <color name="chip_text">#B9C6DE</color>
+    <color name="pill_text">#08101F</color>
+</resources>

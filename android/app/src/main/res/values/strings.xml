@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ZENKTX TV Stream</string>
+    <string name="brand_name">ZENKTX</string>
+    <string name="brand_sub">TV STREAM</string>
+    <string name="watch_now">▶  Watch Now</string>
+    <string name="watch_short">▶  Watch</string>
+    <string name="menu">MENU</string>
+
+    <!-- Home -->
+    <string name="all_channels">All</string>
+    <string name="favourites">★ Favourites</string>
+    <string name="pinoy">Pinoy</string>
+    <string name="channel_count">%1$d CHANNELS</string>
+    <string name="loading">Loading channels…</string>
+    <string name="playlist_errors">%1$d playlist(s) could not load — %2$s</string>
+    <string name="no_channels">No channels here yet.\nOpen MENU → Playlists to add one.</string>
+    <string name="favourite_on">★</string>
+    <string name="favourite_off">☆</string>
+
+    <!-- Channel actions -->
+    <string name="actions_title">%1$s</string>
+    <string name="action_fav_add">☆  Add to Favourites</string>
+    <string name="action_fav_remove">★  Remove from Favourites</string>
+    <string name="action_logo_set">🖼  Set logo URL</string>
+    <string name="action_logo_clear">✕  Remove logo</string>
+    <string name="action_hide">🚫  Hide this channel</string>
+    <string name="logo_hint">https://…/logo.png</string>
+    <string name="logo_saved">Logo updated.</string>
+    <string name="logo_cleared">Logo removed.</string>
+    <string name="channel_hidden">Hidden. Long-press MENU row in Settings to restore.</string>
+    <string name="restore_hidden">Restore %1$d hidden channel(s)</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="row_playlists">Playlists</string>
+    <string name="row_playlists_sub">Add, remove or refresh M3U / JSON sources</string>
+    <string name="row_github">GitHub Sync</string>
+    <string name="row_github_sub">Pull or push your channel list through a repo</string>
+    <string name="row_updates">Check for Updates</string>
+    <string name="row_updates_sub">Version %1$s · automatic check is %2$s</string>
+    <string name="row_logos">Logo Edits</string>
+    <string name="row_logos_sub">%1$d channel(s) with a custom or removed logo</string>
+    <string name="row_hidden">Hidden Channels</string>
+    <string name="row_hidden_sub">%1$d hidden</string>
+    <string name="row_about">About</string>
+    <string name="row_about_sub">ZENKTX TV Stream %1$s</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+    <string name="back">←  BACK</string>
+
+    <!-- Playlists -->
+    <string name="playlists_title">Playlists</string>
+    <string name="add_playlist">＋  Add playlist</string>
+    <string name="playlist_name">Playlist name</string>
+    <string name="playlist_url">M3U / M3U8 / JSON URL</string>
+    <string name="playlist_hint">Tap a playlist to enable or disable it. Long-press to remove it.</string>
+    <string name="playlist_added">Playlist added.</string>
+    <string name="playlist_removed">Playlist removed.</string>
+    <string name="playlist_remove_title">Remove playlist?</string>
+    <string name="playlist_remove_body">“%1$s” will be removed from this device. Nothing is deleted from the source.</string>
+    <string name="playlist_enabled">enabled</string>
+    <string name="playlist_disabled">disabled</string>
+    <string name="playlists_empty">No playlists yet. The bundled channel list is always available.</string>
+
+    <!-- GitHub -->
+    <string name="github_title">GitHub Sync</string>
+    <string name="github_owner">Owner / user</string>
+    <string name="github_repo">Repository</string>
+    <string name="github_path">File path (e.g. channels.m3u)</string>
+    <string name="github_branch">Branch</string>
+    <string name="github_token">Token (needed only to push)</string>
+    <string name="github_saved">GitHub settings saved.</string>
+    <string name="github_pull">↓  Pull from GitHub</string>
+    <string name="github_push">↑  Push to GitHub</string>
+    <string name="github_configure">Configure GitHub</string>
+    <string name="github_pulled">Pulled %1$d channels.</string>
+    <string name="github_pushed">Pushed %1$d channels.</string>
+    <string name="github_not_configured">Set the GitHub repository first.</string>
+
+    <!-- Updates -->
+    <string name="update_title">Update available</string>
+    <string name="update_body">ZENKTX %1$s is available (you have %2$s).\n\n%3$s</string>
+    <string name="update_download">Download update</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading update… %1$d%%</string>
+    <string name="update_ready">Downloaded. Open the installer to finish.</string>
+    <string name="update_failed">Could not check for updates: %1$s</string>
+    <string name="update_latest">You are on the latest version (%1$s).</string>
+    <string name="update_install">Install</string>
+
+    <!-- Player -->
+    <string name="playback_error">Cannot play this channel (%1$s).\nTry another one.</string>
+    <string name="player_retry">↻  Retry</string>
+    <string name="player_next">Next channel  ▶</string>
+    <string name="player_back">←  Back to guide</string>
+    <string name="player_channel">CH %1$d / %2$d</string>
+    <string name="player_no_video">No video yet — the stream is silent or the device cannot decode it.</string>
+    <string name="err_http">The stream server refused the request (HTTP %1$d).\nThe link may be expired, private or geo-blocked.</string>
+    <string name="err_network">Cannot reach the stream.\nCheck the internet connection on this device.</string>
+    <string name="err_timeout">The stream took too long to answer.</string>
+    <string name="err_codec">This device cannot decode this stream (codec not supported).</string>
+    <string name="err_unstable">The stream keeps failing (%1$s).\nMany free links behave like this — try the next channel.</string>
+    <string name="err_stall">The stream stopped sending video (%1$s).\nSome channels go down like this; try the next one.</string>
+    <string name="err_empty">This channel is not broadcasting right now.</string>
+    <string name="err_generic">This channel could not be played (%1$s).</string>
+
+    <string name="player_error_label">CHANNEL UNAVAILABLE</string>
+    <string name="about_body">ZENKTX TV Stream %1$s\n\nA remote-first live TV player for Android TV, phones and Windows.\n\nGitHub: github.com/%2$s\nBuild: %3$s\n%4$s</string>
+    <string name="integrity_ok">Signature verified — official build</string>
+    <string name="manage_hidden">Restore all hidden channels</string>
+
+    <!-- Integrity -->
+    <string name="integrity_title">Unofficial build</string>
+    <string name="integrity_close">Close</string>
+</resources>

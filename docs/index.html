@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZENKTX TV Stream — Live TV for Android TV, Android and Windows</title>
+<meta name="description" content="ZENKTX is a remote-first live TV player for Android TV, Android phones and Windows. 485+ channels, favourites, playlists, GitHub sync and automatic updates." />
+<meta name="theme-color" content="#060911" />
+<meta property="og:title" content="ZENKTX TV Stream" />
+<meta property="og:description" content="A remote-first live TV player for Android TV, Android and Windows." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='118' fill='%230A1020'/%3E%3Crect x='96' y='150' width='176' height='46' rx='23' fill='%2335E7C0'/%3E%3Cpath d='M272 173L170 311' stroke='%2335E7C0' stroke-width='46' stroke-linecap='round'/%3E%3Crect x='96' y='288' width='134' height='46' rx='23' fill='%235B8CFF'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #060911;
+    --surface: #0d1524;
+    --card: #111a2b;
+    --card-hi: #16213a;
+    --line: #1e2a42;
+    --mint: #35e7c0;
+    --blue: #5b8cff;
+    --text: #f2f5ff;
+    --muted: #8b98b4;
+    --radius: 18px;
+    --max: 1180px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  .wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(6, 9, 17, .82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; gap: 28px; height: 68px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand svg { width: 32px; height: 32px; }
+  .brand b { font-size: 16px; letter-spacing: .16em; }
+  .brand small { display: block; font-size: 7px; letter-spacing: .38em; color: var(--mint); }
+  .nav-links { display: flex; gap: 24px; margin-left: auto; }
+  .nav-links a { color: var(--muted); font-size: 13.5px; font-weight: 500; transition: color .18s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--mint); color: #08101f;
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 700;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(53,231,192,.25); }
+  @media (max-width: 860px) { .nav-links { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { position: relative; padding: 92px 0 72px; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: -30% -10% auto -10%; height: 620px;
+    background:
+      radial-gradient(600px 320px at 18% 12%, rgba(53,231,192,.16), transparent 70%),
+      radial-gradient(520px 300px at 82% 0%, rgba(91,140,255,.16), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: .18em; font-weight: 700; text-transform: uppercase;
+    color: var(--mint); border: 1px solid rgba(53,231,192,.28);
+    background: rgba(53,231,192,.06);
+    padding: 6px 12px; border-radius: 999px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); }
+  h1 { font-size: clamp(34px, 4.4vw, 56px); line-height: 1.06; letter-spacing: -.028em; margin: 20px 0 18px; }
+  h1 span { color: var(--mint); }
+  .lede { color: var(--muted); font-size: 16.5px; max-width: 520px; }
+  .hero-actions { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 13px 22px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    border: 1px solid transparent; transition: transform .18s, box-shadow .18s, background .18s;
+  }
+  .btn-primary { background: var(--mint); color: #08101f; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(53,231,192,.26); }
+  .btn-ghost { border-color: var(--line); color: var(--text); background: rgba(255,255,255,.02); }
+  .btn-ghost:hover { background: var(--card); transform: translateY(-2px); }
+  .hero-note { margin-top: 18px; font-size: 12px; color: #6e7c99; }
+  .hero-visual {
+    position: relative;
+    background: linear-gradient(160deg, #0f1a2c, #0a1220 70%);
+    border: 1px solid var(--line); border-radius: 22px;
+    padding: 22px; box-shadow: 0 40px 80px -40px #000;
+  }
+  .grid-mock { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tile {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    height: 74px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; letter-spacing: .06em; color: #9fb0cd; text-align: center; padding: 6px;
+  }
+  .tile.active { border-color: var(--mint); box-shadow: 0 0 0 1px var(--mint), 0 14px 30px -14px rgba(53,231,192,.7); color: var(--text); }
+  .mock-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+  .pill { height: 22px; border-radius: 7px; background: var(--card-hi); border: 1px solid var(--line); }
+  .pill.on { width: 64px; background: #fff; border-color: #fff; }
+  .pill.x { width: 74px; }
+  .pill.y { width: 60px; }
+
+  /* ---------- stats ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 64px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .stat b { display: block; font-size: 24px; letter-spacing: -.02em; }
+  .stat span { font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { order: -1; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- sections ---------- */
+  section { padding: 84px 0; }
+  .section-head { max-width: 620px; margin-bottom: 40px; }
+  .kicker { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); font-weight: 700; }
+  h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.02em; margin: 10px 0 12px; }
+  .section-head p { color: var(--muted); margin: 0; }
+  .alt { background: linear-gradient(180deg, transparent, rgba(13,21,36,.6) 22%, rgba(13,21,36,.6) 78%, transparent); }
+
+  /* screens */
+  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .screens figure { margin: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); }
+  .screens img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .screens figcaption { font-size: 11.5px; color: var(--muted); padding: 11px 14px; border-top: 1px solid var(--line); }
+  @media (max-width: 860px) { .screens { grid-template-columns: 1fr; } }
+
+  /* features */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feature {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; transition: transform .2s, border-color .2s;
+  }
+  .feature:hover { transform: translateY(-3px); border-color: #2c3c5c; }
+  .feature .ico {
+    width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center;
+    background: rgba(53,231,192,.1); border: 1px solid rgba(53,231,192,.22); margin-bottom: 16px;
+  }
+  .feature h3 { margin: 0 0 8px; font-size: 15.5px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  @media (max-width: 980px) { .features { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .features { grid-template-columns: 1fr; } }
+
+  /* downloads */
+  .downloads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .dl {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .dl:hover { border-color: #2c3c5c; }
+  .dl-top { display: flex; align-items: flex-start; gap: 12px; }
+  .dl-ico {
+    width: 44px; height: 44px; border-radius: 12px; flex: none;
+    display: grid; place-items: center; background: rgba(91,140,255,.1);
+    border: 1px solid rgba(91,140,255,.24);
+  }
+  .dl h3 { margin: 0; font-size: 16px; }
+  .dl-sub { color: var(--muted); font-size: 12px; }
+  .ver {
+    margin-left: auto; font-size: 10px; letter-spacing: .1em; font-weight: 700;
+    color: var(--mint); border: 1px solid rgba(53,231,192,.3);
+    background: rgba(53,231,192,.07); border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+  }
+  .dl p { margin: 0; color: #a3aec4; font-size: 13px; }
+  .spec { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 10px 0; display: grid; gap: 7px; }
+  .spec div { display: flex; justify-content: space-between; font-size: 12px; }
+  .spec span:first-child { color: var(--muted); }
+  .spec span:last-child { color: #cfd8ea; font-weight: 600; }
+  .dl .btn { justify-content: center; margin-top: auto; }
+  .dl-foot { font-size: 10.5px; color: #6e7c99; display: flex; justify-content: space-between; align-items: center; }
+  .ok { color: var(--mint); }
+  @media (max-width: 980px) { .downloads { grid-template-columns: 1fr; } }
+
+  /* install */
+  .install { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+  .tabs { display: flex; flex-direction: column; gap: 8px; }
+  .tab {
+    text-align: left; padding: 14px 16px; border-radius: 12px; cursor: pointer;
+    background: var(--card); border: 1px solid var(--line); color: var(--muted);
+    font: inherit; font-size: 14px; font-weight: 600; transition: .18s;
+  }
+  .tab[aria-selected="true"] { color: var(--text); border-color: rgba(53,231,192,.45); background: rgba(53,231,192,.07); }
+  .steps { display: none; }
+  .steps[data-active="true"] { display: block; }
+  .step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .step:last-child { border-bottom: 0; }
+  .num {
+    flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(53,231,192,.1); color: var(--mint); font-size: 12px; font-weight: 700;
+    border: 1px solid rgba(53,231,192,.22);
+  }
+  .step h4 { margin: 0 0 4px; font-size: 14px; }
+  .step p { margin: 0; color: var(--muted); font-size: 13px; }
+  code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 12px;
+    background: #0a1220; border: 1px solid var(--line); border-radius: 6px;
+    padding: 2px 6px; color: #b6e9db;
+  }
+  @media (max-width: 860px) { .install { grid-template-columns: 1fr; } .tabs { flex-direction: row; overflow-x: auto; } }
+
+  /* changelog */
+  .log { position: relative; margin-left: 8px; padding-left: 28px; border-left: 1px solid var(--line); }
+  .entry { position: relative; padding-bottom: 34px; }
+  .entry::before {
+    content: ""; position: absolute; left: -34px; top: 7px; width: 11px; height: 11px;
+    border-radius: 50%; background: var(--bg); border: 2px solid var(--mint);
+  }
+  .entry h3 { margin: 0 0 4px; font-size: 16px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .tagx {
+    font-size: 9.5px; letter-spacing: .1em; font-weight: 700; text-transform: uppercase;
+    color: #08101f; background: var(--mint); border-radius: 999px; padding: 2px 8px; margin-left: 8px;
+  }
+  .entry ul { margin: 0; padding-left: 18px; color: #a3aec4; font-size: 13.5px; }
+  .entry li { margin-bottom: 5px; }
+
+  /* footer */
+  footer { border-top: 1px solid var(--line); padding: 40px 0 54px; color: var(--muted); font-size: 12.5px; }
+  .foot { display: flex; gap: 24px; justify-content: space-between; flex-wrap: wrap; }
+  .foot a { color: var(--muted); }
+  .foot a:hover { color: var(--text); }
+  .legal { margin-top: 22px; max-width: 760px; line-height: 1.65; color: #66738f; font-size: 11.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="ZENKTX home">
+      <svg viewBox="0 0 512 512" aria-hidden="true">
+        <rect width="512" height="512" rx="118" fill="#0A1020"/>
+        <path d="M284.6 152.3A84 84 0 0 1 353.7 242.3" stroke="#35E7C0" stroke-width="11" stroke-linecap="round" fill="none" opacity=".9"/>
+        <path d="M290.1 120.8A116 116 0 0 1 385.6 245.1" stroke="#35E7C0" stroke-width="9" stroke-linecap="round" fill="none" opacity=".35"/>
+        <rect x="96" y="150" width="176" height="46" rx="23" fill="#35E7C0"/>
+        <path d="M272 173L170 311" stroke="#35E7C0" stroke-width="46" stroke-linecap="round"/>
+        <rect x="96" y="288" width="134" height="46" rx="23" fill="#5B8CFF"/>
+        <rect x="150" y="360" width="74" height="8" rx="4" fill="#35E7C0"/>
+        <rect x="236" y="360" width="54" height="8" rx="4" fill="#5B8CFF"/>
+        <path d="M296 286L352 314L296 342z" fill="#F2F5FF"/>
+      </svg>
+      <span><b>ZENKTX</b><small>TV STREAM</small></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#features">Features</a>
+      <a href="#downloads">Downloads</a>
+      <a href="#install">Install</a>
+      <a href="#changelog">Changelog</a>
+    </nav>
+    <a class="nav-cta" id="navDownload" href="#downloads">Download</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-inner">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> Live channels · no subscription</span>
+          <h1>One player for the couch, the pocket and the desk.</h1>
+          <p class="lede">
+            ZENKTX is a remote-first live TV app built for Android TV boxes, phones and
+            Windows. Real channel logos, instant channel hopping, favourites, and a
+            watchdog that tells you why a stream failed instead of showing a black screen.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" id="heroDownload" href="#downloads">⬇ &nbsp;Download for your device</a>
+            <a class="btn btn-ghost" href="#features">See what's inside</a>
+          </div>
+          <div class="hero-note">Free · No account · Works on Android 7.0+ and Windows 10/11 (64-bit)</div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="mock-bar">
+            <div class="pill on"></div><div class="pill x"></div><div class="pill y"></div>
+            <div class="pill y"></div><div class="pill y"></div>
+          </div>
+          <div class="grid-mock">
+            <div class="tile active">TV5</div><div class="tile">GMA</div><div class="tile">A2Z</div>
+            <div class="tile">CNN</div><div class="tile">PBA TV</div><div class="tile">KAPATID</div>
+            <div class="tile">Cartoon</div><div class="tile">Discovery</div><div class="tile">MTV</div>
+            <div class="tile">ABS-CBN</div><div class="tile">PTV 4</div><div class="tile">ONE PH</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="statChannels">485</b><span>Channels bundled</span></div>
+        <div class="stat"><b>9</b><span>Categories + Pinoy</span></div>
+        <div class="stat"><b>3</b><span>Platforms</span></div>
+        <div class="stat"><b>1-tap</b><span>Channel hopping</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section id="overview" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Overview</div>
+        <h2>Built around a remote, not a mouse.</h2>
+        <p>
+          Every screen is reachable with the D-pad. The guide view keeps the channel
+          grid, the filter chips and the detail strip on one screen, so browsing 485
+          channels never feels like scrolling a website.
+        </p>
+      </div>
+      <div class="features">
+        <article class="feature">
+          <div class="ico">📺</div>
+          <h3>Made for Android TV</h3>
+          <p>Leanback launcher, 320×180 banner, focus ring that follows the D-pad on
+            NVIDIA Shield, Chromecast with Google TV, Xiaomi Stick and Android TV 7.0+.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">⚡</div>
+          <h3>Channel up / down while watching</h3>
+          <p>CH+ and CH- hop through the list you were browsing — favourites, Pinoy or a
+            single category — without going back to the guide.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🩺</div>
+          <h3>No more silent black screens</h3>
+          <p>A stall watchdog notices when a stream never produced video and shows the
+            real reason: HTTP 403, geo-block, codec or timeout — with Retry and Next.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">★</div>
+          <h3>Favourites you can star</h3>
+          <p>Long-press any channel to add it to Favourites. A dedicated chip filters the
+            grid, and the star stays visible on the tile.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🖼</div>
+          <h3>Fix your own logos</h3>
+          <p>Streams without artwork can be given a logo URL, or the empty box can be
+            removed — per channel, saved on the device.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🔗</div>
+          <h3>Playlists + GitHub sync</h3>
+          <p>Add any M3U/M3U8 or ZENKTX JSON URL, toggle sources on and off, and pull or
+            push the whole list through a GitHub repository.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🔄</div>
+          <h3>Updates that arrive by themselves</h3>
+          <p>The app checks GitHub Releases on launch. A newer APK is downloaded inside the
+            app and handed to the system installer.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🔐</div>
+          <h3>Signed, tamper-evident builds</h3>
+          <p>Release APKs are signed with a pinned certificate; a repackaged copy is
+            detected and refuses to run.</p>
+        </article>
+        <article class="feature">
+          <div class="ico">🇵🇭</div>
+          <h3>Pinoy channels up front</h3>
+          <p>128 local channels are detected automatically and get their own filter chip,
+            next to News, Sports, Movies, Kids and the rest.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENS -->
+  <section id="screens">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Screens</div>
+        <h2>The actual TV build, not a mockup.</h2>
+        <p>Captured on an Android TV emulator running the release candidate.</p>
+      </div>
+      <div class="screens">
+        <figure>
+          <img src="assets/screens/tv-guide.png" alt="ZENKTX guide screen with category chips and channel grid" loading="lazy" />
+          <figcaption>Guide — chips, 6-column grid, detail strip</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/screens/tv-player.png" alt="ZENKTX player playing a live channel" loading="lazy" />
+          <figcaption>Player — CH ▲ / CH ▼, live badge</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/screens/tv-settings.png" alt="ZENKTX settings screen" loading="lazy" />
+          <figcaption>Settings — playlists, GitHub sync, updates</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section id="downloads">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Downloads</div>
+        <h2>Three builds, one channel list.</h2>
+        <p>Every build ships from the same signed release. Pick the one that matches your screen.</p>
+      </div>
+
+      <div class="downloads">
+        <article class="dl">
+          <div class="dl-top">
+            <div class="dl-ico">📺</div>
+            <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
+            <span class="ver" data-ver>v1.1.0</span>
+          </div>
+          <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
+            browsing for 10-foot screens.</p>
+          <div class="spec">
+            <div><span>Package</span><span>ph.zenktx.tv</span></div>
+            <div><span>Architecture</span><span>arm64-v8a · armeabi-v7a · x86</span></div>
+            <div><span>Compatibility</span><span>Android 7.0+</span></div>
+            <div><span>File size</span><span id="sizeTv">1.5 MB</span></div>
+          </div>
+          <a class="btn btn-primary" data-dl="tv" href="#">⬇ &nbsp;Download APK</a>
+          <div class="dl-foot"><span>Direct release asset</span><span class="ok">✓ Signed</span></div>
+        </article>
+
+        <article class="dl">
+          <div class="dl-top">
+            <div class="dl-ico">📱</div>
+            <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
+            <span class="ver" data-ver>v1.1.0</span>
+          </div>
+          <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
+            same favourites, playlists and logo tools.</p>
+          <div class="spec">
+            <div><span>Package</span><span>ph.zenktx.mobile</span></div>
+            <div><span>Architecture</span><span>arm64-v8a · armeabi-v7a</span></div>
+            <div><span>Minimum version</span><span>Android 7.0+</span></div>
+            <div><span>File size</span><span id="sizeMobile">1.5 MB</span></div>
+          </div>
+          <a class="btn btn-primary" data-dl="mobile" href="#">⬇ &nbsp;Download APK</a>
+          <div class="dl-foot"><span>Direct release asset</span><span class="ok">✓ Signed</span></div>
+        </article>
+
+        <article class="dl">
+          <div class="dl-top">
+            <div class="dl-ico">🖥️</div>
+            <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
+            <span class="ver" data-ver>v1.1.0</span>
+          </div>
+          <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
+            HLS/DASH playback through the bundled media engine.</p>
+          <div class="spec">
+            <div><span>Format</span><span>Installer (.exe) · Portable</span></div>
+            <div><span>Architecture</span><span>x86_64</span></div>
+            <div><span>Compatibility</span><span>Windows 10/11 (64-bit)</span></div>
+            <div><span>File size</span><span id="sizeWin">—</span></div>
+          </div>
+          <a class="btn btn-primary" data-dl="win" href="#">⬇ &nbsp;Download EXE</a>
+          <div class="dl-foot"><span>Windows 10/11 compatible</span><span class="ok">✓ Signed build</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Installation guide</div>
+        <h2>Installed in under a minute.</h2>
+        <p>Sideloading is normal for TV apps. Nothing here needs a cable if you use a downloader app.</p>
+      </div>
+
+      <div class="install">
+        <div class="tabs" role="tablist" aria-label="Platform">
+          <button class="tab" role="tab" aria-selected="true" data-tab="tv">📺 Android TV</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="mobile">📱 Android Mobile</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="win">🖥️ Windows</button>
+        </div>
+
+        <div>
+          <div class="steps" data-panel="tv" data-active="true">
+            <div class="step"><div class="num">1</div><div><h4>Allow unknown sources</h4><p>On the TV: <code>Settings → Apps → Security &amp; restrictions → Install unknown apps</code> and allow your browser or file manager.</p></div></div>
+            <div class="step"><div class="num">2</div><div><h4>Get the APK onto the TV</h4><p>Open the download link on the device itself, or use a downloader app such as Downloader by AFTVnews and paste the release URL.</p></div></div>
+            <div class="step"><div class="num">3</div><div><h4>Install</h4><p>Open the downloaded file and confirm. ZENKTX appears in the apps row with its banner, right next to your streaming apps.</p></div></div>
+            <div class="step"><div class="num">4</div><div><h4>Optional: ADB</h4><p>From a computer on the same network: <code>adb connect &lt;tv-ip&gt;:5555</code> then <code>adb install ZENKTX-TV.apk</code>.</p></div></div>
+          </div>
+
+          <div class="steps" data-panel="mobile">
+            <div class="step"><div class="num">1</div><div><h4>Download the APK</h4><p>Tap the Mobile download button on this page. Chrome may warn that the file type can harm your device — it is the standard APK warning.</p></div></div>
+            <div class="step"><div class="num">2</div><div><h4>Allow installing</h4><p>When prompted, allow <code>Install unknown apps</code> for Chrome or your file manager.</p></div></div>
+            <div class="step"><div class="num">3</div><div><h4>Open and confirm</h4><p>Play Protect may ask to scan the app. Choose <em>Install anyway</em> if you trust the source, then launch ZENKTX Mobile.</p></div></div>
+          </div>
+
+          <div class="steps" data-panel="win">
+            <div class="step"><div class="num">1</div><div><h4>Download the installer</h4><p>Grab <code>ZENKTX-Setup-x64.exe</code> from the latest release. A portable <code>.exe</code> is published next to it.</p></div></div>
+            <div class="step"><div class="num">2</div><div><h4>Pass SmartScreen</h4><p>Windows may say the publisher is unverified: <code>More info → Run anyway</code>. The build is shipped from the signed release pipeline.</p></div></div>
+            <div class="step"><div class="num">3</div><div><h4>Pick your channels</h4><p>The guide opens with the bundled list. Use <code>Ctrl+F</code> to search, <code>↑ ↓</code> to move and <code>Enter</code> to play.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGELOG -->
+  <section id="changelog">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Version history &amp; changelogs</div>
+        <h2>What changed, release by release.</h2>
+        <p>Every tag in the repository publishes these notes automatically.</p>
+      </div>
+
+      <div class="log">
+        <article class="entry">
+          <h3>1.1.0 <span class="tagx">latest</span></h3>
+          <div class="meta">2 November 2026 · Android TV, Android Mobile, Windows</div>
+          <ul>
+            <li>Fixed the filter chip alignment — the focused chip no longer clips its top corners.</li>
+            <li>Channel up / down while playing, without leaving the player.</li>
+            <li>Stream failures now explain themselves: HTTP status, geo-block, codec or timeout.</li>
+            <li>Stall watchdog catches silent streams instead of leaving a black screen.</li>
+            <li>Browser user-agent + retries fix most <code>error_code_io_bad_http_status</code> failures.</li>
+            <li>Favourites with a dedicated chip and star badges.</li>
+            <li>Playlist manager: add or remove M3U/JSON sources, GitHub pull and push.</li>
+            <li>Logo editor — set a URL for missing artwork or remove it entirely.</li>
+            <li>Automatic updates from GitHub Releases, plus in-app download and install.</li>
+            <li>Release builds are signed and pinned; modified copies refuse to run.</li>
+            <li>New Android Mobile build alongside the TV build.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.0.0</h3>
+          <div class="meta">1 November 2026 · Android TV</div>
+          <ul>
+            <li>First release: Guide home screen with category chips, EPG grid and detail strip.</li>
+            <li>485 channels across 8 categories, with 128 Philippines channels flagged.</li>
+            <li>HLS and DASH playback through Media3 / ExoPlayer.</li>
+            <li>Android TV launcher banner and leanback support for Shield, Google TV and sticks.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <div class="brand" style="margin-bottom:8px">
+          <b style="font-size:14px">ZENKTX TV STREAM</b>
+        </div>
+        <div>Remote-first live TV for Android TV, Android and Windows.</div>
+      </div>
+      <div style="display:flex; gap:28px; flex-wrap:wrap">
+        <div><a href="#downloads">Downloads</a></div>
+        <div><a href="#install">Install</a></div>
+        <div><a href="#changelog">Changelog</a></div>
+        <div><a data-repo-link href="#">GitHub</a></div>
+      </div>
+    </div>
+    <p class="legal">
+      ZENKTX does not host or broadcast any channel. The bundled list contains public
+      stream URLs; playback depends on the availability of those sources and on your
+      local network. Distribution of third-party streams may require permission from the
+      rights holder — replace the channel list with your own if you redistribute the app.
+      Android is a trademark of Google LLC. Windows is a trademark of Microsoft Corporation.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Change these two values when you publish the repository / cut a release.
+  // ---------------------------------------------------------------------------
+  const REPO = "zenktx/zenktx-tv";
+  const VERSION = "1.1.0";
+
+  const ASSETS = {
+    tv:     `ZENKTX-TV-${VERSION}.apk`,
+    mobile: `ZENKTX-Mobile-${VERSION}.apk`,
+    win:    `ZENKTX-Setup-${VERSION}.exe`,
+  };
+  const BASE = `https://github.com/${REPO}/releases/latest/download/`;
+
+  document.querySelectorAll("[data-dl]").forEach((a) => {
+    a.href = BASE + ASSETS[a.dataset.dl];
+    a.rel = "noopener";
+  });
+  document.querySelectorAll("[data-ver]").forEach((el) => (el.textContent = "v" + VERSION));
+  document.querySelectorAll("[data-repo-link]").forEach((el) => {
+    el.href = `https://github.com/${REPO}`;
+    el.rel = "noopener";
+  });
+  const nav = document.getElementById("navDownload");
+  if (nav) nav.href = BASE + ASSETS.tv;
+
+  // Install tabs
+  const tabs = document.querySelectorAll(".tab");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+      document.querySelectorAll("[data-panel]").forEach((panel) => {
+        panel.toggleAttribute("data-active", panel.dataset.panel === tab.dataset.tab);
+      });
+    });
+  });
+
+  // Highlight the nav link for the section in view
+  const links = [...document.querySelectorAll(".nav-links a")];
+  const sections = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          links.forEach((l) =>
+            l.style.color = l.getAttribute("href") === "#" + entry.target.id ? "var(--text)" : ""
+          );
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    sections.forEach((s) => io.observe(s));
+  }
+</script>
+</body>
+</html>

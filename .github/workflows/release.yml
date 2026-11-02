@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, e.g. 1.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  VERSION: ${{ github.event.inputs.version || github.ref_name }}
+  ELECTRON_CACHE: ~/.cache/electron
+  ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
+
+jobs:
+  android:
+    name: Android APKs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v3
+
+      # Signing material comes from repository secrets. Without it the release
+      # APK would be unsigned, so the build stops here instead of shipping one.
+      - name: Restore release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.RELEASE_CERT_SHA256 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 secret is missing — refusing to build an unsigned release."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/zenktx-release.jks
+          {
+            echo "storeFile=zenktx-release.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+            echo "certSha256=$CERT_SHA256"
+          } > android/keystore.properties
+
+      - name: Build TV + mobile release APKs
+        working-directory: android
+        run: |
+          ./gradlew --no-daemon assembleTvRelease assembleMobileRelease \
+            -PversionName="$VERSION" \
+            -PversionCode="${{ github.run_number }}"
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${VERSION}.apk"
+          cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${VERSION}.apk"
+          ls -lh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: out/*.apk
+          if-no-files-found: error
+
+  windows:
+    name: Windows x86_64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: windows
+        run: npm install --no-audit --no-fund
+
+      - name: Set version from tag
+        working-directory: windows
+        shell: bash
+        run: npm version "${VERSION#v}" --no-git-tag-version --allow-same-version
+
+      - name: Build installer and portable exe
+        working-directory: windows
+        run: npm run dist
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p out
+          cp windows/dist/*.exe out/ || true
+          ls -lh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: out/*.exe
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Collect files
+        run: |
+          mkdir -p release
+          find dist -type f \( -name "*.apk" -o -name "*.exe" \) -exec cp {} release/ \;
+          ls -lh release
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZENKTX TV Stream ${{ env.VERSION }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          generate_release_notes: false
+          body: |
+            ## ZENKTX TV Stream ${{ env.VERSION }}
+
+            | Platform | Asset |
+            | --- | --- |
+            | Android TV (7.0+) | `ZENKTX-TV-${{ env.VERSION }}.apk` |
+            | Android Mobile (7.0+) | `ZENKTX-Mobile-${{ env.VERSION }}.apk` |
+            | Windows 10/11 x86_64 | `ZENKTX-Setup-${{ env.VERSION }}.exe` |
+
+            The in-app updater reads this release and offers the APK matching the device.
+            Every APK is signed with the ZENKTX release certificate.
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
