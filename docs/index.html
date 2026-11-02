@@ -127,6 +127,7 @@
 
   /* ---------- sections ---------- */
   section { padding: 84px 0; }
+  section[id], .features { scroll-margin-top: 84px; }
   .section-head { max-width: 620px; margin-bottom: 40px; }
   .kicker { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); font-weight: 700; }
   h2 { font-size: clamp(26px, 3vw, 36px); letter-spacing: -.02em; margin: 10px 0 12px; }
@@ -324,7 +325,7 @@
           channels never feels like scrolling a website.
         </p>
       </div>
-      <div class="features">
+      <div class="features" id="features">
         <article class="feature">
           <div class="ico">📺</div>
           <h3>Made for Android TV</h3>
