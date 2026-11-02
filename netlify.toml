@@ -1,0 +1,4 @@
+# The landing page is plain static HTML in docs/, so Netlify only needs to
+# publish that folder; without this it serves the repository root and 404s.
+[build]
+  publish = "docs"
