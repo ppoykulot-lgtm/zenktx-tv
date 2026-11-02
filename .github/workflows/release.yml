@@ -90,6 +90,11 @@ jobs:
   windows:
     name: Windows x86_64
     runs-on: windows-latest
+    # Set WIN_CERT_PFX_BASE64 (base64 of the .pfx) and WIN_CERT_PASSWORD to sign
+    # both executables. Without them the job still builds, but unsigned.
+    env:
+      CSC_LINK: ${{ secrets.WIN_CERT_PFX_BASE64 }}
+      CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -116,6 +121,22 @@ jobs:
           mkdir -p out
           cp windows/dist/*.exe out/ || true
           ls -lh out
+
+      - name: Verify Authenticode signatures
+        if: env.CSC_LINK != ''
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($f in Get-ChildItem out/*.exe) {
+            $sig = Get-AuthenticodeSignature $f.FullName
+            "{0}: {1} - {2}" -f $f.Name, $sig.Status, $sig.SignerCertificate.Subject
+            if ($sig.Status -ne 'Valid') { $failed = $true }
+          }
+          if ($failed) { throw "Signing ran but the signature is not valid." }
+
+      - name: Signing skipped
+        if: env.CSC_LINK == ''
+        run: echo "::warning::WIN_CERT_PFX_BASE64 is not set, so the executables ship unsigned."
 
       - uses: actions/upload-artifact@v4
         with:
@@ -158,10 +179,12 @@ jobs:
             | --- | --- |
             | Android TV (7.0+) | `ZENKTX-TV-${{ steps.v.outputs.version }}.apk` |
             | Android Mobile (7.0+) | `ZENKTX-Mobile-${{ steps.v.outputs.version }}.apk` |
-            | Windows 10/11 x86_64 | `ZENKTX-Setup-${{ steps.v.outputs.version }}.exe` |
+            | Windows 10/11 x86_64 (installer) | `ZENKTX-Setup-${{ steps.v.outputs.version }}.exe` |
+            | Windows 10/11 x86_64 (portable) | `ZENKTX-Portable-${{ steps.v.outputs.version }}.exe` |
 
             The in-app updater reads this release and offers the APK matching the device.
             Every APK is signed with the ZENKTX release certificate.
+            The Windows executables are signed only when the certificate secrets are configured.
           files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

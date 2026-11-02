@@ -182,6 +182,11 @@
   .spec span:first-child { color: var(--muted); }
   .spec span:last-child { color: #cfd8ea; font-weight: 600; }
   .dl .btn { justify-content: center; margin-top: auto; }
+  .dl-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto; }
+  .dl-btns .btn { flex: 1 1 128px; margin-top: 0; }
+  .dl .pick { margin: 12px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+  .dl .pick b { color: var(--text); }
+  .warn { color: #e2a33d; }
   .dl-foot { font-size: 10.5px; color: #6e7c99; display: flex; justify-content: space-between; align-items: center; }
   .ok { color: var(--mint); }
   @media (max-width: 980px) { .downloads { grid-template-columns: 1fr; } }
@@ -465,8 +470,18 @@
             <div><span>Compatibility</span><span>Windows 10/11 (64-bit)</span></div>
             <div><span>File size</span><span id="sizeWin">—</span></div>
           </div>
-          <a class="btn btn-primary" data-dl="win" href="#">⬇ &nbsp;Download EXE</a>
-          <div class="dl-foot"><span>Windows 10/11 compatible</span><span class="ok">✓ Signed build</span></div>
+          <div class="dl-btns">
+            <a class="btn btn-primary" data-dl="win" href="#">⬇ &nbsp;Installer</a>
+            <a class="btn btn-ghost" data-dl="winPortable" href="#">Portable</a>
+          </div>
+          <p class="pick">
+            <b>Installer</b> — normal Windows setup: Start Menu and desktop shortcuts, listed in
+            <em>Apps &amp; features</em> so it uninstalls cleanly. Pick this one on your own PC.<br>
+            <b>Portable</b> — a single <code>.exe</code> that runs without installing: no shortcut,
+            nothing to uninstall. Best for a USB stick or a machine you don't administer.<br>
+            Both behave the same and keep your channels and favourites in the same place.
+          </p>
+          <div class="dl-foot"><span>Windows 10/11 · 64-bit</span><span class="warn">⚠ No publisher certificate</span></div>
         </article>
       </div>
     </div>
@@ -503,8 +518,8 @@
           </div>
 
           <div class="steps" data-panel="win">
-            <div class="step"><div class="num">1</div><div><h4>Download the installer</h4><p>Grab <code>ZENKTX-Setup-x64.exe</code> from the latest release. A portable <code>.exe</code> is published next to it.</p></div></div>
-            <div class="step"><div class="num">2</div><div><h4>Pass SmartScreen</h4><p>Windows may say the publisher is unverified: <code>More info → Run anyway</code>. The build is shipped from the signed release pipeline.</p></div></div>
+            <div class="step"><div class="num">1</div><div><h4>Download the installer</h4><p>Two files ship together: <code>ZENKTX-Setup-&lt;version&gt;.exe</code> installs it properly, <code>ZENKTX-Portable-&lt;version&gt;.exe</code> runs straight from any folder. Take the installer unless you want nothing added to the system.</p></div></div>
+            <div class="step"><div class="num">2</div><div><h4>Pass SmartScreen</h4><p>Windows may say the publisher is unverified: <code>More info → Run anyway</code>. There is no publisher certificate yet, so this warning is expected on both files.</p></div></div>
             <div class="step"><div class="num">3</div><div><h4>Pick your channels</h4><p>The guide opens with the bundled list. Use <code>Ctrl+F</code> to search, <code>↑ ↓</code> to move and <code>Enter</code> to play.</p></div></div>
           </div>
         </div>
@@ -592,6 +607,7 @@
     tv:     `ZENKTX-TV-${VERSION}.apk`,
     mobile: `ZENKTX-Mobile-${VERSION}.apk`,
     win:    `ZENKTX-Setup-${VERSION}.exe`,
+    winPortable: `ZENKTX-Portable-${VERSION}.exe`,
   };
   const BASE = `https://github.com/${REPO}/releases/latest/download/`;
 
