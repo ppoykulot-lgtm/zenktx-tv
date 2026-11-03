@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver>v1.2.0</span>
+            <span class="ver" data-ver="tv">v1.1.1</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver>v1.2.0</span>
+            <span class="ver" data-ver="mobile">v1.1.1</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver>v1.2.0</span>
+            <span class="ver" data-ver="win">v1.2.1</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -568,8 +568,9 @@
         <details>
           <summary>How do updates arrive?</summary>
           <p>The app checks GitHub Releases on launch and can download a newer APK itself, then hands
-            it to the system installer. On Windows, download the new installer and run it over the old
-            copy — settings and favourites stay in place.</p>
+            it to the system installer. On Windows the app downloads the new build itself when you
+            press the update button and reopens on it; a portable copy stays portable. Updates only
+            arrive when the build for your platform actually changed.</p>
         </details>
         <details>
           <summary>How many channels, and where do they come from?</summary>
@@ -597,7 +598,17 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.2.0 <span class="tagx">latest</span></h3>
+          <h3>1.2.1 <span class="tagx">latest</span></h3>
+          <div class="meta">3 November 2026 · Windows only · Android builds unchanged</div>
+          <ul>
+            <li>Fullscreen now fills the whole player: the channel rail collapses, the window goes fullscreen, and <code>Esc</code> steps back out before closing the player.</li>
+            <li>The now-playing strip stays visible on smaller windows — it used to be cut off below the control bar.</li>
+            <li>A Windows build is published only when the Windows code changes, so the desktop updater never offers a release with no new code in it.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.2.0</h3>
           <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
           <ul>
             <li>Adding one playlist no longer clones its channels, and removing it clears them from the guide immediately instead of after a restart. Duplicate entries saved by older builds are cleaned up on launch.</li>
@@ -685,21 +696,29 @@
   // Change these two values when you publish the repository / cut a release.
   // ---------------------------------------------------------------------------
   const REPO = "ppoykulot-lgtm/zenktx-tv";
-  const VERSION = "1.2.0";
+  // A tag only rebuilds the platform whose code changed, so each card keeps the
+  // version and tag of the release that last touched it. Android still sits on
+  // 1.1.1: a Windows-only tag must not look like a new Android build.
+  const VERSIONS = { tv: "1.1.1", mobile: "1.1.1", win: "1.2.1" };
+  const TAGS = { tv: "v1.1.1", mobile: "v1.1.1", win: "v1.2.1" };
 
   const ASSETS = {
-    tv:     `ZENKTX-TV-${VERSION}.apk`,
-    mobile: `ZENKTX-Mobile-${VERSION}.apk`,
-    win:    `ZENKTX-Setup-${VERSION}.exe`,
-    winPortable: `ZENKTX-Portable-${VERSION}.exe`,
+    tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,
+    mobile: `ZENKTX-Mobile-${VERSIONS.mobile}.apk`,
+    win:    `ZENKTX-Setup-${VERSIONS.win}.exe`,
+    winPortable: `ZENKTX-Portable-${VERSIONS.win}.exe`,
   };
-  const BASE = `https://github.com/${REPO}/releases/latest/download/`;
+  const PLATFORM = { tv: "tv", mobile: "mobile", win: "win", winPortable: "win" };
+  const assetUrl = (key) =>
+    `https://github.com/${REPO}/releases/download/${TAGS[PLATFORM[key]]}/${ASSETS[key]}`;
 
   document.querySelectorAll("[data-dl]").forEach((a) => {
-    a.href = BASE + ASSETS[a.dataset.dl];
+    a.href = assetUrl(a.dataset.dl);
     a.rel = "noopener";
   });
-  document.querySelectorAll("[data-ver]").forEach((el) => (el.textContent = "v" + VERSION));
+  document.querySelectorAll("[data-ver]").forEach((el) => {
+    el.textContent = "v" + (VERSIONS[el.dataset.ver] || VERSIONS.win);
+  });
   document.querySelectorAll("[data-repo-link]").forEach((el) => {
     el.href = `https://github.com/${REPO}`;
     el.rel = "noopener";
@@ -709,14 +728,19 @@
     bytes >= 1048576
       ? (bytes / 1048576).toFixed(bytes >= 10485760 ? 0 : 1) + " MB"
       : Math.round(bytes / 1024) + " KB";
-  fetch(`https://api.github.com/repos/${REPO}/releases/latest`)
-    .then((res) => (res.ok ? res.json() : null))
-    .then((release) => {
-      if (!release || !release.assets) return;
-      const sizeOf = (name) => {
-        const asset = release.assets.find((a) => a.name === name);
-        return asset ? fmtSize(asset.size) : "";
-      };
+  Promise.all(
+    [...new Set(Object.values(TAGS))].map((tag) =>
+      fetch(`https://api.github.com/repos/${REPO}/releases/tags/${tag}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)
+    )
+  )
+    .then((releases) => {
+      const sizes = new Map();
+      releases.filter(Boolean).forEach((release) => {
+        (release.assets || []).forEach((asset) => sizes.set(asset.name, asset.size));
+      });
+      const sizeOf = (name) => (sizes.has(name) ? fmtSize(sizes.get(name)) : "");
       const fill = (id, text) => {
         const el = document.getElementById(id);
         if (el && text) el.textContent = text;

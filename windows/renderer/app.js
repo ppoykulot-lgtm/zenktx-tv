@@ -605,6 +605,7 @@ function fail(message, code) {
 }
 
 function closePlayer() {
+  togglePlayerFullscreen(false);
   cleanupPlayer();
   $('player').classList.remove('on');
   $('playerError').classList.remove('on');
@@ -1051,10 +1052,19 @@ $('muteBtn').addEventListener('click', () => {
   savePrefs();
   $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
 });
-$('fsBtn').addEventListener('click', () => {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
-});
+// Fullscreen means the player takes the window, not the document taking the
+// display: the rail collapses and the main process switches the window itself,
+// which is what keeps the button working in a packaged build.
+function togglePlayerFullscreen(force) {
+  const player = $('player');
+  const on = typeof force === 'boolean' ? force : !player.classList.contains('fs');
+  player.classList.toggle('fs', on);
+  $('fsBtn').classList.toggle('on', on);
+  $('fsBtn').title = on ? 'Exit fullscreen (Esc)' : 'Fullscreen (F11)';
+  if (window.zenk.setFullscreen) window.zenk.setFullscreen(on).catch(() => {});
+}
+
+$('fsBtn').addEventListener('click', () => togglePlayerFullscreen());
 $('pSeek').addEventListener('click', (event) => {
   const video = $('video');
   if (!Number.isFinite(video.duration) || video.duration <= 0) return;
@@ -1086,7 +1096,12 @@ document.addEventListener('keydown', (event) => {
   if (playerOpen) {
     // Typing in the player's channel search must not switch channels or pause.
     if (typing) return;
-    if (event.key === 'Escape') { closePlayer(); return; }
+    if (event.key === 'Escape') {
+      // First press leaves fullscreen, the next one closes the player.
+      if ($('player').classList.contains('fs')) togglePlayerFullscreen(false);
+      else closePlayer();
+      return;
+    }
     if (event.key === 'ArrowUp') { event.preventDefault(); switchChannel(1); return; }
     if (event.key === 'ArrowDown') { event.preventDefault(); switchChannel(-1); return; }
     if (event.key === ' ' && !typing) {
