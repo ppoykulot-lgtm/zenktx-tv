@@ -227,9 +227,24 @@ app.whenReady().then(() => {
     await shell.openExternal(url);
   });
 
+  ipcMain.handle('app:set-fullscreen', (event, on) => {
+    const target = BrowserWindow.fromWebContents(event.sender);
+    if (!target) return false;
+    target.setFullScreen(Boolean(on));
+    return target.isFullScreen();
+  });
+
   ipcMain.handle('app:check-update', async () => {
-    const body = await fetchText(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
-    const release = JSON.parse(body);
+    // A tag can carry a single platform now, so walk the feed for the newest
+    // release that actually ships a Windows build instead of trusting "latest".
+    const body = await fetchText(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=20`);
+    const list = JSON.parse(body);
+    const release = (Array.isArray(list) ? list : []).find(
+      (item) =>
+        !item.draft &&
+        (item.assets || []).some((a) => String(a.name).toLowerCase().endsWith('.exe'))
+    );
+    if (!release) throw new Error('No Windows build has been published yet');
     const pick = (needle) => {
       const asset = (release.assets || []).find((a) => {
         const name = a.name.toLowerCase();

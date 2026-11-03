@@ -128,13 +128,17 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
 /* player */
 .player {
   position: fixed; inset: 0; z-index: 40; display: none;
-  grid-template-columns: 292px 1fr; background: #05080f;
+  grid-template-columns: 292px minmax(0, 1fr); grid-template-rows: 100%;
+  background: #05080f; overflow: hidden;
 }
 .player.on { display: grid; }
+/* Fullscreen drops the rail so the video owns the whole window. */
+.player.fs { grid-template-columns: minmax(0, 1fr); }
+.player.fs .pside { display: none; }
 
 /* channel rail */
 .pside {
-  display: flex; flex-direction: column; min-height: 0;
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
   padding: 18px 14px 10px; background: #080d18; border-right: 1px solid var(--line);
 }
 .pside-head { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
@@ -167,7 +171,7 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
 .pitem-name { font-size: 12.5px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* stage */
-.pstage { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-width: 0; background: #05080f; }
+.pstage { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; overflow: hidden; background: #05080f; }
 .pview { position: relative; min-height: 0; }
 .pview video { width: 100%; height: 100%; background: #000; object-fit: contain; }
 .ptop { position: absolute; top: 14px; right: 16px; }
@@ -191,6 +195,7 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
   color: #cfd9ee; font-size: 14px; cursor: pointer;
 }
 .icon-btn:hover { background: #16213a; }
+.icon-btn.on { background: rgba(53, 231, 192, .16); color: var(--mint); }
 .icon-btn.primary { width: 44px; height: 44px; background: var(--mint); color: #06111d; font-size: 16px; }
 .icon-btn.primary:hover { box-shadow: 0 8px 20px rgba(53, 231, 192, .28); }
 .vol {
