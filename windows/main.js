@@ -1,6 +1,7 @@
 'use strict';
 
 const { app, BrowserWindow, ipcMain, shell, dialog, Menu } = require('electron');
+const { spawn } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
@@ -61,6 +62,13 @@ async function fetchText(url, token) {
 
 function base64(text) {
   return Buffer.from(text, 'utf8').toString('base64');
+}
+
+// electron-builder's portable target unpacks itself to a temp folder and
+// exposes the launcher path here, so a portable copy can update itself instead
+// of pushing the user onto the installer.
+function portableLauncher() {
+  return process.env.PORTABLE_EXECUTABLE_FILE || '';
 }
 
 function createWindow() {
@@ -222,14 +230,56 @@ app.whenReady().then(() => {
   ipcMain.handle('app:check-update', async () => {
     const body = await fetchText(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
     const release = JSON.parse(body);
-    const asset = (release.assets || []).find((a) => a.name.toLowerCase().endsWith('.exe'));
+    const pick = (needle) => {
+      const asset = (release.assets || []).find((a) => {
+        const name = a.name.toLowerCase();
+        return name.endsWith('.exe') && name.includes(needle);
+      });
+      return asset ? { name: asset.name, url: asset.browser_download_url, size: asset.size } : null;
+    };
     return {
       version: String(release.tag_name || '').replace(/^v/, ''),
       notes: release.body || '',
       page: release.html_url,
-      asset: asset ? asset.browser_download_url : '',
-      size: asset ? asset.size : 0,
+      portable: Boolean(portableLauncher()),
+      assets: { portable: pick('portable'), setup: pick('setup') },
     };
+  });
+
+  // Downloads the new build, starts it, and quits this copy. The installer and
+  // the portable launcher are both plain executables, so the same path works.
+  ipcMain.handle('app:install-update', async (event, url, name) => {
+    if (!/^https:\/\/github\.com\/ppoykulot-lgtm\/zenktx-tv\/releases\//i.test(url)) {
+      throw new Error('Refusing to download an update from an unknown host');
+    }
+
+    const safeName = String(name || 'zenktx-update.exe').replace(/[^\w.-]/g, '_');
+    const launcher = portableLauncher();
+    const dir = launcher ? path.dirname(launcher) : path.join(app.getPath('temp'), 'zenktx-update');
+    fs.mkdirSync(dir, { recursive: true });
+
+    let target = path.join(dir, safeName);
+    if (launcher && path.resolve(target) === path.resolve(launcher)) {
+      target = path.join(dir, safeName.replace(/\.exe$/i, '-new.exe'));
+    }
+
+    const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+    if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+
+    const total = Number(response.headers.get('content-length') || 0);
+    let received = 0;
+    const out = fs.createWriteStream(target);
+    for await (const chunk of response.body) {
+      received += chunk.length;
+      if (!out.write(chunk)) await new Promise((resolve) => out.once('drain', resolve));
+      if (total) event.sender.send('update:progress', { received, total });
+    }
+    await new Promise((resolve, reject) => out.end((error) => (error ? reject(error) : resolve())));
+
+    const child = spawn(target, [], { detached: true, stdio: 'ignore' });
+    child.unref();
+    setTimeout(() => app.quit(), 600);
+    return target;
   });
 
   createWindow();

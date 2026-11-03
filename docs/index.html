@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver>v1.1.1</span>
+            <span class="ver" data-ver>v1.2.0</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver>v1.1.1</span>
+            <span class="ver" data-ver>v1.2.0</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver>v1.1.1</span>
+            <span class="ver" data-ver>v1.2.0</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -597,7 +597,19 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.1.1 <span class="tagx">latest</span></h3>
+          <h3>1.2.0 <span class="tagx">latest</span></h3>
+          <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
+          <ul>
+            <li>Adding one playlist no longer clones its channels, and removing it clears them from the guide immediately instead of after a restart. Duplicate entries saved by older builds are cleaned up on launch.</li>
+            <li>Add playlist now asks for a title, and re-adding the same URL renames the existing entry rather than creating a second one.</li>
+            <li>A single stream link works as a playlist: an <code>.mpd</code> manifest, a lone <code>.m3u8</code>, or an M3U master playlist becomes one channel instead of failing to parse.</li>
+            <li>New player: channel rail with search and a live count, transport bar with volume and an accurate timeline, and a now-playing strip with the local clock.</li>
+            <li>Update checks run at launch, and pressing the update button installs the new build in place — the app downloads it with a progress bar, closes, and reopens on the new version. Portable copies stay portable.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.1.1</h3>
           <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
           <ul>
             <li>Unplayable channels now say why: a Widevine/PlayReady channel is named as DRM-protected, and a dead provider token is named as an expired link.</li>
@@ -673,7 +685,7 @@
   // Change these two values when you publish the repository / cut a release.
   // ---------------------------------------------------------------------------
   const REPO = "ppoykulot-lgtm/zenktx-tv";
-  const VERSION = "1.1.1";
+  const VERSION = "1.2.0";
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSION}.apk`,

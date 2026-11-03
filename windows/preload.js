@@ -9,5 +9,8 @@ contextBridge.exposeInMainWorld('zenk', {
   githubPush: (cfg, content, message) => ipcRenderer.invoke('net:github-push', cfg, content, message),
   openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
   checkUpdate: () => ipcRenderer.invoke('app:check-update'),
+  installUpdate: (url, name) => ipcRenderer.invoke('app:install-update', url, name),
+  onUpdateProgress: (callback) =>
+    ipcRenderer.on('update:progress', (_event, progress) => callback(progress)),
   platform: process.platform,
 });

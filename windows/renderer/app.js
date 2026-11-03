@@ -25,6 +25,7 @@ const prefs = Object.assign(
     hidden: [],
     logos: {},
     playlists: [],
+    volume: 100,
     github: { owner: '', repo: '', path: 'channels.m3u', branch: 'main', token: '' },
   },
   JSON.parse(localStorage.getItem(PREFS_KEY) || '{}')
@@ -34,10 +35,20 @@ prefs.github = Object.assign(
   prefs.github || {}
 );
 
+// Older builds stored the same playlist once per add, so an existing profile can
+// carry repeats. Keep the first entry for each URL.
+const seenPlaylistUrls = new Set();
+prefs.playlists = (Array.isArray(prefs.playlists) ? prefs.playlists : []).filter((playlist) => {
+  if (!playlist || !playlist.url || seenPlaylistUrls.has(playlist.url)) return false;
+  seenPlaylistUrls.add(playlist.url);
+  return true;
+});
+
 const savePrefs = () => localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
 
 const state = {
   base: [],
+  bundled: [],
   filter: 'All',
   search: '',
   visible: [],
@@ -130,10 +141,6 @@ function hash(value) {
   return Math.abs(h).toString(36);
 }
 
-function parsePlaylist(text, prefix) {
-  return text.trimStart().startsWith('#EXTM3U') ? fromM3u(text, prefix) : fromJson(text, prefix);
-}
-
 function applyLocalState(list) {
   return list
     .filter((c) => !prefs.hidden.includes(c.key))
@@ -147,7 +154,7 @@ function applyLocalState(list) {
 async function boot() {
   try {
     const bundled = await window.zenk.bundledChannels();
-    state.base = (bundled.channels || []).map((c, i) => ({
+    state.bundled = (bundled.channels || []).map((c, i) => ({
       key: `b:${c.id ?? i + 1}`,
       name: c.name || `Channel ${i + 1}`,
       category: c.category || 'Entertainment',
@@ -161,22 +168,62 @@ async function boot() {
     toast(`Could not load the bundled list: ${error.message}`);
   }
 
-  const seen = new Set(state.base.map((c) => c.url));
+  document.title = `ZENKTX TV Stream — v${await window.zenk.version()}`;
+  await loadAll();
+  rebuild();
+  scheduleUpdateCheck();
+}
+
+// Rebuilt from scratch on every change: mutating the old list left the channels
+// of a removed playlist behind until the next launch, and re-added duplicates
+// each time a playlist was reloaded.
+async function loadAll() {
+  const list = state.bundled.slice();
+  const seen = new Set(list.map((c) => c.url));
+
   for (const playlist of prefs.playlists.filter((p) => p.enabled)) {
     try {
       const text = await window.zenk.fetchText(playlist.url);
-      for (const channel of parsePlaylist(text, playlist.id)) {
+      for (const channel of parseSource(text, playlist)) {
         if (seen.has(channel.url)) continue;
         seen.add(channel.url);
-        state.base.push(channel);
+        list.push(channel);
       }
     } catch (error) {
       toast(`${playlist.name}: ${error.message}`);
     }
   }
+  state.base = list;
+}
 
-  document.title = `ZENKTX TV Stream — v${await window.zenk.version()}`;
-  rebuild();
+// A source is not always a list. A lone .mpd or .m3u8 link is a single channel,
+// and so is an M3U master playlist, which carries no #EXTINF entries.
+function singleStream(playlist) {
+  const name = playlist.name || playlist.url.split('/').pop().split('?')[0] || 'Stream';
+  return [{
+    key: `${playlist.id}:single`,
+    name,
+    category: 'Playlist',
+    logo: '',
+    url: playlist.url,
+    streamType: streamType(playlist.url),
+    quality: 'HD',
+    isFilipino: false,
+  }];
+}
+
+function parseSource(text, playlist) {
+  const body = text.trimStart();
+  if (body.startsWith('#EXTM3U')) {
+    const channels = fromM3u(text, playlist.id);
+    return channels.length ? channels : singleStream(playlist);
+  }
+  if (body.startsWith('{') || body.startsWith('[')) {
+    let channels = [];
+    try { channels = fromJson(text, playlist.id); } catch (error) { channels = []; }
+    return channels.length ? channels : singleStream(playlist);
+  }
+  return singleStream(playlist);
 }
 
 function rebuild() {
@@ -428,9 +475,14 @@ function beginPlayback() {
   const meta = `CH ${state.index + 1} / ${state.queue.length} · ${(channel.category || 'LIVE').toUpperCase()}`;
   $('pchipMeta').textContent = 'CONNECTING…';
   setImage($('pchipLogo'), channel.logo);
+  updatePlayerInfo(channel);
+  renderPlayerList();
 
   const video = $('video');
-  video.muted = false;
+  video.volume = Math.max(0, Math.min(1, (prefs.volume ?? 100) / 100));
+  video.muted = Boolean(prefs.muted) || video.volume === 0;
+  $('pVol').value = String(Math.round(video.volume * 100));
+  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
   video.addEventListener('playing', function firstFrame() {
     if (state.queue[state.index]?.key === channel.key) $('pchipMeta').textContent = meta;
   }, { once: true });
@@ -558,6 +610,117 @@ function closePlayer() {
   $('playerError').classList.remove('on');
 }
 
+/* ------------------------------------------------------- player interface */
+
+function renderPlayerList() {
+  const list = $('pList');
+  const source = state.queue.length ? state.queue : state.visible;
+  const query = $('pSearch').value.trim().toLowerCase();
+  const currentKey = source[state.index]?.key;
+  let shown = 0;
+
+  $('pCount').textContent = String(source.length);
+  list.innerHTML = '';
+
+  for (const channel of source) {
+    if (query && !`${channel.name} ${channel.category}`.toLowerCase().includes(query)) continue;
+    shown += 1;
+
+    const row = document.createElement('button');
+    row.className = `pitem${channel.key === currentKey ? ' on' : ''}`;
+
+    const art = document.createElement('span');
+    art.className = 'pitem-art';
+    if (channel.logo) {
+      const img = new Image();
+      img.alt = '';
+      img.src = channel.logo;
+      art.appendChild(img);
+    } else {
+      art.textContent = '▶';
+    }
+
+    const name = document.createElement('span');
+    name.className = 'pitem-name';
+    name.textContent = channel.name;
+
+    row.append(art, name);
+    row.addEventListener('click', () => play(channel));
+    list.appendChild(row);
+
+    if (channel.key === currentKey) requestAnimationFrame(() => row.scrollIntoView({ block: 'nearest' }));
+  }
+
+  if (!shown) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'No channel matches that search.';
+    list.appendChild(empty);
+  }
+}
+
+function updatePlayerInfo(channel) {
+  $('pInfoName').textContent = channel.name;
+  const bits = [channel.category || 'LIVE', channel.streamType.toUpperCase()];
+  if (channel.isFilipino) bits.push('PH');
+  $('pInfoMeta').textContent = `LIVE · ${bits.join(' · ')}`;
+  $('pQuality').textContent = channel.streamType === 'mpd' ? 'AUTO · DASH' : 'AUTO · HLS';
+  $('pInfoLogo').style.visibility = channel.logo ? 'visible' : 'hidden';
+  setImage($('pInfoLogo'), channel.logo);
+  $('pTime').textContent = 'LIVE';
+  $('pTotal').textContent = 'LIVE';
+  $('pSeek').classList.add('live');
+  $('pSeekFill').style.width = '100%';
+}
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = String(total % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+}
+
+function updateTimeline() {
+  const video = $('video');
+  const live = !Number.isFinite(video.duration) || video.duration <= 0;
+  $('pSeek').classList.toggle('live', live);
+  if (live) {
+    $('pTime').textContent = 'LIVE';
+    $('pTotal').textContent = 'LIVE';
+    $('pSeekFill').style.width = '100%';
+    return;
+  }
+  const ratio = video.duration ? Math.min(1, video.currentTime / video.duration) : 0;
+  $('pTime').textContent = formatTime(video.currentTime);
+  $('pTotal').textContent = formatTime(video.duration);
+  $('pSeekFill').style.width = `${ratio * 100}%`;
+  $('pSeekKnob').style.left = `${ratio * 100}%`;
+}
+
+function setVolume(value) {
+  const video = $('video');
+  const level = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+  video.volume = level / 100;
+  video.muted = level === 0;
+  prefs.volume = level;
+  prefs.muted = video.muted;
+  savePrefs();
+  $('pVol').value = String(level);
+  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
+}
+
+function updateClock() {
+  const now = new Date();
+  $('clockTime').textContent = now.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
+  });
+  $('clockDate').textContent = now.toLocaleDateString([], {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+
 /* --------------------------------------------------------------- playlists */
 
 function openPlaylists() {
@@ -597,7 +760,8 @@ function openPlaylists() {
       prefs.playlists = prefs.playlists.filter((p) => p.id !== playlist.id);
       savePrefs();
       openPlaylists();
-      toast('Playlist removed.');
+      reloadAll();
+      toast('Playlist removed — its channels are gone from the guide.');
     });
     item.appendChild(remove);
 
@@ -609,15 +773,7 @@ function openPlaylists() {
 
 async function reloadAll() {
   const key = state.selected?.key;
-  state.base = state.base.filter((c) => !prefs.playlists.some((p) => c.key.startsWith(`${p.id}:`)));
-  for (const playlist of prefs.playlists.filter((p) => p.enabled)) {
-    try {
-      const text = await window.zenk.fetchText(playlist.url);
-      state.base.push(...parsePlaylist(text, playlist.id));
-    } catch (error) {
-      toast(`${playlist.name}: ${error.message}`);
-    }
-  }
+  await loadAll();
   rebuild();
   if (key) {
     const again = state.visible.find((c) => c.key === key);
@@ -626,18 +782,31 @@ async function reloadAll() {
 }
 
 function addPlaylist() {
-  ask('Add playlist', 'M3U / M3U8 / JSON URL', '', (url) => {
-    if (!url) return;
-    prefs.playlists.push({
-      id: hash(url + Date.now()),
-      name: url.split('/').pop().split('?')[0] || 'Playlist',
-      url,
-      enabled: true,
-    });
-    savePrefs();
-    openPlaylists();
-    reloadAll();
-  });
+  $('addTitle').value = '';
+  $('addUrl').value = '';
+  $('dlgAddPlaylist').showModal();
+  $('addTitle').focus();
+}
+
+function savePlaylist() {
+  const url = $('addUrl').value.trim();
+  if (!url) {
+    toast('Paste a playlist or stream URL first.');
+    return;
+  }
+  const title = $('addTitle').value.trim() || url.split('/').pop().split('?')[0] || 'Playlist';
+  const existing = prefs.playlists.find((p) => p.url === url);
+  if (existing) {
+    existing.name = title;
+    existing.enabled = true;
+  } else {
+    prefs.playlists.push({ id: hash(url + Date.now()), name: title, url, enabled: true });
+  }
+  savePrefs();
+  $('dlgAddPlaylist').close();
+  openPlaylists();
+  reloadAll();
+  toast(existing ? 'Playlist updated.' : 'Playlist added.');
 }
 
 /* ------------------------------------------------------------ github sync */
@@ -666,19 +835,14 @@ function readGithub() {
 async function githubPull() {
   const cfg = readGithub();
   if (!cfg.owner || !cfg.repo) return toast('Set the owner and repository first.');
+  const rawUrl = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
+  const label = `GitHub · ${cfg.owner}/${cfg.repo}`;
   try {
-    const text = await window.zenk.fetchText(
-      `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`
-    );
-    const channels = parsePlaylist(text, 'gh');
-    const existing = prefs.playlists.find((p) => p.name === `GitHub · ${cfg.owner}/${cfg.repo}`);
-    if (existing) existing.url = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
-    else prefs.playlists.push({
-      id: hash(cfg.owner + cfg.repo),
-      name: `GitHub · ${cfg.owner}/${cfg.repo}`,
-      url: `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`,
-      enabled: true,
-    });
+    const text = await window.zenk.fetchText(rawUrl);
+    const channels = parseSource(text, { id: 'gh', name: label, url: rawUrl });
+    const existing = prefs.playlists.find((p) => p.name === label);
+    if (existing) existing.url = rawUrl;
+    else prefs.playlists.push({ id: hash(cfg.owner + cfg.repo), name: label, url: rawUrl, enabled: true });
     savePrefs();
     await reloadAll();
     toast(`Pulled ${channels.length} channels.`);
@@ -722,22 +886,68 @@ function isNewer(current, remote) {
   return false;
 }
 
-async function checkUpdates() {
+let pendingUpdate = null;
+
+async function fetchUpdate(silent) {
   try {
     const release = await window.zenk.checkUpdate();
     const current = await window.zenk.version();
-    if (release.version && isNewer(current, release.version)) {
-      toast(`ZENKTX ${release.version} is available — opening the release page…`);
-      await window.zenk.openExternal(release.page);
-    } else {
-      toast(`You are on the latest version (v${current}).`);
+    if (!release.version || !isNewer(current, release.version)) {
+      if (!silent) toast(`You are on the latest version (v${current}).`);
+      return null;
     }
+    return release;
   } catch (error) {
-    const why = String(error && error.message ? error.message : error);
-    toast(/ENOTFOUND|ECONN|network|fetch failed/i.test(why)
-      ? 'Update check needs an internet connection — try again in a moment.'
-      : 'Update check is unavailable right now — open the release page to grab the latest build.');
+    if (!silent) {
+      const why = String(error && error.message ? error.message : error);
+      toast(/ENOTFOUND|ECONN|network|fetch failed/i.test(why)
+        ? 'Update check needs an internet connection — try again in a moment.'
+        : 'Update check is unavailable right now — open the release page to grab the latest build.');
+    }
+    return null;
   }
+}
+
+// A portable build replaces itself with the next portable exe; an installed
+// build runs the installer. Either way the same asset list is used.
+function updateAsset(release) {
+  const assets = release.assets || {};
+  return release.portable ? assets.portable || assets.setup : assets.setup || assets.portable;
+}
+
+function showUpdate(release) {
+  const asset = updateAsset(release);
+  if (!asset) {
+    toast('That release has no Windows download yet.');
+    return;
+  }
+  pendingUpdate = release;
+  const size = asset.size ? `${Math.round(asset.size / 1048576)} MB` : 'the new build';
+  $('updBody').textContent =
+    `ZENKTX ${release.version} is ready. Installing downloads ${size}, closes this copy, ` +
+    'and opens the new version by itself.';
+  $('updBar').style.width = '0%';
+  $('updProgress').hidden = true;
+  $('updInstall').disabled = false;
+  $('updInstall').textContent = 'Install update';
+  $('dlgUpdate').showModal();
+}
+
+async function checkUpdates() {
+  const release = pendingUpdate || (await fetchUpdate(false));
+  if (release) showUpdate(release);
+}
+
+// Nobody presses "check for updates": look once at launch and flag the button.
+function scheduleUpdateCheck() {
+  setTimeout(async () => {
+    const release = await fetchUpdate(true);
+    if (!release) return;
+    pendingUpdate = release;
+    $('updateBtn').classList.add('alert');
+    $('updateBtn').textContent = `Update ${release.version}`;
+    toast(`ZENKTX ${release.version} is available — press “Update ${release.version}” to install it.`);
+  }, 4000);
 }
 
 /* ------------------------------------------------------------------ dialogs */
@@ -781,6 +991,9 @@ $('favBtn').addEventListener('click', () => state.selected && toggleFavourite(st
 
 $('playlistsBtn').addEventListener('click', openPlaylists);
 $('addPlaylistBtn').addEventListener('click', addPlaylist);
+$('addSave').addEventListener('click', savePlaylist);
+$('addCancel').addEventListener('click', () => $('dlgAddPlaylist').close());
+$('addUrl').addEventListener('keydown', (event) => { if (event.key === 'Enter') savePlaylist(); });
 $('closePlaylists').addEventListener('click', () => $('dlgPlaylists').close());
 
 $('githubBtn').addEventListener('click', openGithub);
@@ -790,6 +1003,31 @@ $('closeGithub').addEventListener('click', () => $('dlgGithub').close());
 $('promptCancel').addEventListener('click', () => $('dlgPrompt').close());
 
 $('updateBtn').addEventListener('click', checkUpdates);
+$('updLater').addEventListener('click', () => $('dlgUpdate').close());
+$('updInstall').addEventListener('click', async () => {
+  const asset = pendingUpdate && updateAsset(pendingUpdate);
+  if (!asset) return;
+  $('updInstall').disabled = true;
+  $('updInstall').textContent = 'Starting…';
+  $('updProgress').hidden = false;
+  try {
+    await window.zenk.installUpdate(asset.url, asset.name);
+    $('updInstall').textContent = 'Installing…';
+  } catch (error) {
+    $('updInstall').disabled = false;
+    $('updInstall').textContent = 'Install update';
+    $('updProgress').hidden = true;
+    toast(`Update download failed: ${error.message}`);
+  }
+});
+
+if (window.zenk.onUpdateProgress) {
+  window.zenk.onUpdateProgress(({ received, total }) => {
+    const pct = total ? Math.min(100, Math.round((received / total) * 100)) : 0;
+    $('updBar').style.width = `${pct}%`;
+    if (total) $('updInstall').textContent = `Downloading ${pct}%`;
+  });
+}
 $('retryBtn').addEventListener('click', () => { state.failed = false; beginPlayback(); });
 $('nextBtn').addEventListener('click', () => switchChannel(1));
 $('closeBtn').addEventListener('click', closePlayer);
@@ -799,9 +1037,40 @@ $('chDown').addEventListener('click', () => switchChannel(-1));
 
 $('ppBtn').addEventListener('click', () => {
   const video = $('video');
-  if (video.paused) { video.play().catch(() => {}); $('ppBtn').textContent = '⏸ Pause'; }
-  else { video.pause(); $('ppBtn').textContent = '▶ Play'; }
+  if (video.paused) video.play().catch(() => {});
+  else video.pause();
 });
+
+$('pSearch').addEventListener('input', renderPlayerList);
+$('pSearch').addEventListener('keydown', (event) => event.stopPropagation());
+$('pVol').addEventListener('input', (event) => setVolume(event.target.value));
+$('muteBtn').addEventListener('click', () => {
+  const video = $('video');
+  video.muted = !video.muted;
+  prefs.muted = video.muted;
+  savePrefs();
+  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
+});
+$('fsBtn').addEventListener('click', () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(() => {});
+});
+$('pSeek').addEventListener('click', (event) => {
+  const video = $('video');
+  if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+  const box = $('pSeek').getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (event.clientX - box.left) / box.width));
+  video.currentTime = ratio * video.duration;
+});
+
+const playerVideo = $('video');
+playerVideo.addEventListener('timeupdate', updateTimeline);
+playerVideo.addEventListener('durationchange', updateTimeline);
+playerVideo.addEventListener('play', () => { $('ppBtn').textContent = '⏸'; });
+playerVideo.addEventListener('pause', () => { $('ppBtn').textContent = '▶'; });
+
+updateClock();
+setInterval(updateClock, 1000);
 
 document.addEventListener('keydown', (event) => {
   const playerOpen = $('player').classList.contains('on');
@@ -815,6 +1084,8 @@ document.addEventListener('keydown', (event) => {
   }
 
   if (playerOpen) {
+    // Typing in the player's channel search must not switch channels or pause.
+    if (typing) return;
     if (event.key === 'Escape') { closePlayer(); return; }
     if (event.key === 'ArrowUp') { event.preventDefault(); switchChannel(1); return; }
     if (event.key === 'ArrowDown') { event.preventDefault(); switchChannel(-1); return; }
@@ -824,8 +1095,6 @@ document.addEventListener('keydown', (event) => {
       return;
     }
   }
-
-  if (typing) return;
 
   if (playerOpen) return;
 
