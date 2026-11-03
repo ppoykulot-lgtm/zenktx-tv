@@ -597,7 +597,20 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.1.0 <span class="tagx">latest</span></h3>
+          <h3>1.1.1 <span class="tagx">latest</span></h3>
+          <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
+          <ul>
+            <li>Unplayable channels now say why: a Widevine/PlayReady channel is named as DRM-protected, and a dead provider token is named as an expired link.</li>
+            <li>The error panel wraps long manifest URLs instead of spilling them past the card.</li>
+            <li>A DRM refusal shows up immediately. dash.js used to retry it about twenty times, so the panel arrived roughly ten seconds late.</li>
+            <li>DASH playback starts on a shorter buffer, and the guide reads <code>CONNECTING…</code> until the first frame instead of looking frozen.</li>
+            <li>The player CSP allows the blob worker both engines spawn.</li>
+            <li>The in-app update check points at the right repository again — it had been answered with HTTP 404 on every run — and no longer prints the raw IPC error when it fails.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.1.0</h3>
           <div class="meta">2 November 2026 · Android TV, Android Mobile, Windows</div>
           <ul>
             <li>Fixed the filter chip alignment — the focused chip no longer clips its top corners.</li>
@@ -660,7 +673,7 @@
   // Change these two values when you publish the repository / cut a release.
   // ---------------------------------------------------------------------------
   const REPO = "ppoykulot-lgtm/zenktx-tv";
-  const VERSION = "1.1.0";
+  const VERSION = "1.1.1";
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSION}.apk`,
