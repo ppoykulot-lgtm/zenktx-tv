@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver="tv">v1.1.1</span>
+            <span class="ver" data-ver="tv">v1.2.2</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver="mobile">v1.1.1</span>
+            <span class="ver" data-ver="mobile">v1.2.2</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver="win">v1.2.1</span>
+            <span class="ver" data-ver="win">v1.2.2</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -598,7 +598,18 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.2.1 <span class="tagx">latest</span></h3>
+          <h3>1.2.2 <span class="tagx">latest</span></h3>
+          <div class="meta">3 November 2026 · Windows · Android TV · Android Mobile</div>
+          <ul>
+            <li>Fullscreen is picture-only now: the now-playing strip, the clock and the channel rail are gone, and the floating controls fade away until the mouse moves or a key is pressed.</li>
+            <li>A new build announces itself with a card that lists what changed, on Windows, Android TV and Android Mobile.</li>
+            <li>When a channel has a second listing (a <code>Stream 2</code>, an HD twin), a dead or DRM-locked first address falls through to the next one instead of stopping at the error card.</li>
+            <li>Android update checks read the whole release feed, so a Windows-only tag no longer hides the next APK release from Android viewers.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.2.1</h3>
           <div class="meta">3 November 2026 · Windows only · Android builds unchanged</div>
           <ul>
             <li>Fullscreen now fills the whole player: the channel rail collapses, the window goes fullscreen, and <code>Esc</code> steps back out before closing the player.</li>
@@ -699,8 +710,8 @@
   // A tag only rebuilds the platform whose code changed, so each card keeps the
   // version and tag of the release that last touched it. Android still sits on
   // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.1.1", mobile: "1.1.1", win: "1.2.1" };
-  const TAGS = { tv: "v1.1.1", mobile: "v1.1.1", win: "v1.2.1" };
+  const VERSIONS = { tv: "1.2.2", mobile: "1.2.2", win: "1.2.2" };
+  const TAGS = { tv: "v1.2.2", mobile: "v1.2.2", win: "v1.2.2" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,

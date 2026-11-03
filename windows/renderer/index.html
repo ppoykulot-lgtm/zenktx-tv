@@ -155,13 +155,19 @@
   </dialog>
 
   <!-- update -->
-  <dialog id="dlgUpdate">
-    <h3>Update available</h3>
-    <p id="updBody">—</p>
+  <dialog id="dlgUpdate" class="upd">
+    <div class="upd-head">
+      <span class="upd-badge" id="updBadge">NEW</span>
+      <div>
+        <h3 id="updTitle">A new ZENKTX is ready</h3>
+        <p id="updBody">—</p>
+      </div>
+    </div>
+    <ul class="upd-notes" id="updNotes"></ul>
     <div class="progress" id="updProgress" hidden><div id="updBar"></div></div>
     <div class="row">
       <button class="btn" id="updLater">Later</button>
-      <button class="btn mint" id="updInstall">Install update</button>
+      <button class="btn mint" id="updInstall">Update now</button>
     </div>
   </dialog>
 

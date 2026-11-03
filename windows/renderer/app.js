@@ -60,6 +60,8 @@ const state = {
   dash: null,
   watchdog: 0,
   failed: false,
+  sources: [],
+  sourceIndex: 0,
 };
 
 /* ------------------------------------------------------------------ loading */
@@ -168,7 +170,8 @@ async function boot() {
     toast(`Could not load the bundled list: ${error.message}`);
   }
 
-  document.title = `ZENKTX TV Stream — v${await window.zenk.version()}`;
+  currentVersion = await window.zenk.version();
+  document.title = `ZENKTX TV Stream — v${currentVersion}`;
   await loadAll();
   rebuild();
   scheduleUpdateCheck();
@@ -468,7 +471,10 @@ function beginPlayback() {
 
   cleanupPlayer();
   state.failed = false;
+  state.sources = channelSources(channel);
+  state.sourceIndex = 0;
   $('player').classList.add('on');
+  wakePlayerChrome();
   $('playerError').classList.remove('on');
   $('pchip').style.opacity = '1';
   $('pchipName').textContent = channel.name;
@@ -487,7 +493,22 @@ function beginPlayback() {
     if (state.queue[state.index]?.key === channel.key) $('pchipMeta').textContent = meta;
   }, { once: true });
 
-  if (channel.streamType === 'mpd' && window.dashjs) {
+  playSource(channel);
+
+  clearTimeout(showChipTimer);
+  showChipTimer = setTimeout(() => { $('pchip').style.opacity = '0'; }, 3500);
+}
+
+let showChipTimer = 0;
+
+// Plays one address for the current channel. Everything that has to be redone
+// when a mirror is swapped in (player teardown, error panel) happens in fail().
+function playSource(channel) {
+  const sourceUrl = state.sources[state.sourceIndex] || channel.url;
+  const type = streamType(sourceUrl);
+  const video = $('video');
+
+  if (type === 'mpd' && window.dashjs) {
     const dash = window.dashjs.MediaPlayer().create();
     state.dash = dash;
     // The stock dash.js settings hold a 12 second buffer before the first
@@ -499,7 +520,7 @@ function beginPlayback() {
         scheduling: { scheduleWhilePaused: false },
       },
     });
-    dash.initialize(video, channel.url, true);
+    dash.initialize(video, sourceUrl, true);
     dash.on('error', (event) => {
       const raw = event.error?.message || 'stream error';
       window.__zenkLastStreamError = `dash: ${raw}`;
@@ -513,12 +534,12 @@ function beginPlayback() {
         try { dash.reset(); } catch (error) { /* already torn down */ }
       }, 0);
     });
-  } else if (channel.streamType === 'hls' && window.Hls && window.Hls.isSupported()) {
+  } else if (type === 'hls' && window.Hls && window.Hls.isSupported()) {
     const hls = new window.Hls({
       enableWorker: true, backBufferLength: 30, maxBufferLength: 20, startFragPrefetch: true,
     });
     state.hls = hls;
-    hls.loadSource(channel.url);
+    hls.loadSource(sourceUrl);
     hls.attachMedia(video);
     hls.on(window.Hls.Events.ERROR, (_event, data) => {
       if (!data.fatal) return;
@@ -527,17 +548,39 @@ function beginPlayback() {
       fail(describeHlsError(data, code), data.details || 'HLS_ERROR');
     });
   } else {
-    video.src = channel.url;
+    video.src = sourceUrl;
   }
 
   video.play().catch(() => {});
   startWatchdog(channel);
-
-  clearTimeout(showChipTimer);
-  showChipTimer = setTimeout(() => { $('pchip').style.opacity = '0'; }, 3500);
 }
 
-let showChipTimer = 0;
+// A channel is often listed more than once — a "Stream 2", an "HD" twin, a
+// leftover duplicate in an imported playlist. Those rows carry other addresses
+// for the same feed, so a dead or DRM-locked first link walks the chain instead
+// of showing the error card straight away.
+function channelSources(channel) {
+  const urls = [channel.url];
+  const normalise = (name) =>
+    String(name || '')
+      .toLowerCase()
+      .replace(/\b(hd|fhd|sd|uhd)\b/g, ' ')
+      .replace(/\bstream\s*\d+\b/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+
+  if (Array.isArray(channel.alt)) {
+    for (const url of channel.alt) if (url && !urls.includes(url)) urls.push(url);
+  }
+
+  const target = normalise(channel.name);
+  for (const other of state.base) {
+    if (!other.url || urls.includes(other.url)) continue;
+    if (normalise(other.name) !== target) continue;
+    urls.push(other.url);
+  }
+  return urls.slice(0, 3);
+}
 
 // dash.js reports raw MSE/EME text ("DRM: KeySystem Access Denied", "index.mpd
 // is not available"). Neither is something the viewer can fix, so say what it
@@ -595,6 +638,22 @@ function startWatchdog(channel) {
 }
 
 function fail(message, code) {
+  if (state.sources && state.sourceIndex + 1 < state.sources.length) {
+    state.sourceIndex += 1;
+    clearInterval(state.watchdog);
+    state.failed = false;
+    $('playerError').classList.remove('on');
+    $('pchipMeta').textContent = `MIRROR ${state.sourceIndex + 1} · CONNECTING…`;
+    if (state.hls) { state.hls.destroy(); state.hls = null; }
+    if (state.dash) {
+      const dash = state.dash;
+      state.dash = null;
+      try { dash.reset(); } catch (error) { /* already torn down */ }
+    }
+    playSource(state.queue[state.index]);
+    return;
+  }
+
   state.failed = true;
   clearInterval(state.watchdog);
   const channel = state.queue[state.index];
@@ -606,6 +665,7 @@ function fail(message, code) {
 
 function closePlayer() {
   togglePlayerFullscreen(false);
+  stopPlayerChrome();
   cleanupPlayer();
   $('player').classList.remove('on');
   $('playerError').classList.remove('on');
@@ -888,6 +948,7 @@ function isNewer(current, remote) {
 }
 
 let pendingUpdate = null;
+let currentVersion = '';
 
 async function fetchUpdate(silent) {
   try {
@@ -916,6 +977,20 @@ function updateAsset(release) {
   return release.portable ? assets.portable || assets.setup : assets.setup || assets.portable;
 }
 
+// The workflow writes the release notes in Markdown (a platform table plus a
+// closing note). The card shows only the sentences worth reading, so a viewer
+// sees the new features instead of pipes and backticks.
+function noteLines(body) {
+  return String(body || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('|') && !line.startsWith('#') && !line.startsWith('---'))
+    .filter((line) => !/only the platforms edited|signed only when|certificate secrets/i.test(line))
+    .map((line) => line.replace(/^[-*]\s*/, '').replace(/`/g, '').trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
 function showUpdate(release) {
   const asset = updateAsset(release);
   if (!asset) {
@@ -924,14 +999,28 @@ function showUpdate(release) {
   }
   pendingUpdate = release;
   const size = asset.size ? `${Math.round(asset.size / 1048576)} MB` : 'the new build';
+
+  $('updBadge').textContent = `v${release.version}`;
+  $('updTitle').textContent = 'A new ZENKTX is ready';
   $('updBody').textContent =
-    `ZENKTX ${release.version} is ready. Installing downloads ${size}, closes this copy, ` +
+    `You are on v${currentVersion || '—'}. Updating downloads ${size}, closes this copy ` +
     'and opens the new version by itself.';
+
+  const notes = noteLines(release.notes);
+  const list = $('updNotes');
+  list.innerHTML = '';
+  for (const line of notes) {
+    const item = document.createElement('li');
+    item.textContent = line;
+    list.appendChild(item);
+  }
+  list.hidden = notes.length === 0;
+
   $('updBar').style.width = '0%';
   $('updProgress').hidden = true;
   $('updInstall').disabled = false;
-  $('updInstall').textContent = 'Install update';
-  $('dlgUpdate').showModal();
+  $('updInstall').textContent = 'Update now';
+  if (!$('dlgUpdate').open) $('dlgUpdate').showModal();
 }
 
 async function checkUpdates() {
@@ -947,7 +1036,7 @@ function scheduleUpdateCheck() {
     pendingUpdate = release;
     $('updateBtn').classList.add('alert');
     $('updateBtn').textContent = `Update ${release.version}`;
-    toast(`ZENKTX ${release.version} is available — press “Update ${release.version}” to install it.`);
+    showUpdate(release);
   }, 4000);
 }
 
@@ -1052,6 +1141,35 @@ $('muteBtn').addEventListener('click', () => {
   savePrefs();
   $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
 });
+// ------------------------------------------------------------- chrome idle
+// Fullscreen shows the picture and nothing else: the guide strip is gone and
+// the floating controls fade out after a couple of seconds without the mouse,
+// then come back on any movement or key press.
+let chromeTimer = 0;
+
+function wakePlayerChrome() {
+  const player = $('player');
+  if (!player) return;
+  player.classList.remove('idle');
+  clearTimeout(chromeTimer);
+  if (!player.classList.contains('fs')) return;
+  chromeTimer = setTimeout(() => {
+    if (state.failed || $('playerError').classList.contains('on')) return;
+    if ($('video').paused) return;
+    player.classList.add('idle');
+  }, 2800);
+}
+
+function stopPlayerChrome() {
+  clearTimeout(chromeTimer);
+  $('player').classList.remove('idle');
+}
+
+document.addEventListener('mousemove', wakePlayerChrome, { passive: true });
+document.addEventListener('pointerdown', wakePlayerChrome, { passive: true });
+document.addEventListener('keydown', wakePlayerChrome);
+window.addEventListener('blur', stopPlayerChrome);
+
 // Fullscreen means the player takes the window, not the document taking the
 // display: the rail collapses and the main process switches the window itself,
 // which is what keeps the button working in a packaged build.
@@ -1062,6 +1180,7 @@ function togglePlayerFullscreen(force) {
   $('fsBtn').classList.toggle('on', on);
   $('fsBtn').title = on ? 'Exit fullscreen (Esc)' : 'Fullscreen (F11)';
   if (window.zenk.setFullscreen) window.zenk.setFullscreen(on).catch(() => {});
+  wakePlayerChrome();
 }
 
 $('fsBtn').addEventListener('click', () => togglePlayerFullscreen());
