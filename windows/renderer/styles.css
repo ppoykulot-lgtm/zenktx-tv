@@ -132,9 +132,28 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
   background: #05080f; overflow: hidden;
 }
 .player.on { display: grid; }
-/* Fullscreen drops the rail so the video owns the whole window. */
+/* Fullscreen drops the rail so the video owns the whole window. The guide
+   strip, the clock and the rail all go; the controls float over the picture
+   and fade away while the mouse rests, like a set-top box. */
 .player.fs { grid-template-columns: minmax(0, 1fr); }
 .player.fs .pside { display: none; }
+.player.fs .pinfo { display: none; }
+.player.fs .pstage { grid-template-rows: minmax(0, 1fr); }
+.player.fs .pbar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+  padding: 36px 30px 22px; border-top: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 15, 0) 0%, rgba(5, 8, 15, .5) 40%, rgba(5, 8, 15, .94) 100%);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.player.fs .pchip { top: 22px; left: 24px; border-color: rgba(120, 145, 190, .22); }
+.player.fs .ptop { top: 20px; right: 22px; }
+.player.fs .pchip,
+.player.fs .ptop { transition: opacity .3s ease, transform .3s ease; }
+.player.fs .pbar .icon-btn:hover { background: rgba(255, 255, 255, .14); }
+.player.fs.idle { cursor: none; }
+.player.fs.idle .pbar { opacity: 0; transform: translateY(16px); pointer-events: none; }
+.player.fs.idle .pchip,
+.player.fs.idle .ptop { opacity: 0; transform: translateY(-10px); pointer-events: none; }
 
 /* channel rail */
 .pside {
@@ -171,7 +190,7 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
 .pitem-name { font-size: 12.5px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* stage */
-.pstage { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; overflow: hidden; background: #05080f; }
+.pstage { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; overflow: hidden; background: #05080f; }
 .pview { position: relative; min-height: 0; }
 .pview video { width: 100%; height: 100%; background: #000; object-fit: contain; }
 .ptop { position: absolute; top: 14px; right: 16px; }
@@ -241,7 +260,26 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
 .pclock span { display: block; font-size: 10.5px; color: var(--muted); }
 .pclock small { font-size: 8px; letter-spacing: .18em; color: #5d6b87; font-weight: 700; }
 
-.progress { height: 6px; border-radius: 999px; background: #1d2843; overflow: hidden; margin: 2px 0 8px; }
+/* update card */
+dialog.upd { width: min(470px, 92vw); }
+.upd-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.upd-badge {
+  flex: none; margin-top: 2px; border-radius: 999px; padding: 5px 11px;
+  background: rgba(53, 231, 192, .14); color: var(--mint);
+  border: 1px solid rgba(53, 231, 192, .35);
+  font-size: 11px; font-weight: 800; letter-spacing: .04em;
+}
+.upd-head h3 { margin: 0 0 4px; font-size: 17px; }
+.upd-head p { margin: 0; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.upd-notes {
+  margin: 0 0 4px; padding: 12px 14px 12px 30px; max-height: 190px; overflow-y: auto;
+  background: #0a1220; border: 1px solid var(--line); border-radius: 11px;
+  color: #c7d2e6; font-size: 12px; line-height: 1.65;
+}
+.upd-notes li { margin: 0 0 4px; }
+.upd-notes li::marker { color: var(--mint); }
+
+.progress { height: 6px; border-radius: 999px; background: #1d2843; overflow: hidden; margin: 12px 0 8px; }
 .progress div { height: 100%; width: 0; background: var(--mint); transition: width .2s; }
 
 /* error card, centred on the video */

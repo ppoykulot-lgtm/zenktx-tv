@@ -3,6 +3,7 @@ package ph.zenktx.tv.data
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
+import org.json.JSONArray
 import org.json.JSONObject
 import ph.zenktx.tv.BuildConfig
 import ph.zenktx.tv.net.Http
@@ -27,15 +28,22 @@ object UpdateChecker {
     /** Blocking; call from a background thread. */
     fun latest(repo: String = BuildConfig.GITHUB_REPO, token: String? = null): Release? {
         if (repo.isBlank()) return null
+        // A tag can carry one platform only, so releases/latest is often a
+        // Windows-only build with no APK at all. Walk the feed and take the
+        // newest release that really attaches one.
         val json = Http.getText(
-            "https://api.github.com/repos/$repo/releases/latest",
+            "https://api.github.com/repos/$repo/releases?per_page=20",
             token = token?.ifBlank { null },
         )
-        val root = JSONObject(json)
-        val assets = root.optJSONArray("assets")
-        var apkUrl = ""
-        var size = 0L
-        if (assets != null) {
+        val list = JSONArray(json)
+
+        for (index in 0 until list.length()) {
+            val root = list.optJSONObject(index) ?: continue
+            if (root.optBoolean("draft") || root.optBoolean("prerelease")) continue
+
+            val assets = root.optJSONArray("assets") ?: continue
+            var apkUrl = ""
+            var size = 0L
             for (i in 0 until assets.length()) {
                 val asset = assets.optJSONObject(i) ?: continue
                 val name = asset.optString("name").lowercase()
@@ -45,17 +53,18 @@ object UpdateChecker {
                     break
                 }
             }
-        }
-        if (apkUrl.isBlank()) return null
+            if (apkUrl.isBlank()) continue
 
-        return Release(
-            version = root.optString("tag_name").removePrefix("v"),
-            notes = root.optString("body"),
-            apkUrl = apkUrl,
-            pageUrl = root.optString("html_url"),
-            sizeBytes = size,
-            publishedAt = root.optString("published_at"),
-        )
+            return Release(
+                version = root.optString("tag_name").removePrefix("v"),
+                notes = root.optString("body"),
+                apkUrl = apkUrl,
+                pageUrl = root.optString("html_url"),
+                sizeBytes = size,
+                publishedAt = root.optString("published_at"),
+            )
+        }
+        return null
     }
 
     /** True when [remote] is a higher semantic version than [current]. */

@@ -64,8 +64,30 @@ object Updater {
         }
     }
 
+    /**
+     * Release notes are Markdown written by the workflow: a platform table plus
+     * a closing note. Keep only the readable sentences so the popup shows what
+     * actually changed instead of pipes and backticks.
+     */
+    private fun highlightNotes(body: String): String {
+        val lines = body.lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && !it.startsWith("|") && !it.startsWith("#") && !it.startsWith("---") }
+            .filterNot {
+                it.contains("Only the platforms edited", true) ||
+                    it.contains("signed only when", true) ||
+                    it.contains("certificate secrets", true)
+            }
+            .map { it.removePrefix("- ").removePrefix("* ").replace("`", "").trim() }
+            .filter { it.isNotEmpty() }
+            .take(6)
+            .toList()
+        return if (lines.isEmpty()) "Bug fixes and new channels."
+        else lines.joinToString("\n\u2022 ", prefix = "\u2022 ")
+    }
+
     private fun promptDownload(activity: Activity, release: UpdateChecker.Release) {
-        val notes = release.notes.take(400).ifBlank { "Bug fixes and new channels." }
+        val notes = highlightNotes(release.notes)
         AlertDialog.Builder(activity, R.style.Theme_Zenktx_Dialog)
             .setTitle(activity.getString(R.string.update_title))
             .setMessage(
