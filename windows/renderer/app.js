@@ -733,7 +733,10 @@ async function checkUpdates() {
       toast(`You are on the latest version (v${current}).`);
     }
   } catch (error) {
-    toast(`Update check failed: ${error.message}`);
+    const why = String(error && error.message ? error.message : error);
+    toast(/ENOTFOUND|ECONN|network|fetch failed/i.test(why)
+      ? 'Update check needs an internet connection — try again in a moment.'
+      : 'Update check is unavailable right now — open the release page to grab the latest build.');
   }
 }
 
