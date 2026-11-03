@@ -44,32 +44,72 @@
 
   <!-- player -->
   <div class="player" id="player">
-    <video id="video" playsinline></video>
-    <div class="pchip" id="pchip">
-      <img id="pchipLogo" alt="" />
-      <div><b id="pchipName">—</b><small id="pchipMeta"></small></div>
-    </div>
-
-    <div class="panel" id="playerError">
-      <div class="kicker">CHANNEL UNAVAILABLE</div>
-      <h3 id="errTitle">—</h3>
-      <p id="errBody"></p>
-      <code id="errCode">STREAM</code>
-      <div class="row">
-        <button class="btn mint" id="retryBtn">↻ Retry</button>
-        <button class="btn" id="nextBtn">Next channel ▶</button>
-        <button class="btn" id="closeBtn">← Back</button>
+    <aside class="pside">
+      <div class="pside-head">
+        <b>Channels</b>
+        <span class="pill" id="pCount">0</span>
       </div>
-    </div>
+      <input class="pside-search" id="pSearch" type="search" placeholder="Search by name, tag…" />
+      <div class="plist" id="pList"></div>
+    </aside>
 
-    <div class="pcontrols">
-      <button class="btn" id="ppBtn">⏸ Pause</button>
-      <span class="live">LIVE</span>
-      <div class="spacer"></div>
-      <button class="btn" id="chUp">CH ▲</button>
-      <button class="btn" id="chDown">CH ▼</button>
-      <button class="btn" id="exitBtn">✕ Close</button>
-    </div>
+    <section class="pstage">
+      <div class="pview">
+        <video id="video" playsinline></video>
+
+        <div class="pchip" id="pchip">
+          <img id="pchipLogo" alt="" />
+          <div><b id="pchipName">—</b><small id="pchipMeta"></small></div>
+        </div>
+
+        <div class="ptop">
+          <button class="icon-btn" id="exitBtn" title="Close the player (Esc)">✕</button>
+        </div>
+
+        <div class="panel" id="playerError">
+          <div class="kicker">CHANNEL UNAVAILABLE</div>
+          <h3 id="errTitle">—</h3>
+          <p id="errBody"></p>
+          <code id="errCode">STREAM</code>
+          <div class="row">
+            <button class="btn mint" id="retryBtn">↻ Retry</button>
+            <button class="btn" id="nextBtn">Next channel ▶</button>
+            <button class="btn" id="closeBtn">← Back</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pbar">
+        <button class="icon-btn primary" id="ppBtn" title="Play or pause (Space)">⏸</button>
+        <button class="icon-btn" id="chDown" title="Previous channel (↑)">⏮</button>
+        <button class="icon-btn" id="chUp" title="Next channel (↓)">⏭</button>
+        <button class="icon-btn" id="muteBtn" title="Mute">⏼</button>
+        <input class="vol" id="pVol" type="range" min="0" max="100" value="100" aria-label="Volume" />
+        <div class="seekwrap">
+          <span class="time" id="pTime">LIVE</span>
+          <div class="seek" id="pSeek">
+            <div class="seekfill" id="pSeekFill"></div>
+            <div class="seekknob" id="pSeekKnob"></div>
+          </div>
+          <span class="time" id="pTotal">LIVE</span>
+        </div>
+        <span class="quality" id="pQuality">AUTO</span>
+        <button class="icon-btn" id="fsBtn" title="Fullscreen (F11)">⛶</button>
+      </div>
+
+      <div class="pinfo">
+        <img id="pInfoLogo" alt="" />
+        <div class="pinfo-text">
+          <b id="pInfoName">—</b>
+          <small id="pInfoMeta">—</small>
+        </div>
+        <div class="pclock" title="Local time">
+          <b id="clockTime">--:--:--</b>
+          <span id="clockDate">—</span>
+          <small>LOCAL TIME</small>
+        </div>
+      </div>
+    </section>
   </div>
 
   <!-- context menu -->
@@ -86,6 +126,18 @@
     </div>
   </dialog>
 
+  <!-- add playlist -->
+  <dialog id="dlgAddPlaylist">
+    <h3>Add playlist</h3>
+    <p>Give it a name, then paste an M3U / JSON list URL or a single stream (.m3u8 or .mpd).</p>
+    <div class="field"><label>Title</label><input id="addTitle" placeholder="My channels" /></div>
+    <div class="field"><label>URL</label><input id="addUrl" placeholder="https://…/list.m3u" /></div>
+    <div class="row">
+      <button class="btn" id="addCancel">Cancel</button>
+      <button class="btn mint" id="addSave">Add playlist</button>
+    </div>
+  </dialog>
+
   <!-- github dialog -->
   <dialog id="dlgGithub">
     <h3>GitHub Sync</h3>
@@ -99,6 +151,17 @@
       <button class="btn" id="ghPull">↓ Pull</button>
       <button class="btn" id="ghPush">↑ Push</button>
       <button class="btn mint" id="closeGithub">Done</button>
+    </div>
+  </dialog>
+
+  <!-- update -->
+  <dialog id="dlgUpdate">
+    <h3>Update available</h3>
+    <p id="updBody">—</p>
+    <div class="progress" id="updProgress" hidden><div id="updBar"></div></div>
+    <div class="row">
+      <button class="btn" id="updLater">Later</button>
+      <button class="btn mint" id="updInstall">Install update</button>
     </div>
   </dialog>
 
