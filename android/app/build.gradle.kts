@@ -21,8 +21,8 @@ android {
         minSdk = 24          // Android TV 7.0 / Android 7.0
         targetSdk = 34
         // CI overrides these from the release tag: -PversionName=1.2.0 -PversionCode=42
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10303
-        versionName = (findProperty("versionName") as String?) ?: "1.3.3"
+        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10304
+        versionName = (findProperty("versionName") as String?) ?: "1.3.4"
 
         buildConfigField("String", "CERT_SHA256", "\"${keystoreProps.getProperty("certSha256", "")}\"")
         buildConfigField("String", "GITHUB_REPO", "\"ppoykulot-lgtm/zenktx-tv\"")
@@ -36,6 +36,13 @@ android {
                 storePassword = keystoreProps.getProperty("storePassword")
                 keyAlias = keystoreProps.getProperty("keyAlias")
                 keyPassword = keystoreProps.getProperty("keyPassword")
+                // Every APK up to 1.3.3 carried only the v2 block. Android 7 and
+                // 8 installers, and several file managers, refuse an APK with no
+                // v1 (JAR) signature and show a bare "App not installed".
+                // Sign with all three schemes so any device can verify it.
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
             }
         }
     }
