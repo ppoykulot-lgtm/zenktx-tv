@@ -38,7 +38,7 @@ object Integrity {
         )
     }
 
-    private fun signingSha256(context: Context): String? = runCatching {
+    fun signingSha256(context: Context): String? = runCatching {
         val pm = context.packageManager
         val pkg = context.packageName
         val bytes: ByteArray = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

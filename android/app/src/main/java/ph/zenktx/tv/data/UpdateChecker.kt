@@ -2,6 +2,8 @@ package ph.zenktx.tv.data
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.content.FileProvider
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9,6 +11,7 @@ import ph.zenktx.tv.BuildConfig
 import ph.zenktx.tv.net.Http
 import java.io.File
 import java.io.IOException
+import java.security.MessageDigest
 
 /**
  * In-app updates from GitHub Releases. The APK asset attached to the newest
@@ -26,7 +29,11 @@ object UpdateChecker {
     )
 
     /** Blocking; call from a background thread. */
-    fun latest(repo: String = BuildConfig.GITHUB_REPO, token: String? = null): Release? {
+    fun latest(
+        repo: String = BuildConfig.GITHUB_REPO,
+        token: String? = null,
+        flavor: String = BuildConfig.FLAVOR,
+    ): Release? {
         if (repo.isBlank()) return null
         // A tag can carry one platform only, so releases/latest is often a
         // Windows-only build with no APK at all. Walk the feed and take the
@@ -44,9 +51,13 @@ object UpdateChecker {
             val assets = root.optJSONArray("assets") ?: continue
             var apkUrl = ""
             var size = 0L
+            // A release now carries one flavour, so the TV build must never offer
+            // the mobile APK (or the other way round).
+            val needle = "-${flavor.lowercase()}-"
             for (i in 0 until assets.length()) {
                 val asset = assets.optJSONObject(i) ?: continue
                 val name = asset.optString("name").lowercase()
+                if (needle != "--" && !name.contains(needle)) continue
                 if (name.endsWith(".apk")) {
                     apkUrl = asset.optString("browser_download_url")
                     size = asset.optLong("size")
@@ -56,7 +67,7 @@ object UpdateChecker {
             if (apkUrl.isBlank()) continue
 
             return Release(
-                version = root.optString("tag_name").removePrefix("v"),
+                version = versionOf(root.optString("tag_name")),
                 notes = root.optString("body"),
                 apkUrl = apkUrl,
                 pageUrl = root.optString("html_url"),
@@ -66,6 +77,34 @@ object UpdateChecker {
         }
         return null
     }
+
+    /** "tv-v1.3.3", "v1.3.3" and "1.3.3" all mean 1.3.3. */
+    private fun versionOf(tag: String): String = tag.substringAfterLast("-v", tag).removePrefix("v")
+
+    /**
+     * SHA-256 of the signing certificate inside a downloaded APK. Android
+     * refuses an update signed by a different key and reports only
+     * "App not installed", which says nothing about the cause.
+     */
+    fun apkSigningSha256(context: Context, apk: File): String? = runCatching {
+        val pm = context.packageManager
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            PackageManager.GET_SIGNING_CERTIFICATES
+        } else {
+            @Suppress("DEPRECATION")
+            PackageManager.GET_SIGNATURES
+        }
+        val info = pm.getPackageArchiveInfo(apk.absolutePath, flags) ?: return null
+        val bytes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.signingInfo?.apkContentsSigners?.firstOrNull()?.toByteArray() ?: return null
+        } else {
+            @Suppress("DEPRECATION")
+            info.signatures?.firstOrNull()?.toByteArray() ?: return null
+        }
+        MessageDigest.getInstance("SHA-256")
+            .digest(bytes)
+            .joinToString("") { "%02x".format(it) }
+    }.getOrNull()
 
     /** True when [remote] is a higher semantic version than [current]. */
     fun isNewer(current: String, remote: String): Boolean {

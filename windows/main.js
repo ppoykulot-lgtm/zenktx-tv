@@ -290,7 +290,9 @@ app.whenReady().then(() => {
       return asset ? { name: asset.name, url: asset.browser_download_url, size: asset.size } : null;
     };
     return {
-      version: String(release.tag_name || '').replace(/^v/, ''),
+      // Tags carry a platform prefix now (win-v1.3.3); only the number is
+      // comparable with the installed version.
+      version: (String(release.tag_name || '').match(/(\d+\.\d+\.\d+)/) || [])[1] || '0.0.0',
       notes: release.body || '',
       page: release.html_url,
       portable: Boolean(portableLauncher()),

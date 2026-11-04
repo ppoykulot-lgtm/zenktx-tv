@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import ph.zenktx.tv.BuildConfig
 import ph.zenktx.tv.R
 import ph.zenktx.tv.data.AppSettings
+import ph.zenktx.tv.data.Integrity
 import ph.zenktx.tv.data.UpdateChecker
 
 /**
@@ -150,6 +151,21 @@ object Updater {
             dialog.dismiss()
 
             result.onSuccess { apk ->
+                // Android refuses to replace an app signed by another key and
+                // only says "App not installed". Check before handing the file
+                // to the installer so the reason is on screen.
+                val installed = Integrity.signingSha256(context)
+                val incoming = UpdateChecker.apkSigningSha256(context, apk)
+                if (installed != null && incoming != null && installed != incoming) {
+                    Dialogs.info(
+                        context,
+                        context.getString(R.string.update_title),
+                        "This download is signed with a different key than the copy on this " +
+                            "device, so Android will not replace it. Uninstall ZENKTX, then " +
+                            "install this APK.",
+                    )
+                    return@onSuccess
+                }
                 AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
                     .setTitle(R.string.update_ready)
                     .setPositiveButton(R.string.update_install) { _, _ ->

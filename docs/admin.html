@@ -62,9 +62,41 @@
   dialog label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
   dialog input { width: 100%; }
   .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .tablewrap { overflow-x: auto; }
+  /* The page is public, so the catalogue waits behind a passphrase. */
+  body.locked { overflow: hidden; }
+  body.locked header, body.locked main { filter: blur(3px); pointer-events: none; user-select: none; }
+  .gate {
+    position: fixed; inset: 0; z-index: 50; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: rgba(4,6,10,.86); backdrop-filter: blur(6px);
+  }
+  body.locked .gate { display: flex; }
+  .gate-card {
+    width: min(380px, 100%); background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(0,0,0,.45);
+  }
+  .gate-card h2 { margin: 0 0 6px; font-size: 17px; }
+  .gate-card p { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+  .gate-card input { width: 100%; margin-bottom: 10px; }
+  .gate-card button { width: 100%; }
+  .gate-error { min-height: 18px; color: var(--bad); font-size: 12.5px; margin: 8px 0 0; }
+  td.logo input { width: 132px; font-size: 12px; color: #a9bdd8; }
+  td.drm select { width: 104px; }
+  td.key input { width: 106px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; }
+  td.num input { width: 48px; text-align: right; padding: 4px 6px; }
 </style>
 </head>
-<body>
+<body class="locked">
+<div class="gate" role="dialog" aria-modal="true" aria-label="Admin password">
+  <form class="gate-card" id="gateForm">
+    <h2>Channel admin</h2>
+    <p>This page edits the published channel catalogue. Enter the admin password to continue.</p>
+    <input id="gatePass" type="password" autocomplete="current-password" placeholder="Password" />
+    <button class="primary" type="submit">Unlock</button>
+    <p class="gate-error" id="gateError"></p>
+  </form>
+</div>
 <header>
   <h1><b>ZENKTX</b> channel admin</h1>
   <span id="status">Load the catalogue to begin.</span>
@@ -74,6 +106,7 @@
   <button id="add">Add channel</button>
   <button id="publish">Publish</button>
   <button id="settings" class="ghost" title="Repository and token">⚙</button>
+  <button id="lock" class="ghost" title="Lock this page">🔒</button>
 </header>
 
 <main>
@@ -81,7 +114,9 @@
     Everything here edits <code>docs/catalog.json</code>. Publishing commits that file, and
     <b>Android TV, Android mobile and Windows read it on their next launch</b> — no APK, installer or
     portable copy is rebuilt. Order in this table is the order in the apps. Hiding a channel keeps the
-    row; deleting it writes a tombstone.
+    row; deleting it writes a tombstone, and switching that row back <b>on</b> clears the tombstone again.
+    The <code>#</code> column reorders in place — type a number and the rest renumber. ClearKey DASH
+    channels need their <b>key id</b> and <b>key</b> here, which is also how a new MPD link is added.
   </p>
 
   <div class="bar">
@@ -95,6 +130,7 @@
     </select>
   </div>
 
+  <div class="tablewrap">
   <table>
     <thead>
       <tr>
@@ -102,6 +138,10 @@
         <th>#</th>
         <th>Name</th>
         <th>Stream URL</th>
+        <th>Logo</th>
+        <th>DRM</th>
+        <th>Key ID</th>
+        <th>Key</th>
         <th>Group</th>
         <th>On</th>
         <th></th>
@@ -109,6 +149,7 @@
     </thead>
     <tbody id="rows"></tbody>
   </table>
+  </div>
 </main>
 
 <dialog id="dlgSettings">
@@ -127,6 +168,8 @@
   <input id="branch" />
   <label for="token">Token</label>
   <input id="token" type="password" placeholder="github_pat_…" />
+  <label for="newPass">New admin password</label>
+  <input id="newPass" type="password" placeholder="Leave empty to keep the current one" />
   <div class="row">
     <button id="saveSettings" class="primary">Save</button>
   </div>
@@ -145,6 +188,32 @@ const settings = Object.assign(
 );
 
 const $ = (id) => document.getElementById(id);
+
+// --------------------------------------------------------------- password
+// A static page cannot hold a real secret, but the passphrase keeps the editor
+// away from anyone who stumbles onto the address. It is stored as a SHA-256
+// digest; the settings dialog can replace it.
+const PASS_KEY = 'zenktx.admin.pass';
+const UNLOCK_KEY = 'zenktx.admin.unlocked';
+// SHA-256 of the shipped default passphrase.
+const DEFAULT_PASS_HASH = 'd882944df5db7aa2bfa500ca6eb5d030722a27a578fe035c1d3ddf27f1410c74';
+
+async function sha256(text) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+const passHash = () => localStorage.getItem(PASS_KEY) || DEFAULT_PASS_HASH;
+
+function unlockPage() {
+  sessionStorage.setItem(UNLOCK_KEY, '1');
+  document.body.classList.remove('locked');
+  $('gatePass').value = '';
+  $('gateError').textContent = '';
+  if (settings.token) load();
+}
+
+if (sessionStorage.getItem(UNLOCK_KEY) === '1') document.body.classList.remove('locked');
 let catalog = null;
 let original = '';
 let dirty = false;
@@ -226,7 +295,15 @@ function render() {
 
     const order = document.createElement('td');
     order.className = 'num';
-    order.textContent = String(index + 1);
+    const number = document.createElement('input');
+    number.type = 'number';
+    number.min = '1';
+    number.max = String(list.length);
+    number.value = String(index + 1);
+    number.title = 'Channel number — type a new one and the rest renumber';
+    number.addEventListener('change', () => moveTo(index, Number(number.value) - 1));
+    number.addEventListener('keydown', (event) => { if (event.key === 'Enter') number.blur(); });
+    order.appendChild(number);
 
     const nameCell = document.createElement('td');
     nameCell.className = 'name';
@@ -243,6 +320,7 @@ function render() {
       channel.url = url.value.trim();
       channel.streamType = /\.mpd(\?|$)/i.test(channel.url) ? 'mpd' : 'hls';
       channel.enabled = true;
+      delete channel.tombstone;
       channel.note = '';
       markDirty();
     });
@@ -255,11 +333,55 @@ function render() {
     group.addEventListener('input', () => { channel.category = group.value; markDirty(); });
     groupCell.appendChild(group);
 
+    const logoCell = document.createElement('td');
+    logoCell.className = 'logo';
+    const logo = document.createElement('input');
+    logo.value = channel.logo || '';
+    logo.placeholder = 'https://…';
+    logo.addEventListener('input', () => { channel.logo = logo.value.trim(); markDirty(); });
+    logoCell.appendChild(logo);
+
+    const drmCell = document.createElement('td');
+    drmCell.className = 'drm';
+    const drm = document.createElement('select');
+    [['', 'None'], ['clearkey', 'ClearKey'], ['widevine', 'Widevine']].forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      drm.appendChild(option);
+    });
+    drm.value = channel.drmType || '';
+    drm.addEventListener('change', () => { channel.drmType = drm.value; markDirty(); });
+    drmCell.appendChild(drm);
+
+    const kidCell = document.createElement('td');
+    kidCell.className = 'key';
+    const kid = document.createElement('input');
+    kid.value = channel.keyId || '';
+    kid.placeholder = 'key id';
+    kid.addEventListener('input', () => { channel.keyId = kid.value.trim(); markDirty(); });
+    kidCell.appendChild(kid);
+
+    const keyCell = document.createElement('td');
+    keyCell.className = 'key';
+    const key = document.createElement('input');
+    key.value = channel.key || '';
+    key.placeholder = 'key';
+    key.addEventListener('input', () => { channel.key = key.value.trim(); markDirty(); });
+    keyCell.appendChild(key);
+
     const onCell = document.createElement('td');
     const on = document.createElement('input');
     on.type = 'checkbox';
     on.checked = channel.enabled !== false;
-    on.addEventListener('change', () => { channel.enabled = on.checked; markDirty(); render(); });
+    on.addEventListener('change', () => {
+      channel.enabled = on.checked;
+      // Switching the row back on must clear the removal marker, or the apps
+      // keep hiding a channel this table says is live.
+      if (on.checked) delete channel.tombstone;
+      markDirty();
+      render();
+    });
     onCell.appendChild(on);
 
     const acts = document.createElement('td');
@@ -284,12 +406,23 @@ function render() {
     });
     acts.append(up, down, del);
 
-    tr.append(document.createElement('td'), order, nameCell, urlCell, groupCell, onCell, acts);
+    tr.append(document.createElement('td'), order, nameCell, urlCell, logoCell, drmCell, kidCell, keyCell, groupCell, onCell, acts);
     tr.firstChild.appendChild(check);
     body.appendChild(tr);
   });
 
   $('count').textContent = `${shown} of ${list.length} shown · ${list.filter((c) => c.enabled !== false).length} live`;
+}
+
+function moveTo(index, target) {
+  const list = catalog.channels;
+  const to = Math.max(0, Math.min(list.length - 1, Number.isFinite(target) ? target : index));
+  if (to === index) { render(); return; }
+  const [row] = list.splice(index, 1);
+  list.splice(to, 0, row);
+  list.forEach((channel, i) => { channel.order = i + 1; });
+  markDirty();
+  render();
 }
 
 function move(index, delta) {
@@ -413,8 +546,12 @@ async function publish() {
       const detail = await put.json().catch(() => ({}));
       throw new Error(detail.message || `HTTP ${put.status}`);
     }
-    catalog = parseJson(payload, catalog);
-    original = payload;
+    // Re-read the branch and show what actually landed, not what this tab sent:
+    // a merge or a stale tab used to leave edits on screen that never reached
+    // the file, so a toggled channel came back off on the next load.
+    const landed = await readRemote();
+    catalog = parseJson(landed.text, parseJson(payload, catalog));
+    original = landed.text;
     dirty = false;
     $('publish').textContent = 'Publish';
     render();
@@ -428,7 +565,30 @@ $('load').addEventListener('click', load);
 $('add').addEventListener('click', addChannel);
 $('publish').addEventListener('click', publish);
 $('settings').addEventListener('click', openSettings);
-$('saveSettings').addEventListener('click', () => { saveSettings(); $('dlgSettings').close(); load(); });
+$('saveSettings').addEventListener('click', async () => {
+  saveSettings();
+  const next = $('newPass').value.trim();
+  if (next) {
+    if (next.length < 6) { setStatus('Use at least 6 characters for the password.', 'bad'); return; }
+    localStorage.setItem(PASS_KEY, await sha256(next));
+    $('newPass').value = '';
+  }
+  $('dlgSettings').close();
+  load();
+});
+$('gateForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const typed = await sha256($('gatePass').value);
+  if (typed !== passHash()) {
+    $('gateError').textContent = 'That password is not right.';
+    return;
+  }
+  unlockPage();
+});
+$('lock').addEventListener('click', () => {
+  sessionStorage.removeItem(UNLOCK_KEY);
+  document.body.classList.add('locked');
+});
 $('search').addEventListener('input', render);
 $('all').addEventListener('change', (event) => {
   document.querySelectorAll('.pick').forEach((box) => { box.checked = event.target.checked; });
@@ -440,7 +600,7 @@ $('bulk').addEventListener('change', (event) => {
   const picked = Array.from(document.querySelectorAll('.pick:checked'))
     .map((box) => catalog.channels[Number(box.dataset.index)]);
   for (const channel of picked) {
-    if (action === 'enable') channel.enabled = true;
+    if (action === 'enable') { channel.enabled = true; delete channel.tombstone; }
     if (action === 'disable') channel.enabled = false;
     if (action === 'delete') { channel.enabled = false; channel.tombstone = true; }
   }
@@ -451,7 +611,7 @@ window.addEventListener('beforeunload', (event) => {
   if (dirty) event.preventDefault();
 });
 
-if (settings.token) load();
+if (!document.body.classList.contains('locked') && settings.token) load();
 </script>
 </body>
 </html>

@@ -1,9 +1,18 @@
 name: Release
 
+# Each platform releases on its own tag, so a Windows fix can never rename the
+# Android build:
+#   win-v1.3.3      only the Windows installers
+#   tv-v1.3.3       only the Android TV APK
+#   mobile-v1.3.3   only the Android mobile APK
+#   v1.3.3          a plain tag still builds every platform (kept for old tags)
 on:
   push:
     tags:
       - "v*"
+      - "win-v*"
+      - "tv-v*"
+      - "mobile-v*"
   workflow_dispatch:
     inputs:
       version:
@@ -14,53 +23,74 @@ permissions:
   contents: write
 
 env:
-  VERSION: ${{ github.event.inputs.version || github.ref_name }}
   ELECTRON_CACHE: ~/.cache/electron
   ELECTRON_BUILDER_CACHE: ~/.cache/electron-builder
 
 jobs:
-  # A tag only rebuilds the platforms whose files it changed: an Android edit
-  # must not republish the Windows installers, and the other way round. Each
-  # updater looks for its own asset, so a single-platform release still works.
   changes:
-    name: Changed platforms
+    name: Platforms in this tag
     runs-on: ubuntu-latest
     outputs:
-      android: ${{ steps.diff.outputs.android }}
-      windows: ${{ steps.diff.outputs.windows }}
+      version: ${{ steps.meta.outputs.version }}
+      windows: ${{ steps.meta.outputs.windows }}
+      tv: ${{ steps.meta.outputs.tv }}
+      mobile: ${{ steps.meta.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Diff against the previous tag
-        id: diff
+      - name: Decide what this tag rebuilds
+        id: meta
         shell: bash
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "android=true" >> "$GITHUB_OUTPUT"
-            echo "windows=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          PREV="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
-          if [ -z "$PREV" ]; then
-            echo "No previous tag, treating every platform as changed."
-            CHANGED="$(git ls-tree -r --name-only HEAD)"
+            TAG="v${{ github.event.inputs.version }}"
           else
-            echo "Comparing $PREV..$GITHUB_SHA"
-            CHANGED="$(git diff --name-only "$PREV" "$GITHUB_SHA")"
+            TAG="${GITHUB_REF_NAME}"
           fi
-          if grep -q '^android/' <<< "$CHANGED"; then android=true; else android=false; fi
-          if grep -q '^windows/' <<< "$CHANGED"; then windows=true; else windows=false; fi
-          echo "android=$android" >> "$GITHUB_OUTPUT"
+          VERSION="${TAG##*-}"
+          VERSION="${VERSION#v}"
+
+          case "$TAG" in
+            win-*) PLATFORM=windows ;;
+            tv-*) PLATFORM=tv ;;
+            mobile-*) PLATFORM=mobile ;;
+            *) PLATFORM=all ;;
+          esac
+
+          if [ "$PLATFORM" = "all" ]; then
+            # A plain tag keeps the old behaviour: rebuild only what it changed.
+            PREV="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+            if [ -z "$PREV" ]; then
+              CHANGED="$(git ls-tree -r --name-only HEAD)"
+            else
+              CHANGED="$(git diff --name-only "$PREV" "$GITHUB_SHA")"
+            fi
+            if grep -q '^windows/' <<< "$CHANGED"; then windows=true; else windows=false; fi
+            if grep -q '^android/' <<< "$CHANGED"; then android=true; else android=false; fi
+            tv="$android"
+            mobile="$android"
+          else
+            windows=false; tv=false; mobile=false
+            case "$PLATFORM" in
+              windows) windows=true ;;
+              tv) tv=true ;;
+              mobile) mobile=true ;;
+            esac
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "windows=$windows" >> "$GITHUB_OUTPUT"
-          echo "Android: $android  Windows: $windows"
+          echo "tv=$tv" >> "$GITHUB_OUTPUT"
+          echo "mobile=$mobile" >> "$GITHUB_OUTPUT"
+          echo "$TAG -> $VERSION (windows=$windows tv=$tv mobile=$mobile)"
 
   android:
     name: Android APKs
     needs: changes
-    if: needs.changes.outputs.android == 'true'
+    if: needs.changes.outputs.tv == 'true' || needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,30 +125,36 @@ jobs:
             echo "certSha256=$CERT_SHA256"
           } > android/keystore.properties
 
-      # The tag is "v1.1.0" but the asset names must be "1.1.0" so the landing
-      # page and the in-app updater can find them. versionCode is derived from
-      # the version (1.1.0 -> 10100) so it always increases across releases.
-      - name: Build TV + mobile release APKs
+      # versionCode is derived from the version (1.1.0 -> 10100) so it always
+      # increases across releases; the tag name only decides which flavours run.
+      - name: Build requested release APKs
         working-directory: android
         env:
-          RAW_VERSION: ${{ env.VERSION }}
+          VERSION: ${{ needs.changes.outputs.version }}
+          BUILD_TV: ${{ needs.changes.outputs.tv }}
+          BUILD_MOBILE: ${{ needs.changes.outputs.mobile }}
         run: |
-          VERSION="${RAW_VERSION#v}"
           IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
           CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
-          echo "Building $VERSION (versionCode $CODE)"
-          ./gradlew --no-daemon assembleTvRelease assembleMobileRelease \
-            -PversionName="$VERSION" \
-            -PversionCode="$CODE"
+          TASKS=""
+          if [ "$BUILD_TV" = "true" ]; then TASKS="$TASKS assembleTvRelease"; fi
+          if [ "$BUILD_MOBILE" = "true" ]; then TASKS="$TASKS assembleMobileRelease"; fi
+          echo "Building $VERSION (versionCode $CODE):$TASKS"
+          ./gradlew --no-daemon $TASKS -PversionName="$VERSION" -PversionCode="$CODE"
 
       - name: Collect artifacts
         env:
-          RAW_VERSION: ${{ env.VERSION }}
+          VERSION: ${{ needs.changes.outputs.version }}
+          BUILD_TV: ${{ needs.changes.outputs.tv }}
+          BUILD_MOBILE: ${{ needs.changes.outputs.mobile }}
         run: |
-          VERSION="${RAW_VERSION#v}"
           mkdir -p out
-          cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${VERSION}.apk"
-          cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${VERSION}.apk"
+          if [ "$BUILD_TV" = "true" ]; then
+            cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${VERSION}.apk"
+          fi
+          if [ "$BUILD_MOBILE" = "true" ]; then
+            cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${VERSION}.apk"
+          fi
           ls -lh out
 
       - uses: actions/upload-artifact@v4
@@ -150,8 +186,10 @@ jobs:
 
       - name: Set version from tag
         working-directory: windows
+        env:
+          VERSION: ${{ needs.changes.outputs.version }}
         shell: bash
-        run: npm version "${VERSION#v}" --no-git-tag-version --allow-same-version
+        run: npm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Build installer and portable exe
         working-directory: windows
@@ -199,10 +237,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve version
-        id: v
-        run: echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
-
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -213,32 +247,45 @@ jobs:
           find dist -type f \( -name "*.apk" -o -name "*.exe" \) -exec cp {} release/ \;
           ls -lh release
 
-      # Only the platform this tag rebuilt gets a row, so the notes never claim a
+      - name: Resolve tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=v${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Only the platforms this tag rebuilt get a row, so the notes never claim a
       # new Android build on a Windows-only release.
       - name: Compose release notes
         env:
-          ANDROID: ${{ needs.changes.outputs.android }}
+          VERSION: ${{ needs.changes.outputs.version }}
+          TV: ${{ needs.changes.outputs.tv }}
+          MOBILE: ${{ needs.changes.outputs.mobile }}
           WINDOWS: ${{ needs.changes.outputs.windows }}
         shell: bash
         run: |
-          V="${VERSION#v}"
           {
-            echo "## ZENKTX TV Stream $V"
+            echo "## ZENKTX TV Stream $VERSION"
             echo
-            echo "| Platform | Asset |"
-            echo "| --- | --- |"
-            if [ "$ANDROID" = "true" ]; then
-              echo "| Android TV (7.0+) | \`ZENKTX-TV-$V.apk\` |"
-              echo "| Android Mobile (7.0+) | \`ZENKTX-Mobile-$V.apk\` |"
+            echo "| Platform | Version | Asset |"
+            echo "| --- | --- | --- |"
+            if [ "$TV" = "true" ]; then
+              echo "| Android TV (7.0+) | $VERSION | \`ZENKTX-TV-$VERSION.apk\` |"
+            fi
+            if [ "$MOBILE" = "true" ]; then
+              echo "| Android mobile (7.0+) | $VERSION | \`ZENKTX-Mobile-$VERSION.apk\` |"
             fi
             if [ "$WINDOWS" = "true" ]; then
-              echo "| Windows 10/11 x86_64 (installer) | \`ZENKTX-Setup-$V.exe\` |"
-              echo "| Windows 10/11 x86_64 (portable) | \`ZENKTX-Portable-$V.exe\` |"
+              echo "| Windows 10/11 x86_64 (installer) | $VERSION | \`ZENKTX-Setup-$VERSION.exe\` |"
+              echo "| Windows 10/11 x86_64 (portable) | $VERSION | \`ZENKTX-Portable-$VERSION.exe\` |"
             fi
             echo
-            echo "Only the platforms edited in this tag are rebuilt; the others keep their"
-            echo "previous release, so their updater stays quiet until their code changes."
-            if [ "$ANDROID" = "true" ]; then
+            echo "Each platform carries its own tag and version now, so a release that"
+            echo "touches one platform leaves the other two on the build they already have."
+            if [ "$TV" = "true" ] || [ "$MOBILE" = "true" ]; then
               echo "Every APK is signed with the ZENKTX release certificate."
             fi
             if [ "$WINDOWS" = "true" ]; then
@@ -250,8 +297,8 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          name: ZENKTX TV Stream ${{ steps.v.outputs.version }}
-          tag_name: v${{ steps.v.outputs.version }}
+          name: ZENKTX TV Stream ${{ needs.changes.outputs.version }}
+          tag_name: ${{ steps.tag.outputs.name }}
           draft: false
           generate_release_notes: false
           body_path: release-notes.md

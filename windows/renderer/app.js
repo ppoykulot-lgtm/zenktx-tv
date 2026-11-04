@@ -94,9 +94,11 @@ function fromJson(text, prefix) {
   const root = JSON.parse(text);
   // The published catalogue flags addresses that no longer answer with
   // enabled:false and removals with tombstone:true. Neither belongs on screen,
-  // and a JSON playlist that carries ClearKey ids keeps them here.
+  // and a JSON playlist that carries ClearKey ids keeps them here. A row that
+  // is tombstoned *and* switched on was re-enabled in the admin page, which used
+  // to leave the tombstone behind and hide the channel for ever.
   return (root.channels || [])
-    .filter((c) => c && c.url && c.enabled !== false && !c.tombstone)
+    .filter((c) => c && c.url && c.enabled !== false && !(c.tombstone && c.enabled !== true))
     .map((c, i) => ({
       key: `${prefix}:${c.id ?? i + 1}`,
       name: c.name || `Channel ${i + 1}`,
@@ -280,7 +282,10 @@ async function refreshLive() {
 // APK, installer or portable copy.
 const CATALOG_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/catalog.json';
 const CATALOG_KEY = 'zenktx.catalog.v1';
-const CATALOG_TTL = 30 * 60 * 1000;
+// Zero: every launch asks the published file for its current copy, so a change
+// made in the admin page is there the next time the app opens. The cached copy
+// is only the fallback for an offline launch.
+const CATALOG_TTL = 0;
 
 let catalogAt = 0;
 
@@ -312,7 +317,8 @@ function readCatalogCache() {
 
 async function refreshCatalog() {
   try {
-    const text = await window.zenk.fetchText(CATALOG_URL);
+    // GitHub Pages serves a cached copy; the query string forces a fresh one.
+    const text = await window.zenk.fetchText(`${CATALOG_URL}?t=${Date.now()}`);
     const count = applyCatalogText(text);
     if (!count) return 0;
     catalogAt = Date.now();
@@ -763,6 +769,8 @@ function beginPlayback() {
   if (!channel) return;
 
   cleanupPlayer();
+  wantPlaying = true;
+  state.liveRetried = false;
   state.failed = false;
   state.sources = channelSources(channel);
   state.sourceIndex = 0;
@@ -793,6 +801,19 @@ function beginPlayback() {
 }
 
 let showChipTimer = 0;
+
+// Every engine here attaches its media asynchronously, so the play() call that
+// follows a channel pick lands before the element has anything to play: the
+// promise rejects, and the channel then sat paused until the viewer pressed
+// play. Ask again whenever the element reports it is ready, and only while the
+// viewer still wants it playing.
+let wantPlaying = true;
+
+function resumePlayback() {
+  const video = $('video');
+  if (!wantPlaying || !video.paused) return;
+  video.play().catch(() => {});
+}
 
 // Plays one address for the current channel. Everything that has to be redone
 // when a mirror is swapped in (player teardown, error panel) happens in fail().
@@ -869,7 +890,7 @@ function playSource(channel) {
     video.src = sourceUrl;
   }
 
-  video.play().catch(() => {});
+  resumePlayback();
   startWatchdog(channel);
 }
 
@@ -910,7 +931,9 @@ async function playClearKey(channel, sourceUrl) {
       window.__zenkLastStreamError = `shaka: ${raw}`;
       fail(describeDashError(raw, channel), describeDashCode(raw));
     });
-    return player.load(sourceUrl);
+    return player.load(sourceUrl).then(() => {
+      if (state.shaka === player) resumePlayback();
+    });
   }).catch((error) => {
     if (state.shaka !== player) return;
     const raw = String((error && (error.code || error.message)) || error);
@@ -1004,7 +1027,23 @@ function startWatchdog(channel) {
   }, 1000);
 }
 
-function fail(message, code) {
+// The provider re-tokenises its addresses through the day, so a link the guide
+// cached an hour ago can answer 410 while the channel itself is alive — which is
+// why opening a second copy of the app used to "fix" it. Pull the feed again and
+// retry once when it hands back a different address for this channel.
+async function retryWithFreshLink(code) {
+  if (code !== 'LINK_EXPIRED' || state.liveRetried) return false;
+  const channel = state.queue[state.index];
+  if (!channel) return false;
+  state.liveRetried = true;
+  await refreshLive();
+  const fresh = state.base.find((c) => c.key === channel.key);
+  if (!fresh || fresh.url === channel.url) return false;
+  play(fresh);
+  return true;
+}
+
+async function fail(message, code) {
   if (state.sources && state.sourceIndex + 1 < state.sources.length) {
     state.sourceIndex += 1;
     clearInterval(state.watchdog);
@@ -1020,6 +1059,8 @@ function fail(message, code) {
     playSource(state.queue[state.index]);
     return;
   }
+
+  if (await retryWithFreshLink(code)) return;
 
   state.failed = true;
   clearInterval(state.watchdog);
@@ -1519,7 +1560,8 @@ $('chDown').addEventListener('click', () => switchChannel(-1));
 
 $('ppBtn').addEventListener('click', () => {
   const video = $('video');
-  if (video.paused) video.play().catch(() => {});
+  wantPlaying = video.paused;
+  if (wantPlaying) video.play().catch(() => {});
   else video.pause();
 });
 
@@ -1606,6 +1648,10 @@ playerVideo.addEventListener('timeupdate', updateTimeline);
 playerVideo.addEventListener('durationchange', updateTimeline);
 playerVideo.addEventListener('play', () => { $('ppBtn').classList.add('playing'); });
 playerVideo.addEventListener('pause', () => { $('ppBtn').classList.remove('playing'); });
+// Fires whenever an engine finishes attaching a manifest or a first frame.
+['loadedmetadata', 'canplay', 'canplaythrough'].forEach((name) =>
+  playerVideo.addEventListener(name, resumePlayback)
+);
 
 updateClock();
 setInterval(updateClock, 1000);
