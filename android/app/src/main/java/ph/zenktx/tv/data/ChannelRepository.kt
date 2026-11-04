@@ -192,7 +192,7 @@ object ChannelRepository {
         }.getOrNull() ?: return channels
 
         if (map.isEmpty()) return channels
-        return channels.map { channel ->
+        val patched = channels.map { channel ->
             if (!channel.key.startsWith("b:")) return@map channel
             val live = map[liveKey(channel.name)] ?: return@map channel
             channel.copy(
@@ -200,8 +200,43 @@ object ChannelRepository {
                 logo = live.logo.ifBlank { channel.logo },
                 streamType = live.streamType.ifBlank { channel.streamType },
                 quality = live.quality.ifBlank { channel.quality },
+                drmType = channel.drmType.ifBlank { live.drmType },
+                keyId = channel.keyId.ifBlank { live.keyId },
+                drmKey = channel.drmKey.ifBlank { live.drmKey },
             )
         }
+        return patched + liveExtras(patched, map)
+    }
+
+    /**
+     * The publisher adds an NBA game stream while the game is on and drops it the
+     * next morning, so the catalogue can never list today's game. Anything the
+     * feed calls NBA and the guide does not already hold is added here, in its
+     * own category, on every refresh.
+     */
+    private fun liveExtras(channels: List<Channel>, map: Map<String, LiveEntry>): List<Channel> {
+        val urls = channels.mapTo(HashSet()) { it.url }
+        val extras = ArrayList<Channel>()
+        for (entry in map.values) {
+            if (!entry.name.contains("nba", ignoreCase = true)) continue
+            if (entry.url.isBlank() || !urls.add(entry.url)) continue
+            extras += Channel(
+                key = "live:${hash(entry.url)}",
+                id = 0,
+                name = entry.name,
+                slug = "",
+                category = "NBA Live",
+                logo = entry.logo,
+                url = entry.url,
+                streamType = entry.streamType.ifBlank { streamTypeOf(entry.url) },
+                quality = entry.quality.ifBlank { "HD" },
+                isFilipino = false,
+                drmType = entry.drmType,
+                keyId = entry.keyId,
+                drmKey = entry.drmKey,
+            )
+        }
+        return extras
     }
 
     private fun parseLive(text: String): Map<String, LiveEntry> {
@@ -215,10 +250,14 @@ object ChannelRepository {
             val key = liveKey(name)
             if (map.containsKey(key)) continue
             map[key] = LiveEntry(
+                name = name,
                 url = url,
                 logo = o.optString("logo"),
                 streamType = o.optString("streamType", streamTypeOf(url)),
                 quality = o.optString("quality", "HD"),
+                drmType = o.optString("drmType"),
+                keyId = o.optString("keyId"),
+                drmKey = o.optString("key"),
             )
         }
         return map
@@ -228,23 +267,35 @@ object ChannelRepository {
         name.lowercase().replace(Regex("[^a-z0-9]+"), " ").trim()
 
     private data class LiveEntry(
+        val name: String,
         val url: String,
         val logo: String,
         val streamType: String,
         val quality: String,
+        val drmType: String = "",
+        val keyId: String = "",
+        val drmKey: String = "",
     ) {
         fun toJson(): JSONObject = JSONObject()
+            .put("name", name)
             .put("url", url)
             .put("logo", logo)
             .put("streamType", streamType)
             .put("quality", quality)
+            .put("drmType", drmType)
+            .put("keyId", keyId)
+            .put("key", drmKey)
 
         companion object {
             fun from(o: JSONObject) = LiveEntry(
+                name = o.optString("name"),
                 url = o.optString("url"),
                 logo = o.optString("logo"),
                 streamType = o.optString("streamType"),
                 quality = o.optString("quality"),
+                drmType = o.optString("drmType"),
+                keyId = o.optString("keyId"),
+                drmKey = o.optString("key"),
             )
         }
     }
@@ -281,6 +332,9 @@ object ChannelRepository {
                 streamType = o.optString("streamType", streamTypeOf(url)),
                 quality = o.optString("quality", "HD"),
                 isFilipino = o.optBoolean("isFilipino", false),
+                drmType = o.optString("drmType"),
+                keyId = o.optString("keyId"),
+                drmKey = o.optString("drmKey", o.optString("key")),
             )
         }
         return list
