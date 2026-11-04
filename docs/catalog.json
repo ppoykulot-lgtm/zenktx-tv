@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-04T03:33:12Z",
+ "updatedAt": "2026-11-04T03:34:58Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -268,11 +268,12 @@
    "streamType": "mpd",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": true,
+   "enabled": false,
    "drmType": "clearkey",
    "keyId": "d6f1a8c29b7e4d5a8f332c1e9d7b6a90",
    "key": "790bd17b9e623e832003a993a2de1d87",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX.",
+   "tombstone": true
   },
   {
    "id": 11,
