@@ -288,6 +288,10 @@ function applyCatalogText(text) {
   try {
     const list = fromJson(text, 'b');
     if (!list.length) return 0;
+    // A half-written publish once landed as three channels and got cached, and
+    // the guide then held almost nothing until the cache expired. Keep the list
+    // we already have when the new one is implausibly small.
+    if (list.length < 20 && state.bundled.length > 100) return 0;
     state.bundled = list;
     return list.length;
   } catch (error) {
@@ -802,9 +806,18 @@ function playSource(channel) {
   // ship and fails with "KeySystem Access Denied". Shaka takes the key pair
   // straight from the feed and decrypts through the platform ClearKey CDM,
   // which is how the other IPTV apps play the same links.
-  if (type === 'mpd' && window.shaka && channel.drmType === 'clearkey' && channel.keyId && channel.drmKey) {
-    playClearKey(channel, sourceUrl);
-  } else if (type === 'mpd' && window.dashjs) {
+  if (type === 'mpd' && channel.drmType === 'clearkey' && channel.keyId && channel.drmKey) {
+    if (window.shaka) {
+      playClearKey(channel, sourceUrl);
+    } else {
+      // Falling through to dash.js here produced "the provider rotated this
+      // channel's key", which blames the stream for a build that shipped
+      // without Shaka. Say what is actually wrong.
+      fail('This copy of the app is missing the player for protected streams. Install the latest version, or try the next channel.', 'NO_PLAYER');
+    }
+    return;
+  }
+  if (type === 'mpd' && window.dashjs) {
     const dash = window.dashjs.MediaPlayer().create();
     state.dash = dash;
     // The stock dash.js settings hold a 12 second buffer before the first
