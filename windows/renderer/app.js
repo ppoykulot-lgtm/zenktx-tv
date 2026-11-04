@@ -172,7 +172,7 @@ function buildLiveMap(list) {
       quality: item.quality || 'HD',
       drmType: item.drmType || '',
       keyId: item.keyId || '',
-      key: item.key || '',
+      drmKey: item.key || '',
     };
   }
   return map;
@@ -203,11 +203,11 @@ function applyLive() {
     if (live.drmType) {
       channel.drmType = live.drmType;
       channel.keyId = live.keyId;
-      channel.key = live.key;
+      channel.drmKey = live.drmKey;
     } else {
       delete channel.drmType;
       delete channel.keyId;
-      delete channel.key;
+      delete channel.drmKey;
     }
   }
   return patched;
@@ -255,7 +255,7 @@ async function boot() {
       isFilipino: Boolean(c.isFilipino),
       drmType: c.drmType || '',
       keyId: c.keyId || '',
-      key: c.key || '',
+      drmKey: c.key || '',
     }));
   } catch (error) {
     toast(`Could not load the bundled list: ${error.message}`);
@@ -672,8 +672,8 @@ function playSource(channel) {
     });
     // The feed ships ClearKey ids for these channels, and ClearKey is the one
     // protection scheme dash.js can decrypt without a platform CDM.
-    if (channel.drmType === 'clearkey' && channel.keyId && channel.key) {
-      dash.setProtectionData({ 'org.w3.clearkey': { clearkeys: { [channel.keyId]: channel.key } } });
+    if (channel.drmType === 'clearkey' && channel.keyId && channel.drmKey) {
+      dash.setProtectionData({ 'org.w3.clearkey': { clearkeys: { [channel.keyId]: channel.drmKey } } });
     }
     dash.initialize(video, sourceUrl, true);
     dash.on('error', (event) => {
