@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver="tv">v1.2.3</span>
+            <span class="ver" data-ver="tv">v1.3.0</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver="mobile">v1.2.3</span>
+            <span class="ver" data-ver="mobile">v1.3.0</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver="win">v1.2.5</span>
+            <span class="ver" data-ver="win">v1.3.0</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -598,7 +598,18 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.2.5 <span class="tagx">latest</span></h3>
+          <h3>1.3.0 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>Channels update without reinstalling.</b> All three builds read the published channel list (<code>catalog.json</code>) on launch and cache it for half an hour. Adding, fixing, hiding, retitling or reordering a channel is now one edit in the new <a href="admin.html">channel admin</a> — no APK, installer or portable copy.</li>
+            <li>Fixed <b>subtitles from the previous channel staying on screen</b>: the media element kept the old text tracks and their cues across a switch, so every track is disabled and cleared before the next stream is attached.</li>
+            <li><b>Add playlist accepts a single <code>.mpd</code></b> as well as <code>.m3u8</code>, and a DASH address is recognised from its manifest, not only from the suffix. JSON lists keep their ClearKey id/key fields.</li>
+            <li>Why some MPD links "did not work": of the 101 DASH channels in the feed, <b>65 are Widevine/PlayReady</b> with no licence the app can use, so the key ids in circulation do nothing for them. 15 more addresses were already dead and now ship disabled.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.2.5</h3>
           <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
           <ul>
             <li>Fixed the guide showing <b>every tile highlighted</b>. The ClearKey value added in 1.2.3 was stored under <code>key</code>, which is the channel's identity, so the whole bundled list ended up sharing one empty key and the selected-channel style matched every tile.</li>
@@ -734,6 +745,7 @@
       stream URLs; playback depends on the availability of those sources and on your
       local network. Distribution of third-party streams may require permission from the
       rights holder — replace the channel list with your own if you redistribute the app.
+      Channel list: <a href="admin.html">admin</a>.
       Android is a trademark of Google LLC. Windows is a trademark of Microsoft Corporation.
     </p>
   </div>
@@ -747,8 +759,8 @@
   // A tag only rebuilds the platform whose code changed, so each card keeps the
   // version and tag of the release that last touched it. Android still sits on
   // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.2.3", mobile: "1.2.3", win: "1.2.5" };
-  const TAGS = { tv: "v1.2.3", mobile: "v1.2.3", win: "v1.2.5" };
+  const VERSIONS = { tv: "1.3.0", mobile: "1.3.0", win: "1.3.0" };
+  const TAGS = { tv: "v1.3.0", mobile: "v1.3.0", win: "v1.3.0" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,

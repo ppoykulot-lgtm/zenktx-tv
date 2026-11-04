@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>ZENKTX — Channel admin</title>
+<style>
+  :root {
+    --bg: #060911; --card: #0e1524; --line: #1e2a42; --text: #e7edf8;
+    --muted: #8496b5; --mint: #35e7c0; --warn: #ffb454; --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; background: rgba(6,9,17,.94);
+    border-bottom: 1px solid var(--line); padding: 14px 20px;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  h1 { font-size: 16px; margin: 0 12px 0 0; letter-spacing: .02em; }
+  h1 b { color: var(--mint); }
+  .grow { flex: 1; }
+  input, select, button, textarea {
+    font: inherit; color: var(--text); background: #0b1220;
+    border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px;
+  }
+  input:focus, select:focus { outline: 2px solid rgba(53,231,192,.35); border-color: var(--mint); }
+  button { cursor: pointer; transition: background .15s, border-color .15s; }
+  button:hover { border-color: #2c3c5c; background: #101a2c; }
+  button.primary { background: var(--mint); border-color: var(--mint); color: #04170f; font-weight: 650; }
+  button.primary:hover { background: #4ff0cd; }
+  button.ghost { background: transparent; }
+  button.danger { color: var(--bad); border-color: rgba(255,107,107,.4); }
+  main { padding: 18px 20px 90px; max-width: 1400px; margin: 0 auto; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .note {
+    background: #0c1728; border: 1px solid var(--line); border-left: 3px solid var(--mint);
+    border-radius: 10px; padding: 12px 14px; margin: 0 0 16px; color: #b9c6dc;
+  }
+  .note code { color: var(--mint); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #141f33; vertical-align: middle; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; position: sticky; top: 57px; background: var(--bg); }
+  tr.off td { opacity: .45; }
+  tr.drm td.name::after { content: " · WIDEVINE"; font-size: 9px; letter-spacing: .1em; color: var(--warn); }
+  td.name input { width: 100%; min-width: 150px; }
+  td.url input { width: 100%; min-width: 260px; font-size: 12px; color: #a9bdd8; }
+  td.num { color: var(--muted); font-variant-numeric: tabular-nums; width: 44px; }
+  td.acts { white-space: nowrap; width: 96px; }
+  td.acts button { padding: 4px 8px; margin-right: 4px; }
+  #status { font-size: 12.5px; color: var(--muted); }
+  #status.ok { color: var(--mint); }
+  #status.bad { color: var(--bad); }
+  dialog {
+    border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+    color: var(--text); padding: 18px; width: min(460px, 92vw);
+  }
+  dialog::backdrop { background: rgba(2,5,10,.7); }
+  dialog label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+  dialog input { width: 100%; }
+  .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1><b>ZENKTX</b> channel admin</h1>
+  <span id="status">Load the catalogue to begin.</span>
+  <span class="grow"></span>
+  <input id="search" type="search" placeholder="Filter…" style="width:170px" />
+  <button id="load" class="primary">Load catalogue</button>
+  <button id="add">Add channel</button>
+  <button id="publish">Publish</button>
+  <button id="settings" class="ghost" title="Repository and token">⚙</button>
+</header>
+
+<main>
+  <p class="note">
+    Everything here edits <code>docs/catalog.json</code>. Publishing commits that file, and
+    <b>Android TV, Android mobile and Windows read it on their next launch</b> — no APK, installer or
+    portable copy is rebuilt. Order in this table is the order in the apps. Hiding a channel keeps the
+    row; deleting it writes a tombstone.
+  </p>
+
+  <div class="bar">
+    <span id="count" class="dv"></span>
+    <span class="grow"></span>
+    <select id="bulk">
+      <option value="">Bulk action…</option>
+      <option value="enable">Enable selected</option>
+      <option value="disable">Disable selected</option>
+      <option value="delete">Delete selected</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:30px"><input type="checkbox" id="all" /></th>
+        <th>#</th>
+        <th>Name</th>
+        <th>Stream URL</th>
+        <th>Group</th>
+        <th>On</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+
+<dialog id="dlgSettings">
+  <h3 style="margin:0 0 4px">Publishing settings</h3>
+  <p style="font-size:12.5px;color:#8496b5;margin:0">
+    A fine-grained GitHub token with <b>Contents: read and write</b> on this repository only.
+    It stays in this browser's storage; nothing is sent anywhere except api.github.com.
+  </p>
+  <label for="owner">Owner</label>
+  <input id="owner" />
+  <label for="repo">Repository</label>
+  <input id="repo" />
+  <label for="path">File path</label>
+  <input id="path" />
+  <label for="branch">Branch</label>
+  <input id="branch" />
+  <label for="token">Token</label>
+  <input id="token" type="password" placeholder="github_pat_…" />
+  <div class="row">
+    <button id="saveSettings" class="primary">Save</button>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+
+const SETTINGS_KEY = 'zenktx.admin.v1';
+const RAW = (cfg) =>
+  `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
+
+const settings = Object.assign(
+  { owner: 'ppoykulot-lgtm', repo: 'zenktx-tv', path: 'docs/catalog.json', branch: 'main', token: '' },
+  JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+);
+
+const $ = (id) => document.getElementById(id);
+let catalog = null;
+let original = '';
+let dirty = false;
+
+const setStatus = (text, kind) => {
+  const node = $('status');
+  node.textContent = text;
+  node.className = kind || '';
+};
+
+const markDirty = () => {
+  dirty = true;
+  $('publish').textContent = 'Publish •';
+};
+
+const encode = (text) => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+};
+
+const decodeBase64 = (text) =>
+  new TextDecoder().decode(Uint8Array.from(atob(text.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
+
+function saveSettings() {
+  Object.assign(settings, {
+    owner: $('owner').value.trim(),
+    repo: $('repo').value.trim(),
+    path: $('path').value.trim() || 'docs/catalog.json',
+    branch: $('branch').value.trim() || 'main',
+    token: $('token').value.trim(),
+  });
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function openSettings() {
+  for (const key of ['owner', 'repo', 'path', 'branch', 'token']) $(key).value = settings[key];
+  $('dlgSettings').showModal();
+}
+
+async function load() {
+  setStatus('Loading…');
+  try {
+    const response = await fetch(`${RAW(settings)}?t=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    original = await response.text();
+    catalog = JSON.parse(original);
+    if (!Array.isArray(catalog.channels)) throw new Error('no channels array');
+    dirty = false;
+    $('publish').textContent = 'Publish';
+    render();
+    setStatus(`Loaded ${catalog.channels.length} channels · updated ${catalog.updatedAt || 'unknown'}`, 'ok');
+  } catch (error) {
+    setStatus(`Could not load ${settings.path}: ${error.message}`, 'bad');
+  }
+}
+
+function render() {
+  const query = $('search').value.trim().toLowerCase();
+  const body = $('rows');
+  body.innerHTML = '';
+  const list = catalog.channels;
+  let shown = 0;
+
+  list.forEach((channel, index) => {
+    const hay = `${channel.name || ''} ${channel.url || ''} ${channel.category || ''}`.toLowerCase();
+    if (query && !hay.includes(query)) return;
+    shown += 1;
+
+    const tr = document.createElement('tr');
+    if (channel.enabled === false) tr.className = 'off';
+    if (channel.drmType === 'widevine') tr.classList.add('drm');
+
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.dataset.index = String(index);
+    check.className = 'pick';
+
+    const order = document.createElement('td');
+    order.className = 'num';
+    order.textContent = String(index + 1);
+
+    const nameCell = document.createElement('td');
+    nameCell.className = 'name';
+    const name = document.createElement('input');
+    name.value = channel.name || '';
+    name.addEventListener('input', () => { channel.name = name.value; markDirty(); });
+    nameCell.appendChild(name);
+
+    const urlCell = document.createElement('td');
+    urlCell.className = 'url';
+    const url = document.createElement('input');
+    url.value = channel.url || '';
+    url.addEventListener('input', () => {
+      channel.url = url.value.trim();
+      channel.streamType = /\.mpd(\?|$)/i.test(channel.url) ? 'mpd' : 'hls';
+      channel.enabled = true;
+      channel.note = '';
+      markDirty();
+    });
+    urlCell.appendChild(url);
+
+    const groupCell = document.createElement('td');
+    const group = document.createElement('input');
+    group.value = channel.category || '';
+    group.style.width = '112px';
+    group.addEventListener('input', () => { channel.category = group.value; markDirty(); });
+    groupCell.appendChild(group);
+
+    const onCell = document.createElement('td');
+    const on = document.createElement('input');
+    on.type = 'checkbox';
+    on.checked = channel.enabled !== false;
+    on.addEventListener('change', () => { channel.enabled = on.checked; markDirty(); render(); });
+    onCell.appendChild(on);
+
+    const acts = document.createElement('td');
+    acts.className = 'acts';
+    const up = document.createElement('button');
+    up.textContent = '↑';
+    up.title = 'Move up';
+    up.addEventListener('click', () => move(index, -1));
+    const down = document.createElement('button');
+    down.textContent = '↓';
+    down.title = 'Move down';
+    down.addEventListener('click', () => move(index, 1));
+    const del = document.createElement('button');
+    del.textContent = '✕';
+    del.className = 'danger';
+    del.title = 'Remove from the apps (tombstone)';
+    del.addEventListener('click', () => {
+      channel.enabled = false;
+      channel.tombstone = true;
+      markDirty();
+      render();
+    });
+    acts.append(up, down, del);
+
+    tr.append(document.createElement('td'), order, nameCell, urlCell, groupCell, onCell, acts);
+    tr.firstChild.appendChild(check);
+    body.appendChild(tr);
+  });
+
+  $('count').textContent = `${shown} of ${list.length} shown · ${list.filter((c) => c.enabled !== false).length} live`;
+}
+
+function move(index, delta) {
+  const list = catalog.channels;
+  const target = index + delta;
+  if (target < 0 || target >= list.length) return;
+  const [row] = list.splice(index, 1);
+  list.splice(target, 0, row);
+  list.forEach((channel, i) => { channel.order = i + 1; });
+  markDirty();
+  render();
+}
+
+function addChannel() {
+  if (!catalog) return setStatus('Load the catalogue first.', 'bad');
+  const id = Math.max(1000, ...catalog.channels.map((c) => Number(c.id) || 0)) + 1;
+  catalog.channels.unshift({
+    id,
+    order: 1,
+    name: 'New channel',
+    category: 'General',
+    tags: [],
+    logo: '',
+    url: '',
+    streamType: 'hls',
+    quality: 'HD',
+    isFilipino: false,
+    enabled: false,
+    drmType: '',
+    keyId: '',
+    key: '',
+    note: '',
+  });
+  catalog.channels.forEach((channel, i) => { channel.order = i + 1; });
+  markDirty();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function publish() {
+  if (!catalog) return setStatus('Load the catalogue first.', 'bad');
+  if (!settings.token) { openSettings(); return setStatus('A token is needed to publish.', 'bad'); }
+
+  const payload = JSON.stringify(
+    Object.assign({}, catalog, { updatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z') }),
+    null,
+    1
+  );
+  setStatus('Publishing…');
+  try {
+    const api = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}`;
+    const headers = {
+      Authorization: `Bearer ${settings.token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+    const head = await fetch(`${api}?ref=${encodeURIComponent(settings.branch)}`, { headers });
+    if (!head.ok) throw new Error(`read failed (HTTP ${head.status})`);
+    const current = await head.json();
+    const local = decodeBase64(current.content || '');
+    if (local.trim() === payload.trim()) {
+      setStatus('Nothing changed.', 'ok');
+      return;
+    }
+    const put = await fetch(api, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+      body: JSON.stringify({
+        message: 'Update the channel catalogue',
+        content: encode(payload),
+        sha: current.sha,
+        branch: settings.branch,
+      }),
+    });
+    if (!put.ok) {
+      const detail = await put.json().catch(() => ({}));
+      throw new Error(detail.message || `HTTP ${put.status}`);
+    }
+    catalog = JSON.parse(payload);
+    original = payload;
+    dirty = false;
+    $('publish').textContent = 'Publish';
+    setStatus('Published. Every app picks it up on its next launch (Pages takes ~20s).', 'ok');
+  } catch (error) {
+    setStatus(`Publish failed: ${error.message}`, 'bad');
+  }
+}
+
+$('load').addEventListener('click', load);
+$('add').addEventListener('click', addChannel);
+$('publish').addEventListener('click', publish);
+$('settings').addEventListener('click', openSettings);
+$('saveSettings').addEventListener('click', () => { saveSettings(); $('dlgSettings').close(); load(); });
+$('search').addEventListener('input', render);
+$('all').addEventListener('change', (event) => {
+  document.querySelectorAll('.pick').forEach((box) => { box.checked = event.target.checked; });
+});
+$('bulk').addEventListener('change', (event) => {
+  const action = event.target.value;
+  event.target.value = '';
+  if (!action) return;
+  const picked = Array.from(document.querySelectorAll('.pick:checked'))
+    .map((box) => catalog.channels[Number(box.dataset.index)]);
+  for (const channel of picked) {
+    if (action === 'enable') channel.enabled = true;
+    if (action === 'disable') channel.enabled = false;
+    if (action === 'delete') { channel.enabled = false; channel.tombstone = true; }
+  }
+  markDirty();
+  render();
+});
+window.addEventListener('beforeunload', (event) => {
+  if (dirty) event.preventDefault();
+});
+
+if (settings.token) load();
+</script>
+</body>
+</html>

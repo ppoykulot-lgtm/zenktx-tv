@@ -29,3 +29,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .vscode/
+channels/feed.json
+channels/probe.json
+dist-android.log
