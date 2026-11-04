@@ -1,12 +1,30 @@
 {
  "version": 1,
- "updatedAt": "2026-11-04T07:55:41Z",
+ "updatedAt": "2026-11-04T07:56:48Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
   {
-   "id": 1,
+   "id": "custom-1793102402188",
    "order": 1,
+   "name": "Korean Central Television",
+   "category": "Entertainment",
+   "tags": [],
+   "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoUYSyt5sGL32S1RuZp2_fN-f6HvBDton0XEPh3OJBJg&s=10",
+   "url": "https://live.koryocdn.org/kctv/index.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": false,
+   "enabled": false,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": "",
+   "tombstone": true
+  },
+  {
+   "id": 1,
+   "order": 2,
    "name": "3RS SinePinoy",
    "category": "Movies",
    "tags": [
@@ -31,7 +49,7 @@
   },
   {
    "id": 2,
-   "order": 2,
+   "order": 3,
    "name": "3RSTV",
    "category": "Movies",
    "tags": [
@@ -52,24 +70,6 @@
    "keyId": "",
    "key": "",
    "note": ""
-  },
-  {
-   "id": "custom-1793102402188",
-   "order": 3,
-   "name": "Korean Central Television",
-   "category": "Entertainment",
-   "tags": [],
-   "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoUYSyt5sGL32S1RuZp2_fN-f6HvBDton0XEPh3OJBJg&s=10",
-   "url": "https://live.koryocdn.org/kctv/index.m3u8",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": false,
-   "enabled": false,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": "",
-   "tombstone": true
   },
   {
    "id": 3,
@@ -1096,7 +1096,7 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
-   "enabled": false,
+   "enabled": true,
    "drmType": "",
    "keyId": "",
    "key": "",
