@@ -267,16 +267,60 @@ async function boot() {
   await loadAll();
   applyLive();
   rebuild();
+  reportPlaylistFailures();
   scheduleUpdateCheck();
   if (Date.now() - liveAt > LIVE_TTL) refreshLive();
+}
+
+/* ------------------------------------------------------------ load failures */
+
+// Electron rejects an IPC call as "Error invoking remote method 'x': Error:
+// <message>", and the main process reports a bare "HTTP 410 for <long url>".
+// Neither belongs in a toast: translate the pair into one short sentence.
+function cleanError(error) {
+  const raw = String((error && error.message) || error || '');
+  return raw
+    .replace(/^Error invoking remote method '[^']*':\s*/, '')
+    .replace(/^Error:\s*/, '')
+    .trim();
+}
+
+function describeLoadError(message) {
+  const status = /HTTP (\d{3})/.exec(message);
+  if (status) {
+    const code = Number(status[1]);
+    if (code === 404 || code === 410) return `the link is dead (HTTP ${code})`;
+    if (code === 401 || code === 403) return `the server refused it (HTTP ${code})`;
+    if (code === 429) return 'the server is rate-limiting (HTTP 429)';
+    return `the server answered HTTP ${code}`;
+  }
+  if (/timed? ?out|ETIMEDOUT|abort/i.test(message)) return 'the server did not answer in time';
+  if (/ENOTFOUND|EAI_AGAIN|getaddrinfo|ERR_NAME/i.test(message)) return 'the address did not resolve';
+  if (/ECONNREFUSED|ECONNRESET|socket hang up/i.test(message)) return 'the connection was refused';
+  return message || 'unknown error';
+}
+
+// One message for the whole load, not one per source: a dead playlist used to
+// fire a toast with a full manifest URL on every launch.
+function reportPlaylistFailures() {
+  const failures = state.playlistFailures || [];
+  if (!failures.length) return;
+  const first = failures[0];
+  toast(
+    failures.length === 1
+      ? `${first.name} did not load \u2014 ${first.error}. Open Playlists to fix or remove it.`
+      : `${failures.length} playlists did not load \u2014 ${first.name}: ${first.error}. Open Playlists to fix them.`
+  );
 }
 
 // Rebuilt from scratch on every change: mutating the old list left the channels
 // of a removed playlist behind until the next launch, and re-added duplicates
 // each time a playlist was reloaded.
+
 async function loadAll() {
   const list = state.bundled.slice();
   const seen = new Set(list.map((c) => c.url));
+  const failures = [];
 
   for (const playlist of prefs.playlists.filter((p) => p.enabled)) {
     try {
@@ -286,11 +330,14 @@ async function loadAll() {
         seen.add(channel.url);
         list.push(channel);
       }
+      playlist.error = '';
     } catch (error) {
-      toast(`${playlist.name}: ${error.message}`);
+      playlist.error = describeLoadError(cleanError(error));
+      failures.push(playlist);
     }
   }
   state.base = list;
+  state.playlistFailures = failures;
 }
 
 // A source is not always a list. A lone .mpd or .m3u8 link is a single channel,
@@ -904,11 +951,30 @@ function openPlaylists() {
   prefs.playlists.forEach((playlist) => {
     const item = document.createElement('div');
     item.className = 'item';
-    item.innerHTML = `<div class="grow"><b>${playlist.name}</b><small>${playlist.url}</small></div>`;
+    const problem = playlist.error ? `<small class="bad">${playlist.error}</small>` : '';
+    item.innerHTML = `<div class="grow"><b>${playlist.name}</b><small>${playlist.url}</small>${problem}</div>`;
     const toggle = document.createElement('span');
     toggle.className = 'state';
-    toggle.textContent = playlist.enabled ? 'ENABLED' : 'DISABLED';
+    toggle.textContent = playlist.error ? 'LINK DEAD' : playlist.enabled ? 'ENABLED' : 'DISABLED';
     item.appendChild(toggle);
+
+    // The provider rotated this address. Offer the replacement here instead of
+    // making the viewer delete the playlist and type it in again.
+    if (playlist.error) {
+      const fix = document.createElement('button');
+      fix.className = 'btn';
+      fix.textContent = 'Fix link';
+      fix.addEventListener('click', () => {
+        ask('Replace the link', playlist.error, playlist.url, (value) => {
+          if (!value) return;
+          playlist.url = value;
+          playlist.error = '';
+          savePrefs();
+          reloadAll().then(() => { openPlaylists(); reportPlaylistFailures(); });
+        });
+      });
+      item.appendChild(fix);
+    }
 
     const enable = document.createElement('button');
     enable.className = 'btn';
@@ -936,7 +1002,8 @@ function openPlaylists() {
     list.appendChild(item);
   });
 
-  $('dlgPlaylists').showModal();
+  const dialog = $('dlgPlaylists');
+  if (!dialog.open) dialog.showModal();
 }
 
 async function reloadAll() {
@@ -944,6 +1011,7 @@ async function reloadAll() {
   await loadAll();
   applyLive();
   rebuild();
+  reportPlaylistFailures();
   if (key) {
     const again = state.visible.find((c) => c.key === key);
     if (again) select(again);
@@ -1019,7 +1087,7 @@ async function githubPull() {
     await reloadAll();
     toast(`Pulled ${channels.length} channels.`);
   } catch (error) {
-    toast(`Pull failed: ${error.message}`);
+    toast(`Pull failed: ${describeLoadError(cleanError(error))}.`);
   }
 }
 

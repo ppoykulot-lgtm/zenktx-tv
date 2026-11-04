@@ -375,6 +375,10 @@ dialog p { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
 .item b { font-size: 12.5px; display: block; }
 .item small { color: var(--muted); font-size: 10px; display: block; overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; }
+.item .bad {
+  display: block; margin-top: 3px; color: #ff9c9c; font-size: 9.5px;
+  letter-spacing: .02em;
+}
 .item .state { font-size: 8.5px; letter-spacing: .1em; font-weight: 700; color: var(--mint); }
 
 .toast {
