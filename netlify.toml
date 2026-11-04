@@ -2,3 +2,14 @@
 # publish that folder; without this it serves the repository root and 404s.
 [build]
   publish = "docs"
+
+# The page is maintained once, in this repository, and GitHub Pages already
+# publishes it on every push. This mirror kept drifting a release behind (it was
+# still serving v1.3.2 and its download buttons pointed at files that did not
+# exist yet), so it redirects to the copy that is always current instead of
+# trying to keep two deployments in step.
+[[redirects]]
+  from = "/*"
+  to = "https://ppoykulot-lgtm.github.io/zenktx-tv/:splat"
+  status = 301
+  force = true
