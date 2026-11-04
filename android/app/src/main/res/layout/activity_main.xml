@@ -96,18 +96,17 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Category chips. Taller than the chips themselves so the focused
-             chip can scale without its top corners being clipped. -->
+        <!-- Category chips wrap onto as many rows as the screen needs: a single
+             horizontal strip hid every category past the third one. -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/chips"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
             android:scrollbars="none" />
 
         <TextView
@@ -121,27 +120,31 @@
             android:textSize="8sp"
             android:visibility="gone" />
 
-        <!-- EPG grid -->
+        <!-- EPG grid. clipChildren stays on: a half-scrolled tile drew its name
+             over the detail strip underneath. -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/grid"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:padding="5dp"
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:paddingStart="5dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="5dp"
+            android:paddingBottom="9dp"
             android:scrollbars="none" />
 
         <!-- Detail strip -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="76dp"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/bg_hero"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
 
             <ImageView
                 android:id="@+id/detailLogo"
@@ -185,15 +188,19 @@
                         android:paddingTop="2dp"
                         android:paddingEnd="6dp"
                         android:paddingBottom="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
                         android:textColor="#8FE7D6"
                         android:textSize="6.5sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/detailMeta"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="9dp"
+                        android:layout_weight="1"
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:textColor="@color/muted"

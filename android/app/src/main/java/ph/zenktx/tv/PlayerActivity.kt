@@ -53,6 +53,8 @@ class PlayerActivity : Activity() {
 
         private const val STALL_MS = 18_000L
         private const val CHIP_MS = 3_500L
+        private const val MAX_RECOVERIES = 2
+        private const val RECOVER_DELAY_MS = 900L
     }
 
     private lateinit var binding: ActivityPlayerBinding
@@ -66,6 +68,7 @@ class PlayerActivity : Activity() {
 
     private var hasVideo = false
     private var failed = false
+    private var recoveries = 0
     private var startedAt = 0L
     private var lastCode = ""
 
@@ -162,6 +165,7 @@ class PlayerActivity : Activity() {
 
         failed = false
         hasVideo = false
+        recoveries = 0
         lastCode = ""
         startedAt = SystemClock.elapsedRealtime()
 
@@ -226,17 +230,28 @@ class PlayerActivity : Activity() {
                     if (state == Player.STATE_BUFFERING) View.VISIBLE else View.GONE
 
                 if (state == Player.STATE_ENDED) {
-                    fail(getString(R.string.err_empty), "STREAM_ENDED")
+                    // A live playlist ends for a moment while the provider
+                    // re-tokenises it. Try again before reporting it as gone.
+                    if (!retryQuietly()) {
+                        fail(getString(R.string.err_empty), "STREAM_ENDED")
+                    }
                 }
             }
 
             override fun onPlayerError(error: PlaybackException) {
                 lastCode = error.errorCodeName
-                fail(describe(error), error.errorCodeName)
+                if (!retryQuietly()) fail(describe(error), error.errorCodeName)
+            }
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) clearFailure()
             }
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
-                if (videoSize.height > 0) hasVideo = true
+                if (videoSize.height > 0) {
+                    hasVideo = true
+                    clearFailure()
+                }
             }
         })
         return exo
@@ -275,6 +290,47 @@ class PlayerActivity : Activity() {
         if (clean.length != 32) return null
         val bytes = ByteArray(16) { i -> clean.substring(i * 2, i * 2 + 2).toInt(16).toByte() }
         return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+    }
+
+    /**
+     * Re-prepare the same channel after a transient end or error. The panel is
+     * a report about the stream, so it only appears once the channel has failed
+     * [MAX_RECOVERIES] times in a row instead of after the first hiccup.
+     */
+    private fun retryQuietly(): Boolean {
+        val exo = player ?: return false
+        if (isFinishing || recoveries >= MAX_RECOVERIES) return false
+
+        recoveries++
+        failed = false
+        hasVideo = false
+        startedAt = SystemClock.elapsedRealtime()
+
+        binding.errorPanel.visibility = View.GONE
+        binding.buffering.visibility = View.VISIBLE
+
+        main.removeCallbacks(watchdog)
+        main.postDelayed(watchdog, 1_000)
+        main.postDelayed({
+            if (isFinishing || failed) return@postDelayed
+            exo.prepare()
+            exo.playWhenReady = true
+        }, RECOVER_DELAY_MS)
+        return true
+    }
+
+    /** Frames are back: drop the panel and let the watchdog guard again. */
+    private fun clearFailure() {
+        if (binding.errorPanel.visibility != View.VISIBLE) return
+        binding.errorPanel.visibility = View.GONE
+        if (!failed) return
+
+        failed = false
+        recoveries = 0
+        startedAt = SystemClock.elapsedRealtime()
+        binding.buffering.visibility = View.GONE
+        main.removeCallbacks(watchdog)
+        main.postDelayed(watchdog, 1_000)
     }
 
     private fun describe(error: PlaybackException): String {
