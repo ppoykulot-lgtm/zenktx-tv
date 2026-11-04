@@ -26,11 +26,11 @@ import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
-import coil.load
 import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.data.ChannelRepository
 import ph.zenktx.tv.databinding.ActivityPlayerBinding
 import ph.zenktx.tv.net.Http
+import ph.zenktx.tv.ui.Logos
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -386,10 +386,7 @@ class PlayerActivity : Activity() {
         binding.channelName.text = channel.name
         binding.channelMeta.text = getString(R.string.player_channel, index + 1, queue.size) +
             "  \u00b7  " + channel.category.uppercase()
-        binding.channelLogo.load(channel.logo.ifBlank { null }) {
-            placeholder(R.drawable.ic_channel_placeholder)
-            error(R.drawable.ic_channel_placeholder)
-        }
+        Logos.apply(binding.channelLogo, binding.channelMonogram, channel.name, channel.logo)
 
         binding.channelChip.animate().cancel()
         binding.channelChip.alpha = 1f

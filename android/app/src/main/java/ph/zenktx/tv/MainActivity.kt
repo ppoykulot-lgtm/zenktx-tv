@@ -9,7 +9,6 @@ import android.os.Looper
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import coil.load
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -30,6 +29,7 @@ import ph.zenktx.tv.databinding.ActivityMainBinding
 import ph.zenktx.tv.ui.CategoryChipAdapter
 import ph.zenktx.tv.ui.ChannelGridAdapter
 import ph.zenktx.tv.ui.Dialogs
+import ph.zenktx.tv.ui.Logos
 import ph.zenktx.tv.ui.Ui
 import ph.zenktx.tv.ui.Updater
 import java.text.SimpleDateFormat
@@ -209,6 +209,8 @@ class MainActivity : Activity() {
             binding.detailTag.text = ""
             binding.detailMeta.text = ""
             binding.detailLogo.setImageDrawable(null)
+            binding.detailMonogram.text = ""
+            binding.detailMonogram.visibility = View.GONE
             binding.detailFav.text = getString(R.string.favourite_off)
             return
         }
@@ -223,11 +225,7 @@ class MainActivity : Activity() {
         binding.detailFav.text = getString(
             if (library.isFavourite(channel.key)) R.string.favourite_on else R.string.favourite_off
         )
-        binding.detailLogo.load(channel.logo.ifBlank { null }) {
-            crossfade(true)
-            placeholder(R.drawable.ic_channel_placeholder)
-            error(R.drawable.ic_channel_placeholder)
-        }
+        Logos.apply(binding.detailLogo, binding.detailMonogram, channel.name, channel.logo)
     }
 
     private fun toggleFavourite(channel: Channel) {

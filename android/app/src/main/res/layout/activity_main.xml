@@ -146,13 +146,28 @@
             android:paddingStart="14dp"
             android:paddingEnd="14dp">
 
-            <ImageView
-                android:id="@+id/detailLogo"
+            <FrameLayout
                 android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_hero_logo"
-                android:contentDescription="@string/app_name"
-                android:padding="6dp" />
+                android:layout_height="52dp">
+
+                <TextView
+                    android:id="@+id/detailMonogram"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="#F2F6FF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/detailLogo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/app_name"
+                    android:padding="6dp"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="0dp"

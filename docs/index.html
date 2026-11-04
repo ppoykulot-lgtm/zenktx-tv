@@ -599,7 +599,15 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.3.5 <span class="tagx">latest</span></h3>
+          <h3>1.3.6 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
+          <ul>
+            <li><b>The strip and the player chip use the same fallback as the tiles.</b> 1.3.5 fixed the grid but left the empty play glyph in the detail strip underneath it and in the chip that appears over playback. Both show the channel's initials on its colour now, so a channel without a working logo looks the same everywhere.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.3.5</h3>
           <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
           <ul>
             <li><b>The error card no longer sits on a playing channel.</b> A live playlist that ends, or one segment that fails while the provider re-tokenises it, froze the last frame and parked <i>Channel unavailable</i> on top for good. The player now re-prepares the same channel twice before it reports anything, and it drops the card the moment frames come back.</li>
@@ -820,8 +828,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.3.5", mobile: "1.3.5", win: "1.3.3" };
-  const TAGS = { tv: "v1.3.5", mobile: "v1.3.5", win: "v1.3.3" };
+  const VERSIONS = { tv: "1.3.6", mobile: "1.3.6", win: "1.3.3" };
+  const TAGS = { tv: "v1.3.6", mobile: "v1.3.6", win: "v1.3.3" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
