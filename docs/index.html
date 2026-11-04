@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver="tv">v1.3.2</span>
+            <span class="ver" data-ver="tv">v1.3.3</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver="mobile">v1.3.2</span>
+            <span class="ver" data-ver="mobile">v1.3.3</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver="win">v1.3.2</span>
+            <span class="ver" data-ver="win">v1.3.3</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -598,7 +598,21 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.3.2 <span class="tagx">latest</span></h3>
+          <h3>1.3.3 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>Channels no longer open paused.</b> The play call ran before the player had attached the stream, so it was rejected and the channel sat still until you pressed play. The app now asks again the moment the stream is ready, and remembers whether you paused it yourself.</li>
+            <li><b>A change published in the admin page shows up on the next launch.</b> The app cached the channel list for half an hour and skipped the download when the cache was fresh, so a reorder, a rename or a removal looked like it never happened. Every launch now fetches the current file, with the cache kept for offline use.</li>
+            <li><b>Switching a channel back on works.</b> The <i>on</i> toggle did not clear the removal marker, and the apps skip any row that carries one — that is why 3RS SinePinoy stayed hidden. Enabling a row, single or bulk, clears the tombstone now.</li>
+            <li><b>A 410 is retried with the current link.</b> These providers re-tokenise addresses through the day, so a cached copy can answer <i>HTTP 410</i> while the channel is alive — which is why a second window played it. The app pulls the feed again and retries once before showing the error.</li>
+            <li><b>Admin page:</b> a password gate, an editable <b>channel number</b> that renumbers the rest, per-channel <b>logo</b>, <b>DRM</b>, <b>key id</b> and <b>key</b> fields, and publishing now re-reads the file so the table shows what actually landed.</li>
+            <li><b>Android updates explain a refused install.</b> If the downloaded APK is signed with a different certificate than the installed app — the usual cause of <i>App not installed</i> — the app says so and asks for an uninstall instead of leaving the system dialog to fail silently.</li>
+            <li><b>Each platform has its own version and tag.</b> Windows publishes as <code>win-v…</code>, Android TV as <code>tv-v…</code>, Android mobile as <code>mobile-v…</code>, so a release only renames the build it actually changed.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.3.2</h3>
           <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
             <li><b>The 1.3.1 installers shipped without Shaka Player</b>, so the encrypted channels still failed there with <i>the provider rotated this channel's Clearkey key</i>. The packaged builds vendor only what the build script copies, and that script never fetched Shaka — it existed only in the development tree, where the change was tested. The build now installs <code>shaka-player</code> and copies its bundle next to hls.js and dash.js, so an installer can no longer be produced without it.</li>
@@ -777,11 +791,11 @@
   // Change these two values when you publish the repository / cut a release.
   // ---------------------------------------------------------------------------
   const REPO = "ppoykulot-lgtm/zenktx-tv";
-  // A tag only rebuilds the platform whose code changed, so each card keeps the
-  // version and tag of the release that last touched it. Android still sits on
-  // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.3.2", mobile: "1.3.2", win: "1.3.2" };
-  const TAGS = { tv: "v1.3.2", mobile: "v1.3.2", win: "v1.3.2" };
+  // Every platform releases on its own tag (tv-v…, mobile-v…, win-v…), so each
+  // card keeps the version of the build that platform actually got. A Windows
+  // fix no longer renames the Android build.
+  const VERSIONS = { tv: "1.3.3", mobile: "1.3.3", win: "1.3.3" };
+  const TAGS = { tv: "tv-v1.3.3", mobile: "mobile-v1.3.3", win: "win-v1.3.3" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,
