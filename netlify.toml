@@ -1,13 +1,15 @@
-# The landing page is plain static HTML in docs/, so Netlify only needs to
-# publish that folder; without this it serves the repository root and 404s.
+# The landing page is plain static HTML in docs/ — there is nothing to build.
+# `command = ""` says so explicitly: with no command set, Netlify may try to
+# auto-detect a build from the repository and fail the deploy before it copies
+# a single file, which is what left this mirror four releases behind.
 [build]
   publish = "docs"
+  command = ""
 
 # The page is maintained once, in this repository, and GitHub Pages already
 # publishes it on every push. This mirror kept drifting a release behind (it was
-# still serving v1.3.2 and its download buttons pointed at files that did not
-# exist yet), so it redirects to the copy that is always current instead of
-# trying to keep two deployments in step.
+# still serving v1.3.2 while the site said v1.3.3), so it redirects to the copy
+# that is always current instead of trying to keep two deployments in step.
 [[redirects]]
   from = "/*"
   to = "https://ppoykulot-lgtm.github.io/zenktx-tv/:splat"
