@@ -2,12 +2,14 @@ package ph.zenktx.tv
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Base64
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
@@ -17,6 +19,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
+import androidx.media3.exoplayer.drm.DrmSessionManager
+import androidx.media3.exoplayer.drm.ExoMediaDrm
+import androidx.media3.exoplayer.drm.FrameworkMediaDrm
+import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import coil.load
@@ -24,6 +31,8 @@ import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.data.ChannelRepository
 import ph.zenktx.tv.databinding.ActivityPlayerBinding
 import ph.zenktx.tv.net.Http
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Full-screen live player.
@@ -48,6 +57,9 @@ class PlayerActivity : Activity() {
 
     private lateinit var binding: ActivityPlayerBinding
     private var player: ExoPlayer? = null
+
+    /** Set per channel, before the media source is built. */
+    private var clearKey: DrmSessionManager? = null
 
     private var queue: List<Channel> = emptyList()
     private var index = 0
@@ -159,6 +171,8 @@ class PlayerActivity : Activity() {
 
         val exo = player ?: buildPlayer().also { player = it }
 
+        clearKey = clearKeyManager(channel)
+
         binding.playerView.player = exo
         exo.clearMediaItems()
         exo.setMediaItem(mediaItemFor(channel))
@@ -199,6 +213,8 @@ class PlayerActivity : Activity() {
 
         val sourceFactory = DefaultMediaSourceFactory(http)
             .setLoadErrorHandlingPolicy(DefaultLoadErrorHandlingPolicy(2))
+            // Only consulted when the manifest turns out to be encrypted.
+            .setDrmSessionManagerProvider { clearKey ?: DrmSessionManager.DUMMY }
 
         val exo = ExoPlayer.Builder(this)
             .setMediaSourceFactory(sourceFactory)
@@ -224,6 +240,41 @@ class PlayerActivity : Activity() {
             }
         })
         return exo
+    }
+
+    /**
+     * ClearKey is the only protection the publisher ships that opens without a
+     * licence server: the manifest names the key id and the feed carries the
+     * key. Media3 decrypts it through the platform MediaDrm ClearKey UUID.
+     */
+    private fun clearKeyManager(channel: Channel): DrmSessionManager? {
+        if (channel.drmType != "clearkey") return null
+        val kid = base64Url(channel.keyId) ?: return null
+        val key = base64Url(channel.drmKey) ?: return null
+
+        val request = JSONObject()
+            .put(
+                "keys",
+                JSONArray().put(
+                    JSONObject().put("kty", "oct").put("kid", kid).put("k", key)
+                )
+            )
+            .put("type", "temporary")
+
+        val provider = ExoMediaDrm.Provider {
+            FrameworkMediaDrm.newInstance(C.CLEARKEY_UUID)
+        }
+        return DefaultDrmSessionManager.Builder()
+            .setUuidAndExoMediaDrmProvider(C.CLEARKEY_UUID, provider)
+            .build(LocalMediaDrmCallback(request.toString().toByteArray(Charsets.UTF_8)))
+    }
+
+    /** ClearKey takes the id and key as 16 raw bytes, base64url, unpadded. */
+    private fun base64Url(hex: String): String? {
+        val clean = hex.filter { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }
+        if (clean.length != 32) return null
+        val bytes = ByteArray(16) { i -> clean.substring(i * 2, i * 2 + 2).toInt(16).toByte() }
+        return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
     }
 
     private fun describe(error: PlaybackException): String {

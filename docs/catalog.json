@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-04T02:19:02+00:00",
+ "updatedAt": "2026-11-04T02:58:57+00:00",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -118,10 +118,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "9c3e7a516d824f04a9175b8c2e3d7040",
+   "key": "524a9c2cec98272f71c347345a3fd12e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 5,
@@ -145,10 +145,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "8f7a2c913d6b4e5a9f127c8d4e6a1b90",
+   "key": "a73d3d1211fb23084c62572706f45397",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 6,
@@ -220,10 +220,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "dbf670bed2ea4905a114557e90e7ffb6",
+   "key": "616059bec8dfb27f3524b7e7c31b6cff",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 9,
@@ -268,10 +268,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d6f1a8c29b7e4d5a8f332c1e9d7b6a90",
+   "key": "790bd17b9e623e832003a993a2de1d87",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 11,
@@ -316,10 +316,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f3a8c9126e544d809b312c7f5a8e6140",
+   "key": "43f5361983896b47ff01b4f77c5dbf3f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 13,
@@ -363,10 +363,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e5b2c7091a464d839f25b7c6e018a432",
+   "key": "9a933efca0ae690102cc9594b29803bf",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 15,
@@ -477,10 +477,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "59a51164c2c915352f04066a06f6e807",
+   "key": "eba5cc362d1d63c0fe6460febca0fd11",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 20,
@@ -498,10 +498,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "135fc8757cb349dc89ffc7174ab2fd49",
+   "key": "065008afac7cba180ac889a965fec7cc",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 21,
@@ -544,10 +544,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "73c5f8919d424b06a2186e7c3a5d9040",
+   "key": "bf46e85e8fba9f0eae0931394d478d25",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 23,
@@ -565,10 +565,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "bf849c4337464c4682ec95f76b3af9fc",
+   "key": "e2d1e53b9c63394e9db0090e2782a87f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 24,
@@ -586,10 +586,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "9f71d55c4b0e4c57871180bd06ce832a",
+   "key": "55faa0cb0117cb7060972dfd4f87d537",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 25,
@@ -658,10 +658,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "a7d3f5916c844b209e158f3a7d5c2046",
+   "key": "021fe5515e7dfb1a00a98d51abd0cb7f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 28,
@@ -683,10 +683,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "8aaf27b53099505a8307b7df2f61b46c",
+   "key": "83692149a2e59a8aae8e39ed6a1f6325",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 29,
@@ -729,10 +729,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "3c8e5a927d414b069f236a5c8e1d7049",
+   "key": "a9b9198bf7b116b30492aea4dc471122",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 31,
@@ -1094,10 +1094,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "7d4f9c216a834e508b165c3a7d9e2048",
+   "key": "9d148906d890053a00f5e581185ac066",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 46,
@@ -1117,10 +1117,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "e4f79d996c3449fea0186c921d601115",
+   "key": "99c794f08ce50ebe75eb7e57f397f8e3",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 47,
@@ -1141,10 +1141,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f4b7c8219e364a058d295c6f3e7a1042",
+   "key": "d10c7f2a37c1079e6b83837423c0d6b2",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 48,
@@ -1164,10 +1164,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c7e5a2199d644b318f702a6c4e5d8139",
+   "key": "300778996b5a71594db508982256f365",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 49,
@@ -1187,10 +1187,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "0cff80d5449a48e9a11865ef1532cecf",
+   "key": "cd64df4904f900d2b513ecc7aa019b32",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 50,
@@ -1212,10 +1212,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "02b0d6aa78d547af890c9e27113e81af",
+   "key": "890160f8ece56b8cd232889acb74e276",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 51,
@@ -1237,10 +1237,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "5208606a1a5e4750bc7aaafa3bbad84c",
+   "key": "246d9c7efc6d96d8d596aa294313e17b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 52,
@@ -1262,10 +1262,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "ac87b335cfd44a8589f96a4f8534c674",
+   "key": "4b9066c7778e74b899c2f57d977149b1",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 53,
@@ -1287,10 +1287,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "01f5f16338aa4302b5fc5e3e2c50cd3d",
+   "key": "0dbd0f05009fa64614de990f56b3f322",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 54,
@@ -1311,10 +1311,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "4f9c6e217a354d80b9268e5c3f1a7042",
+   "key": "41b33eebbacf91fe6c86bd28081bf3fd",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 55,
@@ -1334,10 +1334,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "58b949986ed13294bc01b0f330abc527",
+   "key": "23e8c5f2fe202906ac2d6554d9527299",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 56,
@@ -1413,10 +1413,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "335dad778109954503dcbb21dc92015f",
+   "key": "24bfd75d436cbf73168a2a2dccd40281",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 59,
@@ -1437,10 +1437,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f1a6e8329c574b048d216e5f3a7c9048",
+   "key": "8106237b47f99be13f4e941ca5bd35c5",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 60,
@@ -1465,10 +1465,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "0b42be2664d7e811d04f3e504e0924c5",
+   "key": "ae24090123b8c72ac5404dc152847cb8",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 61,
@@ -1493,10 +1493,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "7995c724a13748ed970840a8ab5bb9b3",
+   "key": "67bdaf1e2175b9ff682fcdf0e2354b1e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 62,
@@ -1544,10 +1544,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "34880f56627c11ee8c990242ac120002",
+   "key": "c23677c829bb244b79a3dc09ffd88ca0",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 64,
@@ -1657,10 +1657,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "d67836bb61bc468292412db53f3e193d",
+   "key": "865826b7df4a6ce1493cde232531374e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 69,
@@ -1774,10 +1774,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "2e7f9c518a424d30b2165c3e7a9d6041",
+   "key": "8c8c0ef924c982bc1dd92348e024cd4c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 73,
@@ -1796,10 +1796,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "19f6c8325a744d90b2618e3f7c2a5049",
+   "key": "784fffb38dc4fb6d5b74de822074feb4",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 74,
@@ -2380,10 +2380,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "ad2371259d34404cb89d54a4dc88dcd3",
+   "key": "1ba155e345c4456ba891cbee9b3e1c4c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 88,
@@ -2493,10 +2493,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "9452bb588219504397cc7dfc407356b5",
+   "key": "1b3fc29b2616b147ebe119f2c6f9a02a",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 92,
@@ -2516,10 +2516,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "53c8e6914d724f30a9168b5e2c7d1043",
+   "key": "1e17afbdfff786533796780f3f04aa67",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 93,
@@ -2562,10 +2562,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "83e5c4917d624b00a2196f3c8a5e2047",
+   "key": "d8fae6a24d5df3fa8e17a8f4a4854426",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 95,
@@ -2728,10 +2728,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "55eddd1e157e4c3b830866e4679e7032",
+   "key": "525030e984567ba8df0af80660952368",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 102,
@@ -2879,10 +2879,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "f48caba466394e93b50780f21798787a",
+   "key": "9a074a10db4342e7937076b3e52f6029",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 108,
@@ -3001,10 +3001,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "2351831e4519c8a7204669b56d276258",
+   "key": "c01f5966265cfb1fce0ec0ad9a317913",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 113,
@@ -3075,10 +3075,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "1d9f6b828c454a17b2395e7d3f90a621",
+   "key": "c5776d83cbf50c9354f27b1c830e1996",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 116,
@@ -3249,10 +3249,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e7a3d5916c824b459f105d8e2c7a3046",
+   "key": "616f8ab0c416966e8de415cb60e9e6cf",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 121,
@@ -3289,10 +3289,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 123,
@@ -3416,10 +3416,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c1a5e8329d644f70b2187a3c6e5d2041",
+   "key": "55979431f291f7dff35a43b73b3c2a36",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 128,
@@ -3440,10 +3440,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "5a56c65424b4456e83a4042114b253b2",
+   "key": "d95b534cede8798d0e521e19f0850681",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 129,
@@ -3491,10 +3491,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "fd7754b16f8459f1b3ef2ffac4c2de28",
+   "key": "7fbdfce2567136b26042962ca2e46fad",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 131,
@@ -3515,10 +3515,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c011525969e44b99a86059dbb3cdf4e8",
+   "key": "6700a5d93203417b8585f7de7dd1a09b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 132,
@@ -3596,10 +3596,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d5a7f8219c364e50b2147f6d3a8c9025",
+   "key": "c77d5e56c52c4065c42594422ac85e2c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 135,
@@ -3618,10 +3618,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "44875398e74743caabb7278f2b63433f",
+   "key": "a1e2ad6d895feb2a609683324dd0b93c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 136,
@@ -3640,10 +3640,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "53b26f904ae03a20b56477cfb9c5dca2",
+   "key": "0c64ccfb978e7390bd33344075492aec",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 137,
@@ -3662,10 +3662,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "d2e2e464abaf44259abca6f7055fed52",
+   "key": "2edcd9e9c03f400ca0058598d3a75a5b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 138,
@@ -3782,10 +3782,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "1f7c9a425d864e30b2198a3c6f7d5041",
+   "key": "b392ee3cd42686a8cff3070eef614745",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 143,
@@ -3829,10 +3829,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "6f9c3a218d454b70a2187e5c3d6f9042",
+   "key": "337ca7b74b462dd1ba7441553614538a",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 145,
@@ -4200,10 +4200,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c8a4e6917f324d05b9186c5e3a2f7049",
+   "key": "92b4ece8c84379145045267b47f183d2",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 160,
@@ -4274,10 +4274,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "f6564ec2aee819046328a0e153be574d",
+   "key": "ff46a8a1031eb27ef22576a077c98ab7",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 163,
@@ -4321,10 +4321,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b1f4a8926c374d509e218a7c3f5d6049",
+   "key": "15cde0b44b44f38ea936513a99606c1b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 165,
@@ -4411,10 +4411,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "92d8f3416c754b09a2187e5d3a9c6042",
+   "key": "4e668d238bc656b7d2c7535757aa9531",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 169,
@@ -4433,10 +4433,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "5d308ef487f54107b7da758e195ecbd3",
+   "key": "9d4004d4c065dd4b85ad5bd12c35386f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 170,
@@ -4457,10 +4457,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e4b8d2916a534f709c187d3e5a2f6049",
+   "key": "85d67d8b52caf380c82dc45b07f26f69",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 171,
@@ -4479,10 +4479,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "7b5d15a7385546768aca9fd505ad5e16",
+   "key": "f534393c84c1a9c17fa36bc3a4380981",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 172,
@@ -4501,10 +4501,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "d5d848730e4a4f9b962290039dd2b96b",
+   "key": "c959dc12f1bff5a66d030117fb7e9855",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 173,
@@ -4749,10 +4749,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "a4b2fe10c9d62d32220e8ea2dceda6f9",
+   "key": "e6e1173c892f7fbd60a37a76a78935cb",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 184,
@@ -4792,10 +4792,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "217624a3983b3593ca7d1f3b01042d4f",
+   "key": "fecaa3486d9deef3f7f0e1a95b662cb7",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 186,
@@ -4813,10 +4813,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "07b138f30ad3441ca5a2f476e550af25",
+   "key": "826ee4deef4b45cfafd5f79a591b15c6",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 187,
@@ -4834,10 +4834,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "861ab989089891d84ad0da296954437c",
+   "key": "3bdf94f9fc1888529f8d27d070d38566",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 188,
@@ -4856,10 +4856,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "96b2370bdcc9acb6caa0cfd5aa35dcf4",
+   "key": "b732a02918aa32e739e43952db768cc6",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 189,
@@ -4919,10 +4919,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "0b380bec87af5c16ee145bbf8cd7d65e",
+   "key": "edcb65d1269bd76f166d6bc56114211f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 192,
@@ -5075,10 +5075,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "4e9a6c317d524f808b163c5a2e7d9048",
+   "key": "5079e2288b584f47d4bbf8d149b2a986",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 199,
@@ -5099,10 +5099,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f5c7a8219d464e30b2186a3f7c5d9041",
+   "key": "dacc84b7010ca22f8c63a7c290461ed3",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 200,
@@ -5234,10 +5234,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "45c9e7328b614d059f247a6c3e5d1048",
+   "key": "13ef5feae7c84eb06bcc655a225fb01d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 206,
@@ -5254,10 +5254,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "24a8e6917c534d809f165b3e6a2d9047",
+   "key": "183f05bcb80e9cfcb613b8c767777f27",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 207,
@@ -5344,10 +5344,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f4a8d6216c954e709b187d3a5f2c8049",
+   "key": "34710df996a4089ee6f7e8deb7f46586",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 211,
@@ -5363,10 +5363,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d2e8c4715a634f09b2187c6d3e9a5042",
+   "key": "8b11760042654021997fd07a8a0b7acc",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 212,
@@ -5593,10 +5593,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "dc9fec234a5841bb8d06e92042c741ec",
+   "key": "225676f32612dc803cb4d0f950d063d0",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 222,
@@ -5816,10 +5816,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 232,
@@ -5837,10 +5837,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e8c5d2317a944f06b2186d3a9e7c5042",
+   "key": "ce327be0871677eb1c480d10a73eac34",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 233,
@@ -6104,10 +6104,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "bd1f88dd3b254514bf7a113188c10dc2",
+   "key": "ea86da60f0116f3b92a86acf45b8e071",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 245,
@@ -6124,10 +6124,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "7f4a9c312e854d67b0198c6f5a3e7240",
+   "key": "141f058ad1a6230e7c6f9d302ce378ef",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 246,
@@ -6234,10 +6234,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b9e6a3214c754f908d165a3c7e2f6048",
+   "key": "32300d9517f91a4acb747d360768dd00",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 251,
@@ -6389,10 +6389,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e2c9a5748b314f60a9276d5e3c1f8042",
+   "key": "c845cc41e3826b6d880b802911eb43f9",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 258,
@@ -6691,10 +6691,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "40f019b86241d23ef075633fd7f1e927",
+   "key": "058dec845bd340178a388edd104a015e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 271,
@@ -6712,10 +6712,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "40f019b86241d23ef075633fd7f1e927",
+   "key": "058dec845bd340178a388edd104a015e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 272,
@@ -6759,10 +6759,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "48e7d3219c564f80b2147a5d3e6c2048",
+   "key": "23a7b41054c60983ad020652f7ffa06e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 274,
@@ -6808,10 +6808,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "7e5905e0a87641798a200510f01ae5ca",
+   "key": "814310518395440d57c67f2ef70ea250",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 276,
@@ -6924,10 +6924,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "40f019b86241d23ef075633fd7f1e927",
+   "key": "058dec845bd340178a388edd104a015e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 281,
@@ -6945,10 +6945,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "40f019b86241d23ef075633fd7f1e927",
+   "key": "058dec845bd340178a388edd104a015e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 282,
@@ -7071,10 +7071,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "ad26ea37ce8e4cd8899c85bccc295021",
+   "key": "7893f2b2fcfd15e4f1a896fd1eeaa676",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 288,
@@ -7181,10 +7181,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "6aab8f40536f4ea98e7c97b8f3aa7d4e",
+   "key": "139aa5a55ade471faaddacc4f4de8807",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 293,
@@ -7632,10 +7632,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "489955dbc55c44ad93b69a07cb031e84",
+   "key": "870f3b7c49e8660daf21fe7783d23074",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 304,
@@ -7655,16 +7655,16 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "76f4714902e048e481eb4224d1cf0e66",
+   "key": "ea1d9b76cf4425d20513f8d660ee69e4",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 305,
    "order": 306,
    "name": "NBA TV",
-   "category": "Sports",
+   "category": "NBA Live",
    "tags": [
     "sports",
     "basketball",
@@ -7677,10 +7677,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "84077d18bcf234a42de3745be106a87f",
+   "key": "aee3069c062ec8ee6bfdd32985f287ef",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 306,
@@ -7782,7 +7782,7 @@
    "id": 310,
    "order": 311,
    "name": "NBA TV Philippines",
-   "category": "Sports",
+   "category": "NBA Live",
    "tags": [
     "sports",
     "basketball",
@@ -7798,10 +7798,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "2f7c9a615d834e40b2188a6d3c7f9042",
+   "key": "41d2ade5ff1798859420e925d5d2080d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 311,
@@ -7892,10 +7892,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "ca7e5b318d624f099c246a3e7d5f8140",
+   "key": "3175f0646c504fad87e97c7677a85393",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 315,
@@ -7916,10 +7916,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d84f2a917c364e58b10963a7f2c8d451",
+   "key": "e75d40a44350a148b32ad27081eadacb",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 316,
@@ -7940,10 +7940,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "9130a6448a74430794d355b48b56a64c",
+   "key": "c2f4d3288cdb43cf81e519ceb414dd6f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 317,
@@ -7986,10 +7986,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "d73d5d00d43e4eea94bcd58aacb2d94c",
+   "key": "204bdbac57e666aa90491c535d8b7a20",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 319,
@@ -8132,10 +8132,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d5c8a2914e734b609f127a3d6c5e8048",
+   "key": "11368a3b001407d65a85b4edb410ecdd",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 325,
@@ -8156,10 +8156,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "81f3e6924c754a08b9215d7e9c3f6048",
+   "key": "094cd48e9729cb8bcb0e03e848fc8751",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 326,
@@ -8180,10 +8180,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "5e9a3c718d464f20b9157a6c2e4d8031",
+   "key": "7bf8a7666a2d572fe111b5f829c99266",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 327,
@@ -8273,10 +8273,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "91a5e6327c844f09b2186d3a5e7c2041",
+   "key": "984beb3aeff3554c1a5acc04d6044e55",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 331,
@@ -8323,10 +8323,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "69f5a2318d744c609b125e3a7d8f2046",
+   "key": "182523c0bae912e17e916dd4283280e9",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 333,
@@ -8373,10 +8373,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e9c4f7312a854d69b0137f6e8c2a5490",
+   "key": "1105fa92173b06885be336b887bc4d26",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 335,
@@ -8443,10 +8443,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "73f8c2915d644e70b2189a3c6d7f2045",
+   "key": "fb199597a99e601c9bc8767a1b20312b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 338,
@@ -8470,10 +8470,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e9a4d6316c854b008f175d3a7e2c9048",
+   "key": "d7e06c12d35cfd2e13d8f3d3094941a3",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 339,
@@ -8497,10 +8497,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b4f7c8219d624e30a9156c3a5d7f2048",
+   "key": "60391d7d3bb726a4a95e66c4c0af219d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 340,
@@ -8524,10 +8524,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c5a8f3917d424e809b166f3c2a7d9045",
+   "key": "6a7f2a17bad0a84674108234403d5fa0",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 341,
@@ -8551,10 +8551,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c2f8d6917a354e60b2196d3c5a8f9042",
+   "key": "2f593fbabad7a9f968c9fec691d59806",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 342,
@@ -8578,10 +8578,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f3d8a6915c724b609e146a7f3c2d8049",
+   "key": "20b4724a4d406c3a89c7b0d7084626a0",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 343,
@@ -8605,10 +8605,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "5a7e9c316d424b80a2183f5c7d9e2046",
+   "key": "746ca1548780fc4d8cc9fc948403a3da",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 344,
@@ -8632,10 +8632,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d6c9a4218e534f099b167c3a5d2e8048",
+   "key": "980ec0896ae1ba03f46d85453798b708",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 345,
@@ -8659,10 +8659,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "1c8e5a927d434f60b2196a3c9e5d8041",
+   "key": "33af0fd38e463d1c747a2cb0b203c42e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 346,
@@ -8708,10 +8708,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "63055a8904644407a64a57874703f71e",
+   "key": "0fd611777d37a7ff8afce19d9cee2e91",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 348,
@@ -8775,10 +8775,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "72e4b9c13f864a52a9178d6c0e5b2394",
+   "key": "9390c1edae5ecf680c168daf44bf6a03",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 351,
@@ -8820,10 +8820,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "91e4c6725a834d198f602c7b9e3a5148",
+   "key": "4185d260443198690be03e294fdc1240",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 353,
@@ -8866,10 +8866,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "8cdce02de4ee021313752bf3f4170fb4",
+   "key": "60dbfbe941a0462e0d56a95c7b9e3bee",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 355,
@@ -9056,10 +9056,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f8c2a6915d744b309e186a3f7c2d8049",
+   "key": "1ad3243b38c60312caa6ba11f150c19c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 362,
@@ -9100,10 +9100,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "d9a4f5218c374b069e156f2d7a3c8049",
+   "key": "72aa902f471adf15bef2710b6b689ed0",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 364,
@@ -9145,10 +9145,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "86e5c7921a434f60b9287d3c9e5a6041",
+   "key": "fab817af24eab2a73ae89145797cf556",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 366,
@@ -9305,10 +9305,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "505616380de706936e493fdd1c25d0b6",
+   "key": "5b313f49c63c682236eab3357400e216",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 373,
@@ -9422,10 +9422,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b5d7a6219c434e188f026a3d7c5e9148",
+   "key": "28e1244057ff6feae879c1e985ded0fb",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 378,
@@ -9508,10 +9508,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "f923872b58cb63c827a402ed0b52857a",
+   "key": "c7fa135ed77f7c42389234846b402b71",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 382,
@@ -9529,10 +9529,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "5894eba80a8aee9fab4a925183185d99",
+   "key": "fe50655307fbdc2c4989c195423ccecf",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 383,
@@ -9550,10 +9550,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "a948cce6cb93c4b9d648c9ada274d246",
+   "key": "783e9e314d375f27cade69595fb94bca",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 384,
@@ -9616,10 +9616,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f28d730090f64e229fb255b2afa6e36e",
+   "key": "53d432c60f419541c7319dc1b6508e2c",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 387,
@@ -9729,10 +9729,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "a753e0a4a5084b61ba93ae058c38b1ba",
+   "key": "16257ff813b1dbeaf5573871f540ad70",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 392,
@@ -9772,10 +9772,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c5e8a3927d414b609f286a3c5e1d7049",
+   "key": "7c5edbd3d090bb6de9a9c3685defa959",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 394,
@@ -9835,10 +9835,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "f8391e9130634854b4614f02ec028ea7",
+   "key": "9b9640f873cf906b91dd03c02612d5ce",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 397,
@@ -9921,10 +9921,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "65d8c4912f734a90b8163e7c5d9a2041",
+   "key": "fd495b984013da4e26f83b1a921c0a15",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 401,
@@ -9942,10 +9942,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "a6d4f8912c734b608e159f3a7d5c2046",
+   "key": "ec647e6c500235352a8df03c518e9b23",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 402,
@@ -9982,10 +9982,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "4553f7e8011f411fb625cefc39274300",
+   "key": "98f2f1d153367e84b5d559dc9dfb9a35",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 404,
@@ -10214,10 +10214,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "b6908629732639ada4814a6208296d9c",
+   "key": "7ca9bf03623f77b5e2f16df0b53f274d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 415,
@@ -10237,10 +10237,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b8c3d5906e424f17a9215d8c7a2e6043",
+   "key": "02ce48f1b48f7cbdc3e2703a56e8fa31",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 416,
@@ -10257,10 +10257,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e48e7373d6be47ecab83a20849f6823e",
+   "key": "513ce07a2ee24ffdbe667eff5a9d46a8",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 417,
@@ -10388,10 +10388,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "69a5aa835a061ce64a630d1046727e40",
+   "key": "d02feac8a999bd06bf4059bf33411749",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 423,
@@ -10412,10 +10412,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "f3df7843080ae743bf865dc5fdf64c68",
+   "key": "567c863bc12eb74788ea74888c042e1b",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 424,
@@ -10436,10 +10436,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "cc91508324ce9dcaf425a43d58f1d9d4",
+   "key": "643e5474d9edd87c7d9091c8c97994ca",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 425,
@@ -10484,10 +10484,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "fa34fa8c90336dd528c7a23871cad1fe",
+   "key": "552a78d1aeb74f1650d68255c5749408",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 427,
@@ -10599,10 +10599,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "14eeabf30c14b7fbf3008c03099ce011",
+   "key": "17d2ac8dbc5429bd70af3433aa12158d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 432,
@@ -10628,10 +10628,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "14eeabf30c14b7fbf3008c03099ce011",
+   "key": "17d2ac8dbc5429bd70af3433aa12158d",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 433,
@@ -10679,10 +10679,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "18c6f9235b744d81a0397e2c9f6a5048",
+   "key": "7974c1376447c563f5fdb41be0104ddf",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 435,
@@ -10700,10 +10700,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e6c9a4215d734f608b197c3e2a5d9048",
+   "key": "ec695ab203cb2258db220b3863e2a7ee",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 436,
@@ -10726,10 +10726,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "3a7f9c615d824e40a9168c5b2d7f3049",
+   "key": "2bc91eced1660ecf88299a42e4c0cd91",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 437,
@@ -10747,10 +10747,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "6a2d9f815c744e30b9168f3a7d2c5049",
+   "key": "fb07ec8ca16ffdb8b8a045fa4c8aac74",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 438,
@@ -10812,10 +10812,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "a49085f8da5e65af1efff0edac830b1f",
+   "key": "4659bc58a85c062e3fe0c039a446fe47",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 441,
@@ -10862,10 +10862,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "b6c9f4218d734a059e165c3d7a2f8049",
+   "key": "948aa5c0d0c15c70efb9257f5b75c379",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 443,
@@ -10911,10 +10911,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "e6b4c8217a954d309f165c8e2a3d7049",
+   "key": "1acbc3a347d31fa2236f180574342e71",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 445,
@@ -10997,10 +10997,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 449,
@@ -11017,10 +11017,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 450,
@@ -11037,10 +11037,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 451,
@@ -11057,10 +11057,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 452,
@@ -11077,10 +11077,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 453,
@@ -11120,10 +11120,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 455,
@@ -11251,10 +11251,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
-   "note": ""
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
    "id": 461,
@@ -11562,10 +11562,10 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
+   "drmType": "clearkey",
+   "keyId": "c4a8d5319e624f078b156d3c7a5e2049",
+   "key": "cee9422b4a40d85589f36f1d76fb144f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 475,

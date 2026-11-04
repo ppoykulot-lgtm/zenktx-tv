@@ -172,6 +172,7 @@ function buildLiveMap(list) {
   for (const item of list || []) {
     if (!item || !item.url || item.enabled === false) continue;
     map[liveKey(item.name)] = {
+      name: item.name || '',
       url: item.url,
       logo: cleanLogo(item.logo),
       streamType: item.streamType || streamType(item.url),
@@ -214,9 +215,43 @@ function applyLive() {
       channel.drmType = live.drmType;
       channel.keyId = live.keyId;
       channel.drmKey = live.drmKey;
+    } else if (!channel.drmKey && live.drmKey && live.drmType === channel.drmType) {
+      // Same scheme, newer key: the catalogue can lag a rotated pair by a few
+      // hours, and a stale key looks exactly like a dead channel.
+      channel.keyId = channel.keyId || live.keyId;
+      channel.drmKey = live.drmKey;
     }
   }
+  patched += appendLiveExtras();
   return patched;
+}
+
+// Dcoderz publishes an NBA game stream while the game is on and takes it away
+// the next morning, so the catalogue can never list today's game. Whatever the
+// feed calls NBA and the guide does not already hold is added here, in its own
+// category, every time the feed refreshes.
+function appendLiveExtras() {
+  let added = 0;
+  for (const live of Object.values(liveMap)) {
+    if (!/nba/i.test(live.name || '')) continue;
+    const key = `auto:${hash(live.url)}`;
+    if (state.base.some((c) => c.key === key || c.url === live.url)) continue;
+    state.base.push({
+      key,
+      name: live.name,
+      category: 'NBA Live',
+      logo: live.logo || '',
+      url: live.url,
+      streamType: live.streamType || streamType(live.url),
+      quality: live.quality || 'HD',
+      isFilipino: false,
+      drmType: live.drmType || '',
+      keyId: live.keyId || '',
+      drmKey: live.drmKey || '',
+    });
+    added += 1;
+  }
+  return added;
 }
 
 async function refreshLive() {
@@ -688,6 +723,16 @@ function cleanupPlayer() {
   clearInterval(state.watchdog);
   if (state.hls) { state.hls.destroy(); state.hls = null; }
   if (state.dash) { state.dash.reset(); state.dash = null; }
+  if (state.shaka) {
+    const dying = state.shaka;
+    state.shaka = null;
+    // destroy() is a promise. Attaching the next player before it settles left
+    // the element holding two media sources, so switching from one encrypted
+    // channel to the next produced a black screen that never recovered.
+    shakaTeardown = (async () => {
+      try { await dying.destroy(); } catch (error) { /* already torn down */ }
+    })();
+  }
   const video = $('video');
   video.pause();
   clearCaptions(video);
@@ -752,7 +797,14 @@ function playSource(channel) {
   const type = streamType(sourceUrl);
   const video = $('video');
 
-  if (type === 'mpd' && window.dashjs) {
+  // ClearKey cannot go through dash.js: these manifests advertise Widevine and
+  // PlayReady only, so dash.js asks Chromium for a key system Electron does not
+  // ship and fails with "KeySystem Access Denied". Shaka takes the key pair
+  // straight from the feed and decrypts through the platform ClearKey CDM,
+  // which is how the other IPTV apps play the same links.
+  if (type === 'mpd' && window.shaka && channel.drmType === 'clearkey' && channel.keyId && channel.drmKey) {
+    playClearKey(channel, sourceUrl);
+  } else if (type === 'mpd' && window.dashjs) {
     const dash = window.dashjs.MediaPlayer().create();
     state.dash = dash;
     // The stock dash.js settings hold a 12 second buffer before the first
@@ -777,7 +829,7 @@ function playSource(channel) {
     dash.on('error', (event) => {
       const raw = event.error?.message || 'stream error';
       window.__zenkLastStreamError = `dash: ${raw}`;
-      fail(describeDashError(raw), describeDashCode(raw));
+      fail(describeDashError(raw, channel), describeDashCode(raw));
       // dash.js keeps re-attempting a failed stream (a DRM refusal repeats for
       // about ten seconds). Nothing about the manifest changes in that time,
       // so the message would arrive late for no gain — stop on the first one.
@@ -806,6 +858,52 @@ function playSource(channel) {
 
   video.play().catch(() => {});
   startWatchdog(channel);
+}
+
+// Shaka keeps its own DRM pipeline, so the key pair travels with the channel
+// instead of a licence request: ClearKey is the one scheme that needs no server.
+let shakaTeardown = null;
+
+async function playClearKey(channel, sourceUrl) {
+  if (shakaTeardown) {
+    try { await shakaTeardown; } catch (error) { /* already gone */ }
+    shakaTeardown = null;
+  }
+  const video = $('video');
+  if (video.getAttribute('src')) {
+    video.removeAttribute('src');
+    video.load();
+    clearCaptions(video);
+  }
+  const player = new window.shaka.Player();
+  state.shaka = player;
+
+  const kid = String(channel.keyId).replace(/[^0-9a-f]/gi, '').toLowerCase();
+  const key = String(channel.drmKey).replace(/[^0-9a-f]/gi, '').toLowerCase();
+
+  player.attach(video).then(() => {
+    if (state.shaka !== player) return undefined;
+    player.configure({
+      drm: { clearKeys: { [kid]: key } },
+      // Same reason as the dash.js settings: the next channel has no subtitles,
+      // and these tracks would otherwise burn over its picture.
+      textTrack: { enabled: false },
+      streaming: { rebufferingGoal: 2, bufferingGoal: 8 },
+    });
+    player.addEventListener('error', (event) => {
+      if (state.shaka !== player) return;
+      const detail = event.detail || {};
+      const raw = `${detail.code || 'error'} ${detail.message || ''}`.trim();
+      window.__zenkLastStreamError = `shaka: ${raw}`;
+      fail(describeDashError(raw, channel), describeDashCode(raw));
+    });
+    return player.load(sourceUrl);
+  }).catch((error) => {
+    if (state.shaka !== player) return;
+    const raw = String((error && (error.code || error.message)) || error);
+    window.__zenkLastStreamError = `shaka: ${raw}`;
+    fail(describeDashError(raw, channel), describeDashCode(raw));
+  });
 }
 
 // A channel is often listed more than once — a "Stream 2", an "HD" twin, a
@@ -838,9 +936,12 @@ function channelSources(channel) {
 // dash.js reports raw MSE/EME text ("DRM: KeySystem Access Denied", "index.mpd
 // is not available"). Neither is something the viewer can fix, so say what it
 // actually means instead of pasting the engine's sentence.
-function describeDashError(raw) {
+function describeDashError(raw, channel) {
   if (/key\s*system|drm|eme|content protection/i.test(raw)) {
-    return 'This channel is encrypted with Widevine or PlayReady and its licence server is not public, so no ZENKTX build can open it. The key ids in old lists do nothing here — pick another channel.';
+    if (channel && channel.drmType === 'clearkey') {
+      return 'The provider rotated this channel\u2019s ClearKey key, so the copy in the guide is stale. Refresh the channel list, or try the next channel.';
+    }
+    return 'This channel is encrypted with Widevine or PlayReady and its licence server is not public, so no ZENKTX build can open it — pick another channel.';
   }
   if (/not available|40[134]|gone|forbidden|manifest/i.test(raw)) {
     return 'The channel link has expired or is blocked. These free providers rotate their addresses, so the same channel often works again later.';

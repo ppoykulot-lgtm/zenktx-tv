@@ -19,4 +19,10 @@ data class Channel(
     val streamType: String,   // "hls" | "mpd" | "other"
     val quality: String,
     val isFilipino: Boolean,
+    // ClearKey arrives from the feed as a plain key id + key pair, which is the
+    // only protection Media3 can open here: everything else needs a licence
+    // server that these providers do not publish.
+    val drmType: String = "",
+    val keyId: String = "",
+    val drmKey: String = "",
 )
