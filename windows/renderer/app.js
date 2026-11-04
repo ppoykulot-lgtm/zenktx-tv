@@ -26,6 +26,7 @@ const prefs = Object.assign(
     logos: {},
     playlists: [],
     volume: 100,
+    skin: 'glass',
     github: { owner: '', repo: '', path: 'channels.m3u', branch: 'main', token: '' },
   },
   JSON.parse(localStorage.getItem(PREFS_KEY) || '{}')
@@ -143,6 +144,93 @@ function hash(value) {
   return Math.abs(h).toString(36);
 }
 
+/* ----------------------------------------------------------- live refresh */
+
+// These free providers re-tokenise their addresses every day, so a channel list
+// baked into the installer turns dead within hours and a channel that plays in
+// every other app looks broken here. This is the feed those lists are built
+// from: pull it, cache it, and move every channel onto its current address.
+const LIVE_FEED = 'https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json';
+const LIVE_KEY = 'zenktx.live.v1';
+const LIVE_TTL = 6 * 60 * 60 * 1000;
+
+let liveMap = {};
+let liveAt = 0;
+
+function liveKey(name) {
+  return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function buildLiveMap(list) {
+  const map = {};
+  for (const item of list || []) {
+    if (!item || !item.url || item.enabled === false) continue;
+    map[liveKey(item.name)] = {
+      url: item.url,
+      logo: cleanLogo(item.logo),
+      streamType: item.streamType || streamType(item.url),
+      quality: item.quality || 'HD',
+      drmType: item.drmType || '',
+      keyId: item.keyId || '',
+      key: item.key || '',
+    };
+  }
+  return map;
+}
+
+function readLiveCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(LIVE_KEY) || 'null');
+    if (!cached || !cached.map) return;
+    liveMap = cached.map;
+    liveAt = cached.at || 0;
+  } catch (error) {
+    liveMap = {};
+  }
+}
+
+function applyLive() {
+  if (!Object.keys(liveMap).length) return 0;
+  let patched = 0;
+  for (const channel of state.base) {
+    const live = liveMap[liveKey(channel.name)];
+    if (!live) continue;
+    if (live.url !== channel.url) patched += 1;
+    channel.url = live.url;
+    channel.streamType = live.streamType || channel.streamType;
+    channel.quality = live.quality || channel.quality;
+    if (live.logo) channel.logo = live.logo;
+    if (live.drmType) {
+      channel.drmType = live.drmType;
+      channel.keyId = live.keyId;
+      channel.key = live.key;
+    } else {
+      delete channel.drmType;
+      delete channel.keyId;
+      delete channel.key;
+    }
+  }
+  return patched;
+}
+
+async function refreshLive() {
+  try {
+    const text = await window.zenk.fetchText(LIVE_FEED);
+    const map = buildLiveMap(JSON.parse(text));
+    if (!Object.keys(map).length) return;
+    liveMap = map;
+    liveAt = Date.now();
+    try {
+      localStorage.setItem(LIVE_KEY, JSON.stringify({ at: liveAt, map }));
+    } catch (error) {
+      // Quota is not worth a toast: the in-memory map already works.
+    }
+    if (applyLive()) rebuild();
+  } catch (error) {
+    // Offline, or the feed moved: the bundled list stays a usable fallback.
+  }
+}
+
 function applyLocalState(list) {
   return list
     .filter((c) => !prefs.hidden.includes(c.key))
@@ -165,6 +253,9 @@ async function boot() {
       streamType: c.streamType || streamType(c.url),
       quality: c.quality || 'HD',
       isFilipino: Boolean(c.isFilipino),
+      drmType: c.drmType || '',
+      keyId: c.keyId || '',
+      key: c.key || '',
     }));
   } catch (error) {
     toast(`Could not load the bundled list: ${error.message}`);
@@ -172,9 +263,12 @@ async function boot() {
 
   currentVersion = await window.zenk.version();
   document.title = `ZENKTX TV Stream — v${currentVersion}`;
+  readLiveCache();
   await loadAll();
+  applyLive();
   rebuild();
   scheduleUpdateCheck();
+  if (Date.now() - liveAt > LIVE_TTL) refreshLive();
 }
 
 // Rebuilt from scratch on every change: mutating the old list left the channels
@@ -207,7 +301,7 @@ function singleStream(playlist) {
     key: `${playlist.id}:single`,
     name,
     category: 'Playlist',
-    logo: '',
+    logo: cleanLogo(playlist.logo),
     url: playlist.url,
     streamType: streamType(playlist.url),
     quality: 'HD',
@@ -218,8 +312,16 @@ function singleStream(playlist) {
 function parseSource(text, playlist) {
   const body = text.trimStart();
   if (body.startsWith('#EXTM3U')) {
-    const channels = fromM3u(text, playlist.id);
-    return channels.length ? channels : singleStream(playlist);
+    // Only a channel list carries #EXTINF rows. A master playlist has
+    // #EXT-X-STREAM-INF and a media playlist has #EXT-X-TARGETDURATION; parsing
+    // either as a list turned every segment into a "Channel N" tile and threw
+    // away the title the user typed.
+    const streamPlaylist = /#EXT-X-(STREAM-INF|TARGETDURATION|MEDIA-SEQUENCE|I-FRAME-STREAM-INF)/i.test(body);
+    if (!streamPlaylist) {
+      const channels = fromM3u(text, playlist.id);
+      if (channels.length) return channels;
+    }
+    return singleStream(playlist);
   }
   if (body.startsWith('{') || body.startsWith('[')) {
     let channels = [];
@@ -488,7 +590,7 @@ function beginPlayback() {
   video.volume = Math.max(0, Math.min(1, (prefs.volume ?? 100) / 100));
   video.muted = Boolean(prefs.muted) || video.volume === 0;
   $('pVol').value = String(Math.round(video.volume * 100));
-  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
+  $('muteBtn').classList.toggle('muted', video.muted);
   video.addEventListener('playing', function firstFrame() {
     if (state.queue[state.index]?.key === channel.key) $('pchipMeta').textContent = meta;
   }, { once: true });
@@ -520,6 +622,11 @@ function playSource(channel) {
         scheduling: { scheduleWhilePaused: false },
       },
     });
+    // The feed ships ClearKey ids for these channels, and ClearKey is the one
+    // protection scheme dash.js can decrypt without a platform CDM.
+    if (channel.drmType === 'clearkey' && channel.keyId && channel.key) {
+      dash.setProtectionData({ 'org.w3.clearkey': { clearkeys: { [channel.keyId]: channel.key } } });
+    }
     dash.initialize(video, sourceUrl, true);
     dash.on('error', (event) => {
       const raw = event.error?.message || 'stream error';
@@ -769,7 +876,7 @@ function setVolume(value) {
   prefs.muted = video.muted;
   savePrefs();
   $('pVol').value = String(level);
-  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
+  $('muteBtn').classList.toggle('muted', video.muted);
 }
 
 function updateClock() {
@@ -835,6 +942,7 @@ function openPlaylists() {
 async function reloadAll() {
   const key = state.selected?.key;
   await loadAll();
+  applyLive();
   rebuild();
   if (key) {
     const again = state.visible.find((c) => c.key === key);
@@ -845,6 +953,7 @@ async function reloadAll() {
 function addPlaylist() {
   $('addTitle').value = '';
   $('addUrl').value = '';
+  $('addLogo').value = '';
   $('dlgAddPlaylist').showModal();
   $('addTitle').focus();
 }
@@ -856,12 +965,14 @@ function savePlaylist() {
     return;
   }
   const title = $('addTitle').value.trim() || url.split('/').pop().split('?')[0] || 'Playlist';
+  const logo = cleanLogo($('addLogo').value.trim());
   const existing = prefs.playlists.find((p) => p.url === url);
   if (existing) {
     existing.name = title;
+    existing.logo = logo;
     existing.enabled = true;
   } else {
-    prefs.playlists.push({ id: hash(url + Date.now()), name: title, url, enabled: true });
+    prefs.playlists.push({ id: hash(url + Date.now()), name: title, url, logo, enabled: true });
   }
   savePrefs();
   $('dlgAddPlaylist').close();
@@ -1131,6 +1242,23 @@ $('ppBtn').addEventListener('click', () => {
   else video.pause();
 });
 
+/* --------------------------------------------------------------- designs */
+// Two looks for the control bar, picked here and remembered. Glass floats the
+// controls as a translucent capsule over the picture; Studio is a solid deck.
+function applySkin() {
+  const skin = prefs.skin === 'studio' ? 'studio' : 'glass';
+  document.body.dataset.skin = skin;
+  $('skinBtn').textContent = skin === 'studio' ? 'Studio' : 'Glass';
+}
+
+$('skinBtn').addEventListener('click', () => {
+  prefs.skin = prefs.skin === 'studio' ? 'glass' : 'studio';
+  savePrefs();
+  applySkin();
+  toast(`${prefs.skin === 'studio' ? 'Studio' : 'Glass'} player design`);
+});
+applySkin();
+
 $('pSearch').addEventListener('input', renderPlayerList);
 $('pSearch').addEventListener('keydown', (event) => event.stopPropagation());
 $('pVol').addEventListener('input', (event) => setVolume(event.target.value));
@@ -1139,7 +1267,7 @@ $('muteBtn').addEventListener('click', () => {
   video.muted = !video.muted;
   prefs.muted = video.muted;
   savePrefs();
-  $('muteBtn').textContent = video.muted ? '🔇' : '🔊';
+  $('muteBtn').classList.toggle('muted', video.muted);
 });
 // ------------------------------------------------------------- chrome idle
 // Fullscreen shows the picture and nothing else: the guide strip is gone and
@@ -1195,8 +1323,8 @@ $('pSeek').addEventListener('click', (event) => {
 const playerVideo = $('video');
 playerVideo.addEventListener('timeupdate', updateTimeline);
 playerVideo.addEventListener('durationchange', updateTimeline);
-playerVideo.addEventListener('play', () => { $('ppBtn').textContent = '⏸'; });
-playerVideo.addEventListener('pause', () => { $('ppBtn').textContent = '▶'; });
+playerVideo.addEventListener('play', () => { $('ppBtn').classList.add('playing'); });
+playerVideo.addEventListener('pause', () => { $('ppBtn').classList.remove('playing'); });
 
 updateClock();
 setInterval(updateClock, 1000);

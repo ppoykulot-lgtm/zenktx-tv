@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, shell, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog, Menu, session } = require('electron');
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -177,6 +177,28 @@ app.whenReady().then(() => {
   }
 
   ipcMain.handle('app:version', () => app.getVersion());
+
+  // The renderer requests media from a file:// page with Electron's own user
+  // agent, and several of these CDNs answer that with 403 or a CORS failure
+  // while they serve the same link to a normal browser. Present a browser user
+  // agent and let the player read the response. The window itself keeps
+  // contextIsolation and no node integration, so this opens no page-level hole.
+  const netSession = session.defaultSession;
+  netSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    if (!/^https?:/i.test(details.url)) return callback({ requestHeaders: details.requestHeaders });
+    callback({
+      requestHeaders: Object.assign({}, details.requestHeaders, { 'User-Agent': USER_AGENT }),
+    });
+  });
+  netSession.webRequest.onHeadersReceived((details, callback) => {
+    if (!/^https?:/i.test(details.url)) return callback({ responseHeaders: details.responseHeaders });
+    const headers = Object.assign({}, details.responseHeaders);
+    for (const key of Object.keys(headers)) {
+      if (key.toLowerCase() === 'access-control-allow-origin') delete headers[key];
+    }
+    headers['Access-Control-Allow-Origin'] = ['*'];
+    callback({ responseHeaders: headers });
+  });
 
   ipcMain.handle('app:bundled-channels', () => {
     const file = path.join(ROOT, 'assets', 'channels.json');

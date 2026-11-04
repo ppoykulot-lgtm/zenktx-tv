@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver="win">v1.2.2</span>
+            <span class="ver" data-ver="win">v1.2.3</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -598,7 +598,22 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.2.2 <span class="tagx">latest</span></h3>
+          <h3>1.2.3 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
+          <ul>
+            <li>Dead channels are fixed at the root. The bundled list carried stream addresses whose access tokens had already expired, which is why a channel played in other apps but not here. The app now pulls the publisher's current list on launch, keeps a six-hour cache, and falls back to the bundled copy offline — Kapamilya Channel HD plays again.</li>
+            <li>The bundled guide was rebuilt from that feed: 503 channels, with the current artwork and stream type for each.</li>
+            <li>Adding a single <code>.m3u8</code> stream no longer names it "Channel 1": a media playlist is recognised as one channel and keeps the title you typed.</li>
+            <li>Add playlist now has an optional logo URL field.</li>
+            <li>Two player designs, switched from the control bar: <b>Glass</b> (default) floats the controls as a translucent capsule over the picture, <b>Studio</b> is a solid full-width deck with square keys.</li>
+            <li>The play/pause button is a small round control instead of the 44&nbsp;px mint square, and every transport icon is a drawn glyph that matches the rest of the UI.</li>
+            <li>Scrollbars follow the dark theme instead of the bright Windows rail.</li>
+            <li>The player asks for streams with a browser user agent and allows cross-origin media, matching what the working third-party clients do, so fewer channels are refused outright.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.2.2</h3>
           <div class="meta">3 November 2026 · Windows · Android TV · Android Mobile</div>
           <ul>
             <li>Fullscreen is picture-only now: the now-playing strip, the clock and the channel rail are gone, and the floating controls fade away until the mouse moves or a key is pressed.</li>
@@ -710,8 +725,8 @@
   // A tag only rebuilds the platform whose code changed, so each card keeps the
   // version and tag of the release that last touched it. Android still sits on
   // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.2.2", mobile: "1.2.2", win: "1.2.2" };
-  const TAGS = { tv: "v1.2.2", mobile: "v1.2.2", win: "v1.2.2" };
+  const VERSIONS = { tv: "1.2.2", mobile: "1.2.2", win: "1.2.3" };
+  const TAGS = { tv: "v1.2.2", mobile: "v1.2.2", win: "v1.2.3" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,
