@@ -329,15 +329,41 @@ function addChannel() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+const parseJson = (text, fallback) => {
+  try { return JSON.parse(text); } catch (error) { return fallback; }
+};
+
+const serialize = (data) =>
+  JSON.stringify(
+    Object.assign({}, data, { updatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z') }),
+    null,
+    1
+  );
+
+// One file, several people (and the rebuild script) writing to it. A tab left
+// open for a while holds an old sha, GitHub refuses the write, and nothing this
+// page did lands. Merge per channel instead: rows edited here win, rows left
+// alone follow the newer file, and channels added here are kept.
+function mergeCatalogs(base, ours, theirs) {
+  const index = (list) => new Map(((list && list.channels) || []).map((c) => [String(c.id), c]));
+  const before = index(base);
+  const mine = index(ours);
+  const rows = [];
+  for (const row of (theirs && theirs.channels) || []) {
+    const key = String(row.id);
+    const local = mine.get(key);
+    const untouched = local && before.has(key) && JSON.stringify(local) === JSON.stringify(before.get(key));
+    rows.push(!local || untouched ? row : local);
+  }
+  const seen = new Set(rows.map((row) => String(row.id)));
+  const added = ((ours && ours.channels) || []).filter((c) => !before.has(String(c.id)) && !seen.has(String(c.id)));
+  return Object.assign({}, theirs, ours, { channels: [...added, ...rows] });
+}
+
 async function publish() {
   if (!catalog) return setStatus('Load the catalogue first.', 'bad');
   if (!settings.token) { openSettings(); return setStatus('A token is needed to publish.', 'bad'); }
 
-  const payload = JSON.stringify(
-    Object.assign({}, catalog, { updatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z') }),
-    null,
-    1
-  );
   setStatus('Publishing…');
   try {
     const api = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}`;
@@ -346,32 +372,52 @@ async function publish() {
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
-    const head = await fetch(`${api}?ref=${encodeURIComponent(settings.branch)}`, { headers });
-    if (!head.ok) throw new Error(`read failed (HTTP ${head.status})`);
-    const current = await head.json();
-    const local = decodeBase64(current.content || '');
-    if (local.trim() === payload.trim()) {
+    const readRemote = async () => {
+      const head = await fetch(`${api}?ref=${encodeURIComponent(settings.branch)}`, { headers });
+      if (!head.ok) throw new Error(`read failed (HTTP ${head.status})`);
+      const body = await head.json();
+      return { sha: body.sha, text: decodeBase64(body.content || '') };
+    };
+    const write = (text, sha) =>
+      fetch(api, {
+        method: 'PUT',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+        body: JSON.stringify({
+          message: 'Update the channel catalogue',
+          content: encode(text),
+          sha,
+          branch: settings.branch,
+        }),
+      });
+
+    let remote = await readRemote();
+    let payload = serialize(catalog);
+    if (remote.text.trim() === payload.trim()) {
+      catalog = parseJson(payload, catalog);
+      original = payload;
+      dirty = false;
+      $('publish').textContent = 'Publish';
       setStatus('Nothing changed.', 'ok');
       return;
     }
-    const put = await fetch(api, {
-      method: 'PUT',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
-      body: JSON.stringify({
-        message: 'Update the channel catalogue',
-        content: encode(payload),
-        sha: current.sha,
-        branch: settings.branch,
-      }),
-    });
+
+    let put = await write(payload, remote.sha);
+    if (put.status === 409) {
+      remote = await readRemote();
+      const theirs = parseJson(remote.text, { channels: [] });
+      catalog = mergeCatalogs(parseJson(original, { channels: [] }), catalog, theirs);
+      payload = serialize(catalog);
+      put = await write(payload, remote.sha);
+    }
     if (!put.ok) {
       const detail = await put.json().catch(() => ({}));
       throw new Error(detail.message || `HTTP ${put.status}`);
     }
-    catalog = JSON.parse(payload);
+    catalog = parseJson(payload, catalog);
     original = payload;
     dirty = false;
     $('publish').textContent = 'Publish';
+    render();
     setStatus('Published. Every app picks it up on its next launch (Pages takes ~20s).', 'ok');
   } catch (error) {
     setStatus(`Publish failed: ${error.message}`, 'bad');
