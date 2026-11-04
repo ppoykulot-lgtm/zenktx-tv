@@ -1,18 +1,14 @@
 name: Release
 
-# Each platform releases on its own tag, so a Windows fix can never rename the
-# Android build:
-#   win-v1.3.3      only the Windows installers
-#   tv-v1.3.3       only the Android TV APK
-#   mobile-v1.3.3   only the Android mobile APK
-#   v1.3.3          a plain tag still builds every platform (kept for old tags)
+# Plain "v1.3.4" tags only. The installed apps compare the tag with their own
+# version, and a platform prefix (win-v1.3.4) reads as no version at all to the
+# builds already on people's machines — they then never offer the update.
+# The job below still rebuilds only the platforms whose files changed, so each
+# card on the site keeps its own version and tag.
 on:
   push:
     tags:
       - "v*"
-      - "win-v*"
-      - "tv-v*"
-      - "mobile-v*"
   workflow_dispatch:
     inputs:
       version:
@@ -50,18 +46,11 @@ jobs:
           else
             TAG="${GITHUB_REF_NAME}"
           fi
-          VERSION="${TAG##*-}"
-          VERSION="${VERSION#v}"
+          VERSION="${TAG#v}"
 
-          case "$TAG" in
-            win-*) PLATFORM=windows ;;
-            tv-*) PLATFORM=tv ;;
-            mobile-*) PLATFORM=mobile ;;
-            *) PLATFORM=all ;;
-          esac
-
-          if [ "$PLATFORM" = "all" ]; then
-            # A plain tag keeps the old behaviour: rebuild only what it changed.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            windows=true; tv=true; mobile=true
+          else
             PREV="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
             if [ -z "$PREV" ]; then
               CHANGED="$(git ls-tree -r --name-only HEAD)"
@@ -72,13 +61,6 @@ jobs:
             if grep -q '^android/' <<< "$CHANGED"; then android=true; else android=false; fi
             tv="$android"
             mobile="$android"
-          else
-            windows=false; tv=false; mobile=false
-            case "$PLATFORM" in
-              windows) windows=true ;;
-              tv) tv=true ;;
-              mobile) mobile=true ;;
-            esac
           fi
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -126,7 +108,7 @@ jobs:
           } > android/keystore.properties
 
       # versionCode is derived from the version (1.1.0 -> 10100) so it always
-      # increases across releases; the tag name only decides which flavours run.
+      # increases across releases; the tag decides which flavours run.
       - name: Build requested release APKs
         working-directory: android
         env:
@@ -270,21 +252,21 @@ jobs:
           {
             echo "## ZENKTX TV Stream $VERSION"
             echo
-            echo "| Platform | Version | Asset |"
-            echo "| --- | --- | --- |"
+            echo "| Platform | Asset |"
+            echo "| --- | --- |"
             if [ "$TV" = "true" ]; then
-              echo "| Android TV (7.0+) | $VERSION | \`ZENKTX-TV-$VERSION.apk\` |"
+              echo "| Android TV (7.0+) | \`ZENKTX-TV-$VERSION.apk\` |"
             fi
             if [ "$MOBILE" = "true" ]; then
-              echo "| Android mobile (7.0+) | $VERSION | \`ZENKTX-Mobile-$VERSION.apk\` |"
+              echo "| Android mobile (7.0+) | \`ZENKTX-Mobile-$VERSION.apk\` |"
             fi
             if [ "$WINDOWS" = "true" ]; then
-              echo "| Windows 10/11 x86_64 (installer) | $VERSION | \`ZENKTX-Setup-$VERSION.exe\` |"
-              echo "| Windows 10/11 x86_64 (portable) | $VERSION | \`ZENKTX-Portable-$VERSION.exe\` |"
+              echo "| Windows 10/11 x86_64 (installer) | \`ZENKTX-Setup-$VERSION.exe\` |"
+              echo "| Windows 10/11 x86_64 (portable) | \`ZENKTX-Portable-$VERSION.exe\` |"
             fi
             echo
-            echo "Each platform carries its own tag and version now, so a release that"
-            echo "touches one platform leaves the other two on the build they already have."
+            echo "Only the platforms edited in this tag are rebuilt; the others keep their"
+            echo "previous release, so their updater stays quiet until their code changes."
             if [ "$TV" = "true" ] || [ "$MOBILE" = "true" ]; then
               echo "Every APK is signed with the ZENKTX release certificate."
             fi

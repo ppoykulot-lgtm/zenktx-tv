@@ -1369,7 +1369,10 @@ async function githubPush() {
 /* ----------------------------------------------------------------- updates */
 
 function isNewer(current, remote) {
-  const parse = (v) => String(v).replace(/^v/, '').split('-')[0].split('.').map(Number);
+  // Only the number matters: releases have been tagged v1.3.3 and, briefly,
+  // win-v1.3.3. Reading the first tag as NaN made "there is an update" never
+  // fire, so the digits are pulled out of whatever the tag happens to be.
+  const parse = (v) => ((String(v).match(/\d+(?:\.\d+)+/) || ['0'])[0]).split('.').map(Number);
   const a = parse(current);
   const b = parse(remote);
   for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
