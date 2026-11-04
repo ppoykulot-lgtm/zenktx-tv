@@ -92,8 +92,11 @@ function streamType(url) {
 
 function fromJson(text, prefix) {
   const root = JSON.parse(text);
+  // The published catalogue flags addresses that no longer answer with
+  // enabled:false and removals with tombstone:true. Neither belongs on screen,
+  // and a JSON playlist that carries ClearKey ids keeps them here.
   return (root.channels || [])
-    .filter((c) => c && c.url)
+    .filter((c) => c && c.url && c.enabled !== false && !c.tombstone)
     .map((c, i) => ({
       key: `${prefix}:${c.id ?? i + 1}`,
       name: c.name || `Channel ${i + 1}`,
@@ -103,6 +106,9 @@ function fromJson(text, prefix) {
       streamType: c.streamType || streamType(c.url),
       quality: c.quality || 'HD',
       isFilipino: Boolean(c.isFilipino),
+      drmType: c.drmType || '',
+      keyId: c.keyId || '',
+      drmKey: c.drmKey || c.key || '',
     }));
 }
 
@@ -231,6 +237,62 @@ async function refreshLive() {
   }
 }
 
+/* --------------------------------------------------------- remote catalogue */
+
+// One channel list for Android TV, Android mobile and Windows, published with
+// the site. Adding, fixing, hiding or reordering a channel is a commit to that
+// file — every build reads it on its next launch, so nothing here needs a new
+// APK, installer or portable copy.
+const CATALOG_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/catalog.json';
+const CATALOG_KEY = 'zenktx.catalog.v1';
+const CATALOG_TTL = 30 * 60 * 1000;
+
+let catalogAt = 0;
+
+function applyCatalogText(text) {
+  try {
+    const list = fromJson(text, 'b');
+    if (!list.length) return 0;
+    state.bundled = list;
+    return list.length;
+  } catch (error) {
+    return 0;
+  }
+}
+
+function readCatalogCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(CATALOG_KEY) || 'null');
+    if (!cached || !cached.text) return;
+    catalogAt = cached.at || 0;
+    applyCatalogText(cached.text);
+  } catch (error) {
+    catalogAt = 0;
+  }
+}
+
+async function refreshCatalog() {
+  try {
+    const text = await window.zenk.fetchText(CATALOG_URL);
+    const count = applyCatalogText(text);
+    if (!count) return 0;
+    catalogAt = Date.now();
+    try {
+      localStorage.setItem(CATALOG_KEY, JSON.stringify({ at: catalogAt, text }));
+    } catch (error) {
+      // Quota: the in-memory list is already live for this session.
+    }
+    await loadAll();
+    applyLive();
+    rebuild();
+    return count;
+  } catch (error) {
+    // Offline or the catalogue moved: the cached copy, then the bundled one,
+    // keep the guide usable.
+    return 0;
+  }
+}
+
 function applyLocalState(list) {
   return list
     .filter((c) => !prefs.hidden.includes(c.key))
@@ -261,6 +323,7 @@ async function boot() {
     toast(`Could not load the bundled list: ${error.message}`);
   }
 
+  readCatalogCache();
   currentVersion = await window.zenk.version();
   document.title = `ZENKTX TV Stream — v${currentVersion}`;
   readLiveCache();
@@ -270,6 +333,7 @@ async function boot() {
   reportPlaylistFailures();
   scheduleUpdateCheck();
   if (Date.now() - liveAt > LIVE_TTL) refreshLive();
+  if (Date.now() - catalogAt > CATALOG_TTL) refreshCatalog();
 }
 
 /* ------------------------------------------------------------ load failures */
@@ -370,6 +434,13 @@ function parseSource(text, playlist) {
       if (channels.length) return channels;
     }
     return singleStream(playlist);
+  }
+  if (body.startsWith('<?xml') || body.startsWith('<MPD')) {
+    // Some DASH addresses carry no .mpd suffix: a Plex id, a redirect ending in
+    // a slash. The manifest itself is the only reliable signal, and this runs
+    // before the address is ever handed to hls.js.
+    const single = singleStream(playlist)[0];
+    return [Object.assign(single, { streamType: 'mpd' })];
   }
   if (body.startsWith('{') || body.startsWith('[')) {
     let channels = [];
@@ -592,14 +663,37 @@ function hideChannel(channel) {
 
 /* ------------------------------------------------------------------ player */
 
+// A caption belongs to the stream that carried it. The media element keeps its
+// text tracks, and their cues, across a src change, so the next channel — which
+// has no subtitles at all — inherited the last one's and painted them over the
+// picture. Disable every track, drop its cues and remove the elements the
+// engines added before anything new is attached.
+function clearCaptions(video) {
+  for (const track of Array.from(video.textTracks || [])) {
+    try {
+      track.mode = 'disabled';
+      const cues = track.cues;
+      if (cues) {
+        for (let i = cues.length - 1; i >= 0; i -= 1) track.removeCue(cues[i]);
+      }
+    } catch (error) {
+      // A track owned by the media engine can refuse cue removal; disabled mode
+      // alone still keeps it off screen.
+    }
+  }
+  for (const node of Array.from(video.querySelectorAll('track'))) node.remove();
+}
+
 function cleanupPlayer() {
   clearInterval(state.watchdog);
   if (state.hls) { state.hls.destroy(); state.hls = null; }
   if (state.dash) { state.dash.reset(); state.dash = null; }
   const video = $('video');
   video.pause();
+  clearCaptions(video);
   video.removeAttribute('src');
   video.load();
+  clearCaptions(video);
 }
 
 function play(channel) {
@@ -668,6 +762,10 @@ function playSource(channel) {
       streaming: {
         buffer: { initialBufferLevel: 2, stableBufferTime: 8, bufferTimeAtTopQuality: 20 },
         scheduling: { scheduleWhilePaused: false },
+        // These manifests carry subtitle tracks; switching one on and then
+        // moving to a channel without subtitles used to leave the old cues
+        // burning over the new picture.
+        text: { defaultEnabled: false },
       },
     });
     // The feed ships ClearKey ids for these channels, and ClearKey is the one
@@ -742,7 +840,7 @@ function channelSources(channel) {
 // actually means instead of pasting the engine's sentence.
 function describeDashError(raw) {
   if (/key\s*system|drm|eme|content protection/i.test(raw)) {
-    return 'This channel is DRM-protected (Widevine). Android and Chrome carry the decoder; this Windows build does not, so this one cannot play here. Try another channel.';
+    return 'This channel is encrypted with Widevine or PlayReady and its licence server is not public, so no ZENKTX build can open it. The key ids in old lists do nothing here — pick another channel.';
   }
   if (/not available|40[134]|gone|forbidden|manifest/i.test(raw)) {
     return 'The channel link has expired or is blocked. These free providers rotate their addresses, so the same channel often works again later.';

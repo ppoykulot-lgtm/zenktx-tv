@@ -24,6 +24,15 @@ object ChannelRepository {
     private const val KEY_LIVE_MAP = "map"
     private const val KEY_LIVE_AT = "at"
     private const val LIVE_TTL_MS = 6 * 60 * 60 * 1000L
+
+    // The one channel list every build reads. Publishing a change is a commit to
+    // this file; the app picks it up on the next launch, so a new, fixed,
+    // reordered or removed channel never waits for a new APK.
+    private const val CATALOG_URL = "https://ppoykulot-lgtm.github.io/zenktx-tv/catalog.json"
+    private const val CATALOG_PREFS = "zenktx_catalog"
+    private const val KEY_CATALOG = "json"
+    private const val KEY_CATALOG_AT = "at"
+    private const val CATALOG_TTL_MS = 30 * 60 * 1000L
     private val STREAM_PLAYLIST =
         Regex("#EXT-X-(STREAM-INF|TARGETDURATION|MEDIA-SEQUENCE|I-FRAME-STREAM-INF)")
 
@@ -73,7 +82,7 @@ object ChannelRepository {
         val errors = ArrayList<String>()
         val out = ArrayList<Channel>(500)
 
-        val bundled = runCatching { bundled(context) }
+        val bundled = runCatching { catalog(context).ifEmpty { bundled(context) } }
             .onFailure { errors += "Bundled channels: ${it.message}" }
             .getOrDefault(emptyList())
         out += bundled
@@ -129,6 +138,30 @@ object ChannelRepository {
             isFilipino = false,
         )
     )
+
+    /**
+     * The published catalogue, cached for half an hour. Offline, or if the
+     * catalogue moved, the copy inside the APK keeps the app usable.
+     */
+    private fun catalog(context: Context): List<Channel> {
+        val prefs = context.applicationContext
+            .getSharedPreferences(CATALOG_PREFS, Context.MODE_PRIVATE)
+
+        if (System.currentTimeMillis() - prefs.getLong(KEY_CATALOG_AT, 0L) > CATALOG_TTL_MS) {
+            runCatching {
+                val text = Http.getText(CATALOG_URL)
+                if (fromJson(text, "b").isNotEmpty()) {
+                    prefs.edit()
+                        .putString(KEY_CATALOG, text)
+                        .putLong(KEY_CATALOG_AT, System.currentTimeMillis())
+                        .apply()
+                }
+            }
+        }
+
+        val cached = prefs.getString(KEY_CATALOG, null) ?: return emptyList()
+        return runCatching { fromJson(cached, "b") }.getOrDefault(emptyList())
+    }
 
     /**
      * Pulls the publisher's current list, caches it for six hours and moves every
@@ -230,7 +263,12 @@ object ChannelRepository {
         for (i in 0 until arr.length()) {
             val o = arr.optJSONObject(i) ?: continue
             val url = o.optString("url")
-            if (url.isBlank()) continue
+            // enabled:false is an address the publisher already found dead;
+            // tombstone:true is a channel an admin removed. Neither belongs in
+            // the guide.
+            if (url.isBlank() || !o.optBoolean("enabled", true) ||
+                o.optBoolean("tombstone", false)
+            ) continue
             val id = o.optInt("id", i + 1)
             list += Channel(
                 key = "$prefix:$id",
