@@ -34,6 +34,29 @@
         <item name="android:tint">@color/player_icon</item>
     </style>
 
+    <!-- Small round play/pause key: mint fill, dark glyph. -->
+    <style name="PlayerButtonPrimary">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:background">@drawable/bg_player_play</item>
+        <item name="android:focusable">true</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:tint">@color/btn_primary_text</item>
+    </style>
+
+    <!-- Channel up / down as compact round keys. -->
+    <style name="PlayerChipButton">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">@drawable/bg_player_button</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
     <style name="SettingsRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">66dp</item>

@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver="tv">v1.2.2</span>
+            <span class="ver" data-ver="tv">v1.2.3</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver="mobile">v1.2.2</span>
+            <span class="ver" data-ver="mobile">v1.2.3</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -599,7 +599,7 @@
       <div class="log">
         <article class="entry">
           <h3>1.2.3 <span class="tagx">latest</span></h3>
-          <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
+          <div class="meta">4 November 2026 · Windows · Android TV · Android Mobile</div>
           <ul>
             <li>Dead channels are fixed at the root. The bundled list carried stream addresses whose access tokens had already expired, which is why a channel played in other apps but not here. The app now pulls the publisher's current list on launch, keeps a six-hour cache, and falls back to the bundled copy offline — Kapamilya Channel HD plays again.</li>
             <li>The bundled guide was rebuilt from that feed: 503 channels, with the current artwork and stream type for each.</li>
@@ -608,6 +608,8 @@
             <li>Two player designs, switched from the control bar: <b>Glass</b> (default) floats the controls as a translucent capsule over the picture, <b>Studio</b> is a solid full-width deck with square keys.</li>
             <li>The play/pause button is a small round control instead of the 44&nbsp;px mint square, and every transport icon is a drawn glyph that matches the rest of the UI.</li>
             <li>Scrollbars follow the dark theme instead of the bright Windows rail.</li>
+            <li>Android TV and Mobile get the same rebuilt guide and the same on-launch refresh; a single <code>.m3u8</code> added as a playlist keeps its title there too, and Add playlist takes the optional logo URL.</li>
+            <li>Android's player bar floats as a rounded translucent deck with a small round play key instead of the old full-width strip.</li>
             <li>The player asks for streams with a browser user agent and allows cross-origin media, matching what the working third-party clients do, so fewer channels are refused outright.</li>
           </ul>
         </article>
@@ -725,8 +727,8 @@
   // A tag only rebuilds the platform whose code changed, so each card keeps the
   // version and tag of the release that last touched it. Android still sits on
   // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.2.2", mobile: "1.2.2", win: "1.2.3" };
-  const TAGS = { tv: "v1.2.2", mobile: "v1.2.2", win: "v1.2.3" };
+  const VERSIONS = { tv: "1.2.3", mobile: "1.2.3", win: "1.2.3" };
+  const TAGS = { tv: "v1.2.3", mobile: "v1.2.3", win: "v1.2.3" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,

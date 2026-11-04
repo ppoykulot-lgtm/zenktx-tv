@@ -12,6 +12,7 @@ data class Playlist(
     val id: String,
     val name: String,
     val url: String,
+    val logo: String = "",
     val enabled: Boolean = true,
 )
 
@@ -33,17 +34,19 @@ class PlaylistStore(context: Context) {
                     id = o.optString("id"),
                     name = o.optString("name"),
                     url = o.optString("url"),
+                    logo = o.optString("logo"),
                     enabled = o.optBoolean("enabled", true),
                 )
             }.filter { it.id.isNotBlank() && it.url.isNotBlank() }
         }.getOrDefault(emptyList())
     }
 
-    fun add(name: String, url: String): Playlist {
+    fun add(name: String, url: String, logo: String = ""): Playlist {
         val playlist = Playlist(
             id = UUID.randomUUID().toString().take(8),
             name = name.ifBlank { defaultName(url) },
             url = url.trim(),
+            logo = logo.trim(),
         )
         save(list() + playlist)
         return playlist
@@ -65,6 +68,7 @@ class PlaylistStore(context: Context) {
                     .put("id", it.id)
                     .put("name", it.name)
                     .put("url", it.url)
+                    .put("logo", it.logo)
                     .put("enabled", it.enabled)
             )
         }

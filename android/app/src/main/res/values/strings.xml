@@ -54,6 +54,7 @@
     <string name="add_playlist">＋  Add playlist</string>
     <string name="playlist_name">Playlist name</string>
     <string name="playlist_url">M3U / M3U8 / JSON URL</string>
+    <string name="playlist_logo">Logo URL (optional)</string>
     <string name="playlist_hint">Tap a playlist to enable or disable it. Long-press to remove it.</string>
     <string name="playlist_added">Playlist added.</string>
     <string name="playlist_removed">Playlist removed.</string>
