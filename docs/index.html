@@ -476,7 +476,7 @@
           <div class="dl-top">
             <div class="dl-ico">🖥️</div>
             <div><h3>Windows x86_64</h3><div class="dl-sub">Windows 10 / 11 64-bit</div></div>
-            <span class="ver" data-ver="win">v1.2.4</span>
+            <span class="ver" data-ver="win">v1.2.5</span>
           </div>
           <p>A desktop build of the same guide: keyboard shortcuts, resize-friendly layout and
             HLS/DASH playback through the bundled media engine.</p>
@@ -598,7 +598,17 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.2.4 <span class="tagx">latest</span></h3>
+          <h3>1.2.5 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
+          <ul>
+            <li>Fixed the guide showing <b>every tile highlighted</b>. The ClearKey value added in 1.2.3 was stored under <code>key</code>, which is the channel's identity, so the whole bundled list ended up sharing one empty key and the selected-channel style matched every tile.</li>
+            <li>That same clash silently broke <b>favourites, hidden channels and per-channel logo edits</b> for bundled channels — they were all filed under that empty key. They work again, and existing favourites are matched by the restored <code>b:&lt;id&gt;</code> keys.</li>
+            <li>The DRM value now travels as <code>drmKey</code>, so the player still hands ClearKey ids to dash.js without touching channel identity.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.2.4</h3>
           <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
           <ul>
             <li>A playlist whose link has died no longer dumps a raw <code>Error invoking remote method</code> message and a full manifest URL into a toast on every launch. The app now says one short sentence — <i>“232 did not load — the link is dead (HTTP 410). Open Playlists to fix or remove it.”</i> — and stays quiet once you deal with it.</li>
@@ -737,8 +747,8 @@
   // A tag only rebuilds the platform whose code changed, so each card keeps the
   // version and tag of the release that last touched it. Android still sits on
   // 1.1.1: a Windows-only tag must not look like a new Android build.
-  const VERSIONS = { tv: "1.2.3", mobile: "1.2.3", win: "1.2.4" };
-  const TAGS = { tv: "v1.2.3", mobile: "v1.2.3", win: "v1.2.4" };
+  const VERSIONS = { tv: "1.2.3", mobile: "1.2.3", win: "1.2.5" };
+  const TAGS = { tv: "v1.2.3", mobile: "v1.2.3", win: "v1.2.5" };
 
   const ASSETS = {
     tv:     `ZENKTX-TV-${VERSIONS.tv}.apk`,
