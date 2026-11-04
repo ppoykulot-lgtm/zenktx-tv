@@ -206,14 +206,14 @@ function applyLive() {
     channel.streamType = live.streamType || channel.streamType;
     channel.quality = live.quality || channel.quality;
     if (live.logo) channel.logo = live.logo;
-    if (live.drmType) {
+    // The published catalogue is authoritative about protection: it knows which
+    // feeds are Widevine and which addresses are dead. The live feed only fills
+    // the fields in for a channel the catalogue does not describe, and must not
+    // wipe them.
+    if (!channel.drmType && live.drmType) {
       channel.drmType = live.drmType;
       channel.keyId = live.keyId;
       channel.drmKey = live.drmKey;
-    } else {
-      delete channel.drmType;
-      delete channel.keyId;
-      delete channel.drmKey;
     }
   }
   return patched;
