@@ -54,7 +54,22 @@ async function fetchText(url, token) {
     headers['X-GitHub-Api-Version'] = '2022-11-28';
   }
 
-  const response = await fetch(url, { headers, redirect: 'follow' });
+  // fetch() rejects with a bare "TypeError: fetch failed" for DNS and socket
+  // trouble, which tells the viewer nothing. Name the cause instead, and give up
+  // after fifteen seconds so one dead host cannot stall the whole channel load.
+  let response;
+  try {
+    response = await fetch(url, {
+      headers,
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    const cause =
+      (error.cause && (error.cause.code || error.cause.message)) || error.name || 'network error';
+    throw new Error(`Could not reach the server (${cause})`);
+  }
+
   const body = await response.text();
   if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
   return body;

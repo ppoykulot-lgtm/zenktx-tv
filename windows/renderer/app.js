@@ -297,6 +297,7 @@ function describeLoadError(message) {
   if (/timed? ?out|ETIMEDOUT|abort/i.test(message)) return 'the server did not answer in time';
   if (/ENOTFOUND|EAI_AGAIN|getaddrinfo|ERR_NAME/i.test(message)) return 'the address did not resolve';
   if (/ECONNREFUSED|ECONNRESET|socket hang up/i.test(message)) return 'the connection was refused';
+  if (/could not reach the server/i.test(message)) return 'the server could not be reached';
   return message || 'unknown error';
 }
 
