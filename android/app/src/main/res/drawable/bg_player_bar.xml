@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floating control deck: translucent so the picture reads through. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="22dp" />
+    <solid android:color="#E60A1120" />
+    <stroke
+        android:width="1dp"
+        android:color="#40233A5C" />
+</shape>

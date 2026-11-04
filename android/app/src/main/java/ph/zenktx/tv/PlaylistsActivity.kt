@@ -66,11 +66,12 @@ class PlaylistsActivity : Activity() {
             listOf(
                 Dialogs.Field("name", getString(R.string.playlist_name)),
                 Dialogs.Field("url", getString(R.string.playlist_url), uri = true),
+                Dialogs.Field("logo", getString(R.string.playlist_logo), uri = true),
             ),
         ) { values ->
             val url = values["url"].orEmpty()
             if (url.isBlank()) return@form
-            store.add(values["name"].orEmpty(), url)
+            store.add(values["name"].orEmpty(), url, values["logo"].orEmpty())
             ChannelRepository.dirty = true
             refresh()
         }
