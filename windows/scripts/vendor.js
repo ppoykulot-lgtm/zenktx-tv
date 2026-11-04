@@ -18,7 +18,12 @@ const OUT = path.join(ROOT, 'renderer', 'vendor');
 const DASH_VERSION = '4.7.4';
 const DASH_URL = `https://cdn.dashjs.org/v${DASH_VERSION}/dash.all.min.js`;
 
-const FILES = [['hls.js/dist/hls.min.js', 'hls.min.js']];
+const FILES = [
+  ['hls.js/dist/hls.min.js', 'hls.min.js'],
+  // ClearKey needs Shaka: dash.js asks for the key systems the manifest
+  // advertises (Widevine, PlayReady) and Electron ships neither.
+  ['shaka-player/dist/shaka-player.compiled.js', 'shaka-player.compiled.js'],
+];
 
 fs.mkdirSync(OUT, { recursive: true });
 
