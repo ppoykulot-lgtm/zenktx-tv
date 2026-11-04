@@ -33,3 +33,5 @@ channels/feed.json
 channels/probe.json
 dist-android.log
 channels/keycheck.json
+build.log
+.chk/
