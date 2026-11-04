@@ -5,8 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
-import ph.zenktx.tv.R
 import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.databinding.ItemGridChannelBinding
 
@@ -45,15 +43,9 @@ class ChannelGridAdapter(
     inner class TileVH(val binding: ItemGridChannelBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(channel: Channel) {
             binding.tileName.text = channel.name
-            binding.tileLogo.load(channel.logo.ifBlank { null }) {
-                crossfade(true)
-                placeholder(R.drawable.ic_channel_placeholder)
-                error(R.drawable.ic_channel_placeholder)
-            }
+            Logos.apply(binding.tileLogo, binding.tileMonogram, channel.name, channel.logo)
             binding.tileStar.visibility =
                 if (isFavourite(channel.key)) View.VISIBLE else View.GONE
-            binding.tileNoLogo.visibility =
-                if (channel.logo.isBlank()) View.VISIBLE else View.GONE
 
             binding.root.setOnClickListener { onClick(channel) }
             binding.root.setOnLongClickListener {
