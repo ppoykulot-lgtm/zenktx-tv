@@ -440,7 +440,7 @@
           <div class="dl-top">
             <div class="dl-ico">📺</div>
             <div><h3>Android TV</h3><div class="dl-sub">Google TV · Shield · Sony · Xiaomi · TCL</div></div>
-            <span class="ver" data-ver="tv">v1.3.3</span>
+            <span class="ver" data-ver="tv">v1.3.4</span>
           </div>
           <p>Engineered for remote controls: leanback banner, D-pad focus rings, and grid-first
             browsing for 10-foot screens.</p>
@@ -458,7 +458,7 @@
           <div class="dl-top">
             <div class="dl-ico">📱</div>
             <div><h3>Android Mobile</h3><div class="dl-sub">Phones &amp; tablets</div></div>
-            <span class="ver" data-ver="mobile">v1.3.3</span>
+            <span class="ver" data-ver="mobile">v1.3.4</span>
           </div>
           <p>Same engine in a portrait build with a three-column grid, tap-to-play and the
             same favourites, playlists and logo tools.</p>
@@ -598,7 +598,18 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.3.3 <span class="tagx">latest</span></h3>
+          <h3>1.3.4 <span class="tagx">latest</span></h3>
+          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
+          <ul>
+            <li><b>The APKs are signed with all three schemes now.</b> Every Android build up to 1.3.3 carried only the v2 signature block; Android 7 and 8 installers — and several file managers — refuse an APK with no v1 (JAR) signature and show a bare <i>App not installed</i> with no reason. The release APK now verifies against v1, v2 and v3.</li>
+            <li><b>If the copy already on the device was signed with another key</b> (an old build made before the release keystore existed), Android still refuses to replace it. Uninstall ZENKTX first, then install this APK.</li>
+            <li><b>Play Protect will warn about any sideloaded IPTV app</b> — <i>“Harmful app blocked”</i> is a reputation warning, not a virus report. Choose <b>Install anyway</b>; tapping <i>Got it</i> cancels the install, which ends as “App not installed”.</li>
+            <li>Windows stays on 1.3.3: a tag only rebuilds the platforms it changed, so the Android fix did not rename the Windows build.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.3.3</h3>
           <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
             <li><b>Channels no longer open paused.</b> The play call ran before the player had attached the stream, so it was rejected and the channel sat still until you pressed play. The app now asks again the moment the stream is ready, and remembers whether you paused it yourself.</li>
@@ -794,8 +805,10 @@
   // Every platform releases on its own tag (tv-v…, mobile-v…, win-v…), so each
   // card keeps the version of the build that platform actually got. A Windows
   // fix no longer renames the Android build.
-  const VERSIONS = { tv: "1.3.3", mobile: "1.3.3", win: "1.3.3" };
-  const TAGS = { tv: "v1.3.3", mobile: "v1.3.3", win: "v1.3.3" };
+  // Each platform keeps the version of the release that last touched it: the
+  // APK signing fix is Android-only, so Windows stays on 1.3.3.
+  const VERSIONS = { tv: "1.3.4", mobile: "1.3.4", win: "1.3.3" };
+  const TAGS = { tv: "v1.3.4", mobile: "v1.3.4", win: "v1.3.3" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
