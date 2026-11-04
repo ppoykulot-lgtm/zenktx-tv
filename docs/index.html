@@ -607,7 +607,7 @@
             <li><b>A 410 is retried with the current link.</b> These providers re-tokenise addresses through the day, so a cached copy can answer <i>HTTP 410</i> while the channel is alive — which is why a second window played it. The app pulls the feed again and retries once before showing the error.</li>
             <li><b>Admin page:</b> a password gate, an editable <b>channel number</b> that renumbers the rest, per-channel <b>logo</b>, <b>DRM</b>, <b>key id</b> and <b>key</b> fields, and publishing now re-reads the file so the table shows what actually landed.</li>
             <li><b>Android updates explain a refused install.</b> If the downloaded APK is signed with a different certificate than the installed app — the usual cause of <i>App not installed</i> — the app says so and asks for an uninstall instead of leaving the system dialog to fail silently.</li>
-            <li><b>Each platform has its own version and tag.</b> Windows publishes as <code>win-v…</code>, Android TV as <code>tv-v…</code>, Android mobile as <code>mobile-v…</code>, so a release only renames the build it actually changed.</li>
+            <li><b>Each platform keeps its own version number.</b> A tag only rebuilds the platforms whose files changed, and each card on this page keeps the version and tag of the release that last touched it — a Windows fix no longer renames the Android build. Tags stay in the plain <code>v1.3.4</code> form on purpose: the updater inside the installed app compares the tag with its own version, and a prefixed tag reads as no version at all, which is exactly why the update notice stopped appearing after 1.3.2.</li>
           </ul>
         </article>
 
