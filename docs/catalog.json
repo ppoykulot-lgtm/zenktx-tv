@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T01:18:11Z",
+ "updatedAt": "2026-11-05T01:19:33Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -169,8 +169,36 @@
    "note": ""
   },
   {
-   "id": 1,
+   "id": 26,
    "order": 8,
+   "name": "ANC",
+   "category": "News",
+   "tags": [
+    "news",
+    "international",
+    "english",
+    "media",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "abs cbn",
+    "iwanttfc",
+    "HD"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/anc_26.png",
+   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/cv5/001/2/ch00000090990000001216/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2BoK2PIan60vhUUxnwtpVvgcytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 1,
+   "order": 9,
    "name": "3RS SinePinoy",
    "category": "Movies",
    "tags": [
@@ -194,7 +222,7 @@
   },
   {
    "id": 2,
-   "order": 9,
+   "order": 10,
    "name": "3RSTV",
    "category": "Movies",
    "tags": [
@@ -207,28 +235,6 @@
    ],
    "logo": "https://iyadtv.pages.dev/images/3rstv.svg",
    "url": "https://live20.bozztv.com/giatvplayout7/giatv-210631/tracks-v1a1/mono.ts.m3u8",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 374,
-   "order": 10,
-   "name": "SMNI News Channel",
-   "category": "News",
-   "tags": [
-    "News",
-    "Philippines",
-    "Pinoy",
-    "local"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/smni_news_channel_233.png",
-   "url": "https://stream.kdlc.click/hls/stream.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
@@ -706,36 +712,8 @@
    "note": ""
   },
   {
-   "id": 26,
-   "order": 31,
-   "name": "ANC",
-   "category": "News",
-   "tags": [
-    "news",
-    "international",
-    "english",
-    "media",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "abs cbn",
-    "iwanttfc",
-    "HD"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/anc_26.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/cv5/001/2/ch00000090990000001216/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2BoK2PIan60vhUUxnwtpVvgcytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
    "id": 27,
-   "order": 32,
+   "order": 31,
    "name": "Animax",
    "category": "Kids",
    "tags": [
@@ -757,7 +735,7 @@
   },
   {
    "id": 28,
-   "order": 33,
+   "order": 32,
    "name": "Animal Planet HD",
    "category": "Documentary",
    "tags": [
@@ -782,7 +760,7 @@
   },
   {
    "id": 29,
-   "order": 34,
+   "order": 33,
    "name": "amasian tv Anime 24/7",
    "category": "Kids",
    "tags": [
@@ -803,7 +781,7 @@
   },
   {
    "id": 30,
-   "order": 35,
+   "order": 34,
    "name": "Animal Planet",
    "category": "Documentary",
    "tags": [
@@ -828,7 +806,7 @@
   },
   {
    "id": 31,
-   "order": 36,
+   "order": 35,
    "name": "Filmrise Anime",
    "category": "Anime",
    "tags": [
@@ -850,7 +828,7 @@
   },
   {
    "id": 32,
-   "order": 37,
+   "order": 36,
    "name": "Anime All Day",
    "category": "Kids",
    "tags": [
@@ -870,7 +848,7 @@
   },
   {
    "id": 33,
-   "order": 38,
+   "order": 37,
    "name": "Boruto: Naruto Next Generations",
    "category": "Kids",
    "tags": [
@@ -897,7 +875,7 @@
   },
   {
    "id": 34,
-   "order": 39,
+   "order": 38,
    "name": "Inuyasha",
    "category": "Kids",
    "tags": [
@@ -924,7 +902,7 @@
   },
   {
    "id": 35,
-   "order": 40,
+   "order": 39,
    "name": "Anime by Pluto",
    "category": "Kids",
    "tags": [
@@ -951,7 +929,7 @@
   },
   {
    "id": 36,
-   "order": 41,
+   "order": 40,
    "name": "Anime Movies",
    "category": "Kids",
    "tags": [
@@ -978,7 +956,7 @@
   },
   {
    "id": 37,
-   "order": 42,
+   "order": 41,
    "name": "Naruto",
    "category": "Kids",
    "tags": [
@@ -1005,7 +983,7 @@
   },
   {
    "id": 38,
-   "order": 43,
+   "order": 42,
    "name": "Anime x Hidive",
    "category": "Kids",
    "tags": [
@@ -1025,7 +1003,7 @@
   },
   {
    "id": 39,
-   "order": 44,
+   "order": 43,
    "name": "Animax Stream 3",
    "category": "Kids",
    "tags": [
@@ -1047,7 +1025,7 @@
   },
   {
    "id": 40,
-   "order": 45,
+   "order": 44,
    "name": " One Piece",
    "category": "Kids",
    "tags": [
@@ -1074,7 +1052,7 @@
   },
   {
    "id": 41,
-   "order": 46,
+   "order": 45,
    "name": "Arirang",
    "category": "Entertainment",
    "tags": [
@@ -1097,7 +1075,7 @@
   },
   {
    "id": 42,
-   "order": 47,
+   "order": 46,
    "name": " Sailor Moon",
    "category": "Kids",
    "tags": [
@@ -1124,7 +1102,7 @@
   },
   {
    "id": 43,
-   "order": 48,
+   "order": 47,
    "name": "Asian Crush",
    "category": "Entertainment",
    "tags": [
@@ -1146,7 +1124,7 @@
   },
   {
    "id": 44,
-   "order": 49,
+   "order": 48,
    "name": "AVL TV",
    "category": "Entertainment",
    "tags": [
@@ -1171,7 +1149,7 @@
   },
   {
    "id": 45,
-   "order": 50,
+   "order": 49,
    "name": "Arirang Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -1194,7 +1172,7 @@
   },
   {
    "id": 46,
-   "order": 51,
+   "order": 50,
    "name": "AXN Stream 2",
    "category": "Movies",
    "tags": [
@@ -1217,7 +1195,7 @@
   },
   {
    "id": 47,
-   "order": 52,
+   "order": 51,
    "name": "Asian Food Network",
    "category": "Entertainment",
    "tags": [
@@ -1241,7 +1219,7 @@
   },
   {
    "id": 48,
-   "order": 53,
+   "order": 52,
    "name": "AXN",
    "category": "Movies",
    "tags": [
@@ -1264,7 +1242,7 @@
   },
   {
    "id": 49,
-   "order": 54,
+   "order": 53,
    "name": "AXN Movies",
    "category": "Movies",
    "tags": [
@@ -1287,7 +1265,7 @@
   },
   {
    "id": 50,
-   "order": 55,
+   "order": 54,
    "name": "PBB Collab 3.0",
    "category": "Entertainment",
    "tags": [
@@ -1312,7 +1290,7 @@
   },
   {
    "id": 51,
-   "order": 56,
+   "order": 55,
    "name": "Main Livestream",
    "category": "Entertainment",
    "tags": [
@@ -1337,7 +1315,7 @@
   },
   {
    "id": 52,
-   "order": 57,
+   "order": 56,
    "name": "Dining Area",
    "category": "Entertainment",
    "tags": [
@@ -1362,7 +1340,7 @@
   },
   {
    "id": 53,
-   "order": 58,
+   "order": 57,
    "name": "External Den",
    "category": "Entertainment",
    "tags": [
@@ -1387,7 +1365,7 @@
   },
   {
    "id": 54,
-   "order": 59,
+   "order": 58,
    "name": "BBC Earth",
    "category": "Documentary",
    "tags": [
@@ -1411,7 +1389,7 @@
   },
   {
    "id": 55,
-   "order": 60,
+   "order": 59,
    "name": "BBC Lifestyle Stream 2",
    "category": "Documentary",
    "tags": [
@@ -1434,7 +1412,7 @@
   },
   {
    "id": 56,
-   "order": 61,
+   "order": 60,
    "name": "BBC CBeebies",
    "category": "Kids",
    "tags": [
@@ -1457,7 +1435,7 @@
   },
   {
    "id": 57,
-   "order": 62,
+   "order": 61,
    "name": "BeIn Sports",
    "category": "Sports",
    "tags": [
@@ -1485,7 +1463,7 @@
   },
   {
    "id": 58,
-   "order": 63,
+   "order": 62,
    "name": "BeIn Sports 1",
    "category": "Sports",
    "tags": [
@@ -1513,7 +1491,7 @@
   },
   {
    "id": 59,
-   "order": 64,
+   "order": 63,
    "name": "BBC WORLD News",
    "category": "News",
    "tags": [
@@ -1537,7 +1515,7 @@
   },
   {
    "id": 60,
-   "order": 65,
+   "order": 64,
    "name": "BeIn Sports 2",
    "category": "Sports",
    "tags": [
@@ -1565,7 +1543,7 @@
   },
   {
    "id": 61,
-   "order": 66,
+   "order": 65,
    "name": "BeIn Sports 3",
    "category": "Sports",
    "tags": [
@@ -1593,7 +1571,7 @@
   },
   {
    "id": 62,
-   "order": 67,
+   "order": 66,
    "name": "BeIn Sports XTRA",
    "category": "Sports",
    "tags": [
@@ -1621,7 +1599,7 @@
   },
   {
    "id": 63,
-   "order": 68,
+   "order": 67,
    "name": "BBC Lifestyle",
    "category": "Documentary",
    "tags": [
@@ -1644,7 +1622,7 @@
   },
   {
    "id": 64,
-   "order": 69,
+   "order": 68,
    "name": "Billiard TV",
    "category": "Sports",
    "tags": [
@@ -1665,7 +1643,7 @@
   },
   {
    "id": 65,
-   "order": 70,
+   "order": 69,
    "name": "Bilyonaryo",
    "category": "News",
    "tags": [
@@ -1690,7 +1668,7 @@
   },
   {
    "id": 66,
-   "order": 71,
+   "order": 70,
    "name": "Blast Movies",
    "category": "Movies",
    "tags": [
@@ -1712,7 +1690,7 @@
   },
   {
    "id": 67,
-   "order": 72,
+   "order": 71,
    "name": "Bloomberg Stream 2",
    "category": "News",
    "tags": [
@@ -1734,7 +1712,7 @@
   },
   {
    "id": 68,
-   "order": 73,
+   "order": 72,
    "name": "Boing",
    "category": "Kids",
    "tags": [
@@ -1757,7 +1735,7 @@
   },
   {
    "id": 69,
-   "order": 74,
+   "order": 73,
    "name": "BBC News",
    "category": "News",
    "tags": [
@@ -1781,7 +1759,7 @@
   },
   {
    "id": 70,
-   "order": 75,
+   "order": 74,
    "name": "BOOMERANG",
    "category": "Kids",
    "tags": [
@@ -1804,7 +1782,7 @@
   },
   {
    "id": 71,
-   "order": 76,
+   "order": 75,
    "name": "BS Fuji",
    "category": "Entertainment",
    "tags": [
@@ -1849,7 +1827,7 @@
   },
   {
    "id": 72,
-   "order": 77,
+   "order": 76,
    "name": "Bilyonaryo Stream 2",
    "category": "News",
    "tags": [
@@ -1874,7 +1852,7 @@
   },
   {
    "id": 73,
-   "order": 78,
+   "order": 77,
    "name": "Bloomberg",
    "category": "News",
    "tags": [
@@ -1896,7 +1874,7 @@
   },
   {
    "id": 74,
-   "order": 79,
+   "order": 78,
    "name": "BS Nittele",
    "category": "Entertainment",
    "tags": [
@@ -1941,7 +1919,7 @@
   },
   {
    "id": 75,
-   "order": 80,
+   "order": 79,
    "name": "Da Ai TV",
    "category": "Entertainment",
    "tags": [
@@ -1986,7 +1964,7 @@
   },
   {
    "id": 76,
-   "order": 81,
+   "order": 80,
    "name": "BS10 + more Converge Channels",
    "category": "Entertainment",
    "tags": [
@@ -2031,7 +2009,7 @@
   },
   {
    "id": 77,
-   "order": 82,
+   "order": 81,
    "name": "DD National",
    "category": "Entertainment",
    "tags": [
@@ -2076,7 +2054,7 @@
   },
   {
    "id": 78,
-   "order": 83,
+   "order": 82,
    "name": "Good TV",
    "category": "Entertainment",
    "tags": [
@@ -2121,7 +2099,7 @@
   },
   {
    "id": 79,
-   "order": 84,
+   "order": 83,
    "name": "Hunan TV",
    "category": "Entertainment",
    "tags": [
@@ -2166,7 +2144,7 @@
   },
   {
    "id": 80,
-   "order": 85,
+   "order": 84,
    "name": "Phoenix Television",
    "category": "Entertainment",
    "tags": [
@@ -2211,7 +2189,7 @@
   },
   {
    "id": 81,
-   "order": 86,
+   "order": 85,
    "name": "Rai Italia",
    "category": "Entertainment",
    "tags": [
@@ -2256,7 +2234,7 @@
   },
   {
    "id": 82,
-   "order": 87,
+   "order": 86,
    "name": "Wion",
    "category": "Entertainment",
    "tags": [
@@ -2301,7 +2279,7 @@
   },
   {
    "id": 83,
-   "order": 88,
+   "order": 87,
    "name": "Saudi TV",
    "category": "Entertainment",
    "tags": [
@@ -2346,7 +2324,7 @@
   },
   {
    "id": 84,
-   "order": 89,
+   "order": 88,
    "name": "TVE",
    "category": "Entertainment",
    "tags": [
@@ -2391,7 +2369,7 @@
   },
   {
    "id": 85,
-   "order": 90,
+   "order": 89,
    "name": "3ABN",
    "category": "Entertainment",
    "tags": [
@@ -2436,7 +2414,7 @@
   },
   {
    "id": 86,
-   "order": 91,
+   "order": 90,
    "name": "Cartoonito",
    "category": "Kids",
    "tags": [
@@ -2458,7 +2436,7 @@
   },
   {
    "id": 87,
-   "order": 92,
+   "order": 91,
    "name": "Cartoonito Stream 2",
    "category": "Kids",
    "tags": [
@@ -2480,7 +2458,7 @@
   },
   {
    "id": 88,
-   "order": 93,
+   "order": 92,
    "name": "Cartoon Channel PH",
    "category": "Kids",
    "tags": [
@@ -2502,7 +2480,7 @@
   },
   {
    "id": 89,
-   "order": 94,
+   "order": 93,
    "name": "Xingkong",
    "category": "Entertainment",
    "tags": [
@@ -2547,7 +2525,7 @@
   },
   {
    "id": 90,
-   "order": 95,
+   "order": 94,
    "name": "Cartoon Network Stream 2",
    "category": "Kids",
    "tags": [
@@ -2570,7 +2548,7 @@
   },
   {
    "id": 91,
-   "order": 96,
+   "order": 95,
    "name": "Cartoon Network HD+",
    "category": "Kids",
    "tags": [
@@ -2593,7 +2571,7 @@
   },
   {
    "id": 92,
-   "order": 97,
+   "order": 96,
    "name": "Cartoon Network",
    "category": "Kids",
    "tags": [
@@ -2616,7 +2594,7 @@
   },
   {
    "id": 93,
-   "order": 98,
+   "order": 97,
    "name": "[adult swim]",
    "category": "Kids",
    "tags": [
@@ -2639,7 +2617,7 @@
   },
   {
    "id": 94,
-   "order": 99,
+   "order": 98,
    "name": "CCTV4",
    "category": "News",
    "tags": [
@@ -2662,7 +2640,7 @@
   },
   {
    "id": 95,
-   "order": 100,
+   "order": 99,
    "name": "CCTV4 Stream 2",
    "category": "News",
    "tags": [
@@ -2685,7 +2663,7 @@
   },
   {
    "id": 96,
-   "order": 101,
+   "order": 100,
    "name": "CGTN Documentary",
    "category": "News",
    "tags": [
@@ -2708,7 +2686,7 @@
   },
   {
    "id": 97,
-   "order": 102,
+   "order": 101,
    "name": "China Travel",
    "category": "News",
    "tags": [
@@ -2731,7 +2709,7 @@
   },
   {
    "id": 98,
-   "order": 103,
+   "order": 102,
    "name": "Channel News Asia",
    "category": "News",
    "tags": [
@@ -2755,7 +2733,7 @@
   },
   {
    "id": 99,
-   "order": 104,
+   "order": 103,
    "name": "Celestial Classic Movies",
    "category": "Movies",
    "tags": [
@@ -2776,7 +2754,7 @@
   },
   {
    "id": 100,
-   "order": 105,
+   "order": 104,
    "name": "CinemaOne",
    "category": "Movies",
    "tags": [
@@ -2802,7 +2780,7 @@
   },
   {
    "id": 101,
-   "order": 106,
+   "order": 105,
    "name": "CinemaOne PH",
    "category": "Movies",
    "tags": [
@@ -2828,7 +2806,7 @@
   },
   {
    "id": 102,
-   "order": 107,
+   "order": 106,
    "name": "Celestial Movies Pinoy",
    "category": "Movies",
    "tags": [
@@ -2852,7 +2830,7 @@
   },
   {
    "id": 104,
-   "order": 108,
+   "order": 107,
    "name": "CineMo! Stream 2",
    "category": "Movies",
    "tags": [
@@ -2877,7 +2855,7 @@
   },
   {
    "id": 103,
-   "order": 109,
+   "order": 108,
    "name": "CineMo!",
    "category": "Movies",
    "tags": [
@@ -2902,7 +2880,7 @@
   },
   {
    "id": 105,
-   "order": 110,
+   "order": 109,
    "name": "CinemaOne PH Stream 2",
    "category": "Movies",
    "tags": [
@@ -2928,7 +2906,7 @@
   },
   {
    "id": 106,
-   "order": 111,
+   "order": 110,
    "name": "CinemaOne PH Stream 3",
    "category": "Movies",
    "tags": [
@@ -2954,7 +2932,7 @@
   },
   {
    "id": 107,
-   "order": 112,
+   "order": 111,
    "name": "Cinemax",
    "category": "Movies",
    "tags": [
@@ -2979,7 +2957,7 @@
   },
   {
    "id": 108,
-   "order": 113,
+   "order": 112,
    "name": "CineMo! PH",
    "category": "Movies",
    "tags": [
@@ -3004,7 +2982,7 @@
   },
   {
    "id": 109,
-   "order": 114,
+   "order": 113,
    "name": "CLTV36",
    "category": "News",
    "tags": [
@@ -3027,7 +3005,7 @@
   },
   {
    "id": 110,
-   "order": 115,
+   "order": 114,
    "name": "CineMo! PH Stream 2",
    "category": "Movies",
    "tags": [
@@ -3052,7 +3030,7 @@
   },
   {
    "id": 111,
-   "order": 116,
+   "order": 115,
    "name": "Cinemax Stream 2",
    "category": "Movies",
    "tags": [
@@ -3077,7 +3055,7 @@
   },
   {
    "id": 112,
-   "order": 117,
+   "order": 116,
    "name": "CNBC Stream 2",
    "category": "News",
    "tags": [
@@ -3101,7 +3079,7 @@
   },
   {
    "id": 113,
-   "order": 118,
+   "order": 117,
    "name": "CLTV36 Stream 2",
    "category": "News",
    "tags": [
@@ -3124,7 +3102,7 @@
   },
   {
    "id": 114,
-   "order": 119,
+   "order": 118,
    "name": "CNBC",
    "category": "News",
    "tags": [
@@ -3148,7 +3126,7 @@
   },
   {
    "id": 115,
-   "order": 120,
+   "order": 119,
    "name": "CNN HD",
    "category": "News",
    "tags": [
@@ -3175,7 +3153,7 @@
   },
   {
    "id": 116,
-   "order": 121,
+   "order": 120,
    "name": "Comedy Central",
    "category": "Kids",
    "tags": [
@@ -3210,7 +3188,7 @@
   },
   {
    "id": 117,
-   "order": 122,
+   "order": 121,
    "name": "South Park",
    "category": "Kids",
    "tags": [
@@ -3245,7 +3223,7 @@
   },
   {
    "id": 118,
-   "order": 123,
+   "order": 122,
    "name": "Concert Channel",
    "category": "Music",
    "tags": [
@@ -3306,7 +3284,7 @@
   },
   {
    "id": 119,
-   "order": 124,
+   "order": 123,
    "name": "Crunchyroll",
    "category": "Kids",
    "tags": [
@@ -3326,7 +3304,7 @@
   },
   {
    "id": 120,
-   "order": 125,
+   "order": 124,
    "name": "CRIME INVESTIGATION",
    "category": "Documentary",
    "tags": [
@@ -3349,7 +3327,7 @@
   },
   {
    "id": 121,
-   "order": 126,
+   "order": 125,
    "name": "Crunchyroll Stream 2",
    "category": "Kids",
    "tags": [
@@ -3369,7 +3347,7 @@
   },
   {
    "id": 122,
-   "order": 127,
+   "order": 126,
    "name": "Crunchyroll Stream 3",
    "category": "Kids",
    "tags": [
@@ -3389,7 +3367,7 @@
   },
   {
    "id": 123,
-   "order": 128,
+   "order": 127,
    "name": "Curiosity Now",
    "category": "Movies",
    "tags": [
@@ -3414,7 +3392,7 @@
   },
   {
    "id": 124,
-   "order": 129,
+   "order": 128,
    "name": "Danger TV",
    "category": "Movies",
    "tags": [
@@ -3439,7 +3417,7 @@
   },
   {
    "id": 125,
-   "order": 130,
+   "order": 129,
    "name": "Crunchyroll Stream 4",
    "category": "Kids",
    "tags": [
@@ -3459,7 +3437,7 @@
   },
   {
    "id": 126,
-   "order": 131,
+   "order": 130,
    "name": "DAZN Ringside",
    "category": "Sports",
    "tags": [
@@ -3491,7 +3469,7 @@
   },
   {
    "id": 127,
-   "order": 132,
+   "order": 131,
    "name": "DepEd TV",
    "category": "Entertainment",
    "tags": [
@@ -3516,7 +3494,7 @@
   },
   {
    "id": 128,
-   "order": 133,
+   "order": 132,
    "name": "Discovery Channel Stream 2",
    "category": "Documentary",
    "tags": [
@@ -3540,7 +3518,7 @@
   },
   {
    "id": 129,
-   "order": 134,
+   "order": 133,
    "name": "Discovery Family",
    "category": "Kids",
    "tags": [
@@ -3568,7 +3546,7 @@
   },
   {
    "id": 130,
-   "order": 135,
+   "order": 134,
    "name": "Discovery Science",
    "category": "Documentary",
    "tags": [
@@ -3591,7 +3569,7 @@
   },
   {
    "id": 131,
-   "order": 136,
+   "order": 135,
    "name": "Discovery Turbo",
    "category": "Documentary",
    "tags": [
@@ -3615,7 +3593,7 @@
   },
   {
    "id": 132,
-   "order": 137,
+   "order": 136,
    "name": "DAZN",
    "category": "Sports",
    "tags": [
@@ -3647,7 +3625,7 @@
   },
   {
    "id": 133,
-   "order": 138,
+   "order": 137,
    "name": "Discovery Asia",
    "category": "Documentary",
    "tags": [
@@ -3672,7 +3650,7 @@
   },
   {
    "id": 134,
-   "order": 139,
+   "order": 138,
    "name": "Discovery Channel",
    "category": "Documentary",
    "tags": [
@@ -3696,7 +3674,7 @@
   },
   {
    "id": 135,
-   "order": 140,
+   "order": 139,
    "name": "Disney Jr",
    "category": "Kids",
    "tags": [
@@ -3718,7 +3696,7 @@
   },
   {
    "id": 136,
-   "order": 141,
+   "order": 140,
    "name": "DMAX",
    "category": "Entertainment",
    "tags": [
@@ -3740,7 +3718,7 @@
   },
   {
    "id": 137,
-   "order": 142,
+   "order": 141,
    "name": "DMAX Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -3762,7 +3740,7 @@
   },
   {
    "id": 138,
-   "order": 143,
+   "order": 142,
    "name": "Disney Channel",
    "category": "Kids",
    "tags": [
@@ -3784,7 +3762,7 @@
   },
   {
    "id": 139,
-   "order": 144,
+   "order": 143,
    "name": "Disney XD",
    "category": "Kids",
    "tags": [
@@ -3806,7 +3784,7 @@
   },
   {
    "id": 140,
-   "order": 145,
+   "order": 144,
    "name": "Dream TV PH",
    "category": "Movies",
    "tags": [
@@ -3830,7 +3808,7 @@
   },
   {
    "id": 141,
-   "order": 146,
+   "order": 145,
    "name": "DZMM Teleradyo",
    "category": "News",
    "tags": [
@@ -3858,7 +3836,7 @@
   },
   {
    "id": 142,
-   "order": 147,
+   "order": 146,
    "name": "Dreamworks HD",
    "category": "Kids",
    "tags": [
@@ -3882,7 +3860,7 @@
   },
   {
    "id": 143,
-   "order": 148,
+   "order": 147,
    "name": "DW News",
    "category": "News",
    "tags": [
@@ -3905,7 +3883,7 @@
   },
   {
    "id": 144,
-   "order": 149,
+   "order": 148,
    "name": "Dreamworks Tagalized",
    "category": "Kids",
    "tags": [
@@ -3929,7 +3907,7 @@
   },
   {
    "id": 145,
-   "order": 150,
+   "order": 149,
    "name": "ESPN2",
    "category": "Sports",
    "tags": [
@@ -3956,7 +3934,7 @@
   },
   {
    "id": 146,
-   "order": 151,
+   "order": 150,
    "name": "DZRH TV",
    "category": "News",
    "tags": [
@@ -3982,7 +3960,7 @@
   },
   {
    "id": 147,
-   "order": 152,
+   "order": 151,
    "name": "ESPNEWS",
    "category": "Sports",
    "tags": [
@@ -4009,7 +3987,7 @@
   },
   {
    "id": 148,
-   "order": 153,
+   "order": 152,
    "name": "ESPN",
    "category": "Sports",
    "tags": [
@@ -4036,7 +4014,7 @@
   },
   {
    "id": 149,
-   "order": 154,
+   "order": 153,
    "name": "Evolution Earth",
    "category": "Documentary",
    "tags": [
@@ -4061,7 +4039,7 @@
   },
   {
    "id": 150,
-   "order": 155,
+   "order": 154,
    "name": "EDGE SPORT",
    "category": "Sports",
    "tags": [
@@ -4089,7 +4067,7 @@
   },
   {
    "id": 151,
-   "order": 156,
+   "order": 155,
    "name": "ESPN U",
    "category": "Sports",
    "tags": [
@@ -4116,7 +4094,7 @@
   },
   {
    "id": 152,
-   "order": 157,
+   "order": 156,
    "name": "Euro News.",
    "category": "News",
    "tags": [
@@ -4138,7 +4116,7 @@
   },
   {
    "id": 153,
-   "order": 158,
+   "order": 157,
    "name": "FailArmy",
    "category": "Entertainment",
    "tags": [
@@ -4159,7 +4137,7 @@
   },
   {
    "id": 154,
-   "order": 159,
+   "order": 158,
    "name": "Fight Network",
    "category": "Sports",
    "tags": [
@@ -4183,7 +4161,7 @@
   },
   {
    "id": 155,
-   "order": 160,
+   "order": 159,
    "name": "EWTN",
    "category": "Entertainment",
    "tags": [
@@ -4207,7 +4185,7 @@
   },
   {
    "id": 156,
-   "order": 161,
+   "order": 160,
    "name": "Fight TV",
    "category": "Sports",
    "tags": [
@@ -4231,7 +4209,7 @@
   },
   {
    "id": 157,
-   "order": 162,
+   "order": 161,
    "name": "Fight +",
    "category": "Sports",
    "tags": [
@@ -4255,7 +4233,7 @@
   },
   {
    "id": 158,
-   "order": 163,
+   "order": 162,
    "name": "FilAmTV",
    "category": "News",
    "tags": [
@@ -4279,7 +4257,7 @@
   },
   {
    "id": 159,
-   "order": 164,
+   "order": 163,
    "name": "Fashion TV HD",
    "category": "Entertainment",
    "tags": [
@@ -4300,7 +4278,7 @@
   },
   {
    "id": 160,
-   "order": 165,
+   "order": 164,
    "name": "FITE 24/7",
    "category": "Sports",
    "tags": [
@@ -4323,7 +4301,7 @@
   },
   {
    "id": 161,
-   "order": 166,
+   "order": 165,
    "name": "FITE 24/7 Stream 2",
    "category": "Sports",
    "tags": [
@@ -4346,7 +4324,7 @@
   },
   {
    "id": 162,
-   "order": 167,
+   "order": 166,
    "name": "FOX",
    "category": "Sports",
    "tags": [
@@ -4374,7 +4352,7 @@
   },
   {
    "id": 164,
-   "order": 168,
+   "order": 167,
    "name": "Food Network HD",
    "category": "Entertainment",
    "tags": [
@@ -4397,7 +4375,7 @@
   },
   {
    "id": 163,
-   "order": 169,
+   "order": 168,
    "name": "FilAmTV Stream 2",
    "category": "News",
    "tags": [
@@ -4421,7 +4399,7 @@
   },
   {
    "id": 165,
-   "order": 170,
+   "order": 169,
    "name": "FRANCE 24",
    "category": "News",
    "tags": [
@@ -4443,7 +4421,7 @@
   },
   {
    "id": 166,
-   "order": 171,
+   "order": 170,
    "name": "Fox Sports 1",
    "category": "Sports",
    "tags": [
@@ -4468,7 +4446,7 @@
   },
   {
    "id": 167,
-   "order": 172,
+   "order": 171,
    "name": "Global Fashion Channel",
    "category": "Entertainment",
    "tags": [
@@ -4489,7 +4467,7 @@
   },
   {
    "id": 168,
-   "order": 173,
+   "order": 172,
    "name": "FRANCE 24 Stream 2",
    "category": "News",
    "tags": [
@@ -4511,7 +4489,7 @@
   },
   {
    "id": 169,
-   "order": 174,
+   "order": 173,
    "name": "GMA Life TV",
    "category": "News",
    "tags": [
@@ -4533,7 +4511,7 @@
   },
   {
    "id": 170,
-   "order": 175,
+   "order": 174,
    "name": "Global Trekker",
    "category": "Documentary",
    "tags": [
@@ -4557,7 +4535,7 @@
   },
   {
    "id": 171,
-   "order": 176,
+   "order": 175,
    "name": "GMA Pinoy TV",
    "category": "News",
    "tags": [
@@ -4579,7 +4557,7 @@
   },
   {
    "id": 172,
-   "order": 177,
+   "order": 176,
    "name": "GMA News TV",
    "category": "News",
    "tags": [
@@ -4601,7 +4579,7 @@
   },
   {
    "id": 173,
-   "order": 178,
+   "order": 177,
    "name": "Golden TV",
    "category": "Entertainment",
    "tags": [
@@ -4625,7 +4603,7 @@
   },
   {
    "id": 175,
-   "order": 179,
+   "order": 178,
    "name": "GMA Stream 2",
    "category": "News",
    "tags": [
@@ -4647,7 +4625,7 @@
   },
   {
    "id": 176,
-   "order": 180,
+   "order": 179,
    "name": "GTV Stream 2",
    "category": "News",
    "tags": [
@@ -4670,7 +4648,7 @@
   },
   {
    "id": 177,
-   "order": 181,
+   "order": 180,
    "name": "hallypop",
    "category": "Music",
    "tags": [
@@ -4694,7 +4672,7 @@
   },
   {
    "id": 178,
-   "order": 182,
+   "order": 181,
    "name": "GNN",
    "category": "News",
    "tags": [
@@ -4716,7 +4694,7 @@
   },
   {
    "id": 179,
-   "order": 183,
+   "order": 182,
    "name": "Hallmark",
    "category": "Movies",
    "tags": [
@@ -4738,7 +4716,7 @@
   },
   {
    "id": 180,
-   "order": 184,
+   "order": 183,
    "name": "GTV",
    "category": "News",
    "tags": [
@@ -4761,7 +4739,7 @@
   },
   {
    "id": 181,
-   "order": 185,
+   "order": 184,
    "name": "Hallmark Movies & More",
    "category": "Movies",
    "tags": [
@@ -4783,7 +4761,7 @@
   },
   {
    "id": 182,
-   "order": 186,
+   "order": 185,
    "name": "HBO Boxing",
    "category": "Sports",
    "tags": [
@@ -4805,7 +4783,7 @@
   },
   {
    "id": 183,
-   "order": 187,
+   "order": 186,
    "name": "HBO Boxing Stream 2",
    "category": "Sports",
    "tags": [
@@ -4827,7 +4805,7 @@
   },
   {
    "id": 184,
-   "order": 188,
+   "order": 187,
    "name": "HBO",
    "category": "Movies",
    "tags": [
@@ -4849,7 +4827,7 @@
   },
   {
    "id": 185,
-   "order": 189,
+   "order": 188,
    "name": "HBO Comedy",
    "category": "Movies",
    "tags": [
@@ -4870,7 +4848,7 @@
   },
   {
    "id": 186,
-   "order": 190,
+   "order": 189,
    "name": "HBO Family",
    "category": "Movies",
    "tags": [
@@ -4891,7 +4869,7 @@
   },
   {
    "id": 187,
-   "order": 191,
+   "order": 190,
    "name": "HBO POP",
    "category": "Movies",
    "tags": [
@@ -4912,7 +4890,7 @@
   },
   {
    "id": 188,
-   "order": 192,
+   "order": 191,
    "name": "HBO Mundi",
    "category": "Movies",
    "tags": [
@@ -4934,7 +4912,7 @@
   },
   {
    "id": 189,
-   "order": 193,
+   "order": 192,
    "name": "HBO Signature",
    "category": "Movies",
    "tags": [
@@ -4955,7 +4933,7 @@
   },
   {
    "id": 190,
-   "order": 194,
+   "order": 193,
    "name": "HBO PLUS",
    "category": "Movies",
    "tags": [
@@ -4976,7 +4954,7 @@
   },
   {
    "id": 191,
-   "order": 195,
+   "order": 194,
    "name": "HBO Zone Stream 2",
    "category": "Movies",
    "tags": [
@@ -4997,7 +4975,7 @@
   },
   {
    "id": 192,
-   "order": 196,
+   "order": 195,
    "name": "HBO Zone",
    "category": "Movies",
    "tags": [
@@ -5018,7 +4996,7 @@
   },
   {
    "id": 193,
-   "order": 197,
+   "order": 196,
    "name": "HBO Xtreme",
    "category": "Movies",
    "tags": [
@@ -5039,7 +5017,7 @@
   },
   {
    "id": 194,
-   "order": 198,
+   "order": 197,
    "name": "HBO POP Stream 2",
    "category": "Movies",
    "tags": [
@@ -5060,7 +5038,7 @@
   },
   {
    "id": 195,
-   "order": 199,
+   "order": 198,
    "name": "American Pickers",
    "category": "Entertainment",
    "tags": [
@@ -5084,7 +5062,7 @@
   },
   {
    "id": 196,
-   "order": 200,
+   "order": 199,
    "name": "Deal Zone",
    "category": "Entertainment",
    "tags": [
@@ -5108,7 +5086,7 @@
   },
   {
    "id": 197,
-   "order": 201,
+   "order": 200,
    "name": "Modern Innovations",
    "category": "Entertainment",
    "tags": [
@@ -5132,7 +5110,7 @@
   },
   {
    "id": 198,
-   "order": 202,
+   "order": 201,
    "name": "HGTV HD",
    "category": "Entertainment",
    "tags": [
@@ -5153,7 +5131,7 @@
   },
   {
    "id": 199,
-   "order": 203,
+   "order": 202,
    "name": "History HD",
    "category": "Entertainment",
    "tags": [
@@ -5177,7 +5155,7 @@
   },
   {
    "id": 200,
-   "order": 204,
+   "order": 203,
    "name": "Modern Marvels",
    "category": "Entertainment",
    "tags": [
@@ -5201,7 +5179,7 @@
   },
   {
    "id": 201,
-   "order": 205,
+   "order": 204,
    "name": "Torque",
    "category": "Entertainment",
    "tags": [
@@ -5225,7 +5203,7 @@
   },
   {
    "id": 202,
-   "order": 206,
+   "order": 205,
    "name": "Xtreme Outdoor",
    "category": "Entertainment",
    "tags": [
@@ -5249,7 +5227,7 @@
   },
   {
    "id": 203,
-   "order": 207,
+   "order": 206,
    "name": "HIYAH!",
    "category": "Movies",
    "tags": [
@@ -5272,7 +5250,7 @@
   },
   {
    "id": 204,
-   "order": 208,
+   "order": 207,
    "name": "Hope Channel PH",
    "category": "Entertainment",
    "tags": [
@@ -5293,7 +5271,7 @@
   },
   {
    "id": 205,
-   "order": 209,
+   "order": 208,
    "name": "Hits Movies",
    "category": "Movies",
    "tags": [
@@ -5312,7 +5290,7 @@
   },
   {
    "id": 206,
-   "order": 210,
+   "order": 209,
    "name": "Hits Now",
    "category": "Movies",
    "tags": [
@@ -5332,7 +5310,7 @@
   },
   {
    "id": 207,
-   "order": 211,
+   "order": 210,
    "name": "Hope Channel International",
    "category": "Entertainment",
    "tags": [
@@ -5353,7 +5331,7 @@
   },
   {
    "id": 208,
-   "order": 212,
+   "order": 211,
    "name": "HypeTV",
    "category": "Movies",
    "tags": [
@@ -5377,7 +5355,7 @@
   },
   {
    "id": 209,
-   "order": 213,
+   "order": 212,
    "name": "INCTV",
    "category": "News",
    "tags": [
@@ -5400,7 +5378,7 @@
   },
   {
    "id": 210,
-   "order": 214,
+   "order": 213,
    "name": "IBC13",
    "category": "News",
    "tags": [
@@ -5422,7 +5400,7 @@
   },
   {
    "id": 211,
-   "order": 215,
+   "order": 214,
    "name": "Hits HD",
    "category": "Movies",
    "tags": [
@@ -5441,7 +5419,7 @@
   },
   {
    "id": 212,
-   "order": 216,
+   "order": 215,
    "name": "IBC13 Stream 2",
    "category": "News",
    "tags": [
@@ -5463,7 +5441,7 @@
   },
   {
    "id": 213,
-   "order": 217,
+   "order": 216,
    "name": "INC Radio",
    "category": "News",
    "tags": [
@@ -5486,7 +5464,7 @@
   },
   {
    "id": 214,
-   "order": 218,
+   "order": 217,
    "name": "INCTV Stream 2",
    "category": "News",
    "tags": [
@@ -5509,7 +5487,7 @@
   },
   {
    "id": 215,
-   "order": 219,
+   "order": 218,
    "name": "InTravel",
    "category": "Documentary",
    "tags": [
@@ -5531,7 +5509,7 @@
   },
   {
    "id": 216,
-   "order": 220,
+   "order": 219,
    "name": "InWonder",
    "category": "Documentary",
    "tags": [
@@ -5553,7 +5531,7 @@
   },
   {
    "id": 217,
-   "order": 221,
+   "order": 220,
    "name": "InWild",
    "category": "Documentary",
    "tags": [
@@ -5575,7 +5553,7 @@
   },
   {
    "id": 218,
-   "order": 222,
+   "order": 221,
    "name": "ION",
    "category": "Movies",
    "tags": [
@@ -5599,7 +5577,7 @@
   },
   {
    "id": 219,
-   "order": 223,
+   "order": 222,
    "name": "ION Mystery",
    "category": "Movies",
    "tags": [
@@ -5623,7 +5601,7 @@
   },
   {
    "id": 220,
-   "order": 224,
+   "order": 223,
    "name": "ION Plus",
    "category": "Movies",
    "tags": [
@@ -5647,7 +5625,7 @@
   },
   {
    "id": 221,
-   "order": 225,
+   "order": 224,
    "name": "Jeepney TV",
    "category": "Movies",
    "tags": [
@@ -5671,7 +5649,7 @@
   },
   {
    "id": 222,
-   "order": 226,
+   "order": 225,
    "name": "Just for Laughs Gags",
    "category": "Entertainment",
    "tags": [
@@ -5692,7 +5670,7 @@
   },
   {
    "id": 223,
-   "order": 227,
+   "order": 226,
    "name": "Just for Laughs Gags Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -5713,7 +5691,7 @@
   },
   {
    "id": 225,
-   "order": 228,
+   "order": 227,
    "name": "Kartoon Channel",
    "category": "Kids",
    "tags": [
@@ -5735,7 +5713,7 @@
   },
   {
    "id": 226,
-   "order": 229,
+   "order": 228,
    "name": "Jeepney TV Stream 3",
    "category": "Movies",
    "tags": [
@@ -5759,7 +5737,7 @@
   },
   {
    "id": 227,
-   "order": 230,
+   "order": 229,
    "name": "Kidsflix",
    "category": "Kids",
    "tags": [
@@ -5781,7 +5759,7 @@
   },
   {
    "id": 229,
-   "order": 231,
+   "order": 230,
    "name": "Kids TV",
    "category": "Kids",
    "tags": [
@@ -5803,7 +5781,7 @@
   },
   {
    "id": 230,
-   "order": 232,
+   "order": 231,
    "name": "Baby Shark TV",
    "category": "Kids",
    "tags": [
@@ -5825,7 +5803,7 @@
   },
   {
    "id": 231,
-   "order": 233,
+   "order": 232,
    "name": "Baby Shark TV Stream 2",
    "category": "Kids",
    "tags": [
@@ -5847,7 +5825,7 @@
   },
   {
    "id": 232,
-   "order": 234,
+   "order": 233,
    "name": "KBS World",
    "category": "Movies",
    "tags": [
@@ -5868,7 +5846,7 @@
   },
   {
    "id": 233,
-   "order": 235,
+   "order": 234,
    "name": "Barbie and Friends",
    "category": "Kids",
    "tags": [
@@ -5890,7 +5868,7 @@
   },
   {
    "id": 234,
-   "order": 236,
+   "order": 235,
    "name": "Barney and Friends",
    "category": "Kids",
    "tags": [
@@ -5912,7 +5890,7 @@
   },
   {
    "id": 235,
-   "order": 237,
+   "order": 236,
    "name": "Rainbow Ruby",
    "category": "Kids",
    "tags": [
@@ -5934,7 +5912,7 @@
   },
   {
    "id": 236,
-   "order": 238,
+   "order": 237,
    "name": "Toony Planet",
    "category": "Kids",
    "tags": [
@@ -5956,7 +5934,7 @@
   },
   {
    "id": 237,
-   "order": 239,
+   "order": 238,
    "name": "Dora TV",
    "category": "Kids",
    "tags": [
@@ -5978,7 +5956,7 @@
   },
   {
    "id": 238,
-   "order": 240,
+   "order": 239,
    "name": "Kapamilya Channel HD Stream 2",
    "category": "News",
    "tags": [
@@ -6001,7 +5979,7 @@
   },
   {
    "id": 239,
-   "order": 241,
+   "order": 240,
    "name": "Teletubbies",
    "category": "Kids",
    "tags": [
@@ -6023,7 +6001,7 @@
   },
   {
    "id": 240,
-   "order": 242,
+   "order": 241,
    "name": "Minecraft TV",
    "category": "Kids",
    "tags": [
@@ -6046,7 +6024,7 @@
   },
   {
    "id": 241,
-   "order": 243,
+   "order": 242,
    "name": "Zoo Moo",
    "category": "Kids",
    "tags": [
@@ -6068,7 +6046,7 @@
   },
   {
    "id": 242,
-   "order": 244,
+   "order": 243,
    "name": "Lego Kids TV",
    "category": "Kids",
    "tags": [
@@ -6090,7 +6068,7 @@
   },
   {
    "id": 243,
-   "order": 245,
+   "order": 244,
    "name": "Kix HD Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -6110,7 +6088,7 @@
   },
   {
    "id": 244,
-   "order": 246,
+   "order": 245,
    "name": "Knowledge Channel",
    "category": "Kids",
    "tags": [
@@ -6136,7 +6114,7 @@
   },
   {
    "id": 245,
-   "order": 247,
+   "order": 246,
    "name": "Kix HD",
    "category": "Entertainment",
    "tags": [
@@ -6156,7 +6134,7 @@
   },
   {
    "id": 246,
-   "order": 248,
+   "order": 247,
    "name": "Kpop TV Play",
    "category": "Music",
    "tags": [
@@ -6176,7 +6154,7 @@
   },
   {
    "id": 247,
-   "order": 249,
+   "order": 248,
    "name": "KroneHit TV",
    "category": "Music",
    "tags": [
@@ -6197,7 +6175,7 @@
   },
   {
    "id": 248,
-   "order": 250,
+   "order": 249,
    "name": "Knowledge Channel Stream 2",
    "category": "Kids",
    "tags": [
@@ -6223,7 +6201,7 @@
   },
   {
    "id": 249,
-   "order": 251,
+   "order": 250,
    "name": "Living Asia Channel",
    "category": "News",
    "tags": [
@@ -6246,7 +6224,7 @@
   },
   {
    "id": 250,
-   "order": 252,
+   "order": 251,
    "name": "Lifetime",
    "category": "Entertainment",
    "tags": [
@@ -6266,7 +6244,7 @@
   },
   {
    "id": 251,
-   "order": 253,
+   "order": 252,
    "name": "Lifetime Movie Favorites",
    "category": "Entertainment",
    "tags": [
@@ -6286,7 +6264,7 @@
   },
   {
    "id": 252,
-   "order": 254,
+   "order": 253,
    "name": "Light TV",
    "category": "Entertainment",
    "tags": [
@@ -6309,7 +6287,7 @@
   },
   {
    "id": 253,
-   "order": 255,
+   "order": 254,
    "name": "MMA-TV",
    "category": "Sports",
    "tags": [
@@ -6332,7 +6310,7 @@
   },
   {
    "id": 254,
-   "order": 256,
+   "order": 255,
    "name": "Living Asia Channel Stream 2",
    "category": "News",
    "tags": [
@@ -6355,7 +6333,7 @@
   },
   {
    "id": 255,
-   "order": 257,
+   "order": 256,
    "name": "UFA",
    "category": "Sports",
    "tags": [
@@ -6378,7 +6356,7 @@
   },
   {
    "id": 256,
-   "order": 258,
+   "order": 257,
    "name": "Glory Kickboxing",
    "category": "Sports",
    "tags": [
@@ -6401,7 +6379,7 @@
   },
   {
    "id": 257,
-   "order": 259,
+   "order": 258,
    "name": "Lotus Macau",
    "category": "Entertainment",
    "tags": [
@@ -6421,7 +6399,7 @@
   },
   {
    "id": 258,
-   "order": 260,
+   "order": 259,
    "name": "Lotus Macau Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -6441,7 +6419,7 @@
   },
   {
    "id": 259,
-   "order": 261,
+   "order": 260,
    "name": "PFL MMA",
    "category": "Sports",
    "tags": [
@@ -6464,7 +6442,7 @@
   },
   {
    "id": 260,
-   "order": 262,
+   "order": 261,
    "name": "Inside Arm Wrestling",
    "category": "Sports",
    "tags": [
@@ -6487,7 +6465,7 @@
   },
   {
    "id": 261,
-   "order": 263,
+   "order": 262,
    "name": "Mindanow Network",
    "category": "News",
    "tags": [
@@ -6511,7 +6489,7 @@
   },
   {
    "id": 262,
-   "order": 264,
+   "order": 263,
    "name": "MIRAMAX",
    "category": "Movies",
    "tags": [
@@ -6533,7 +6511,7 @@
   },
   {
    "id": 263,
-   "order": 265,
+   "order": 264,
    "name": "Mindanow Network Stream 2",
    "category": "News",
    "tags": [
@@ -6557,7 +6535,7 @@
   },
   {
    "id": 264,
-   "order": 266,
+   "order": 265,
    "name": "Metro Channel",
    "category": "Entertainment",
    "tags": [
@@ -6577,7 +6555,7 @@
   },
   {
    "id": 265,
-   "order": 267,
+   "order": 266,
    "name": "MLB Network",
    "category": "Sports",
    "tags": [
@@ -6602,7 +6580,7 @@
   },
   {
    "id": 266,
-   "order": 268,
+   "order": 267,
    "name": "MLB",
    "category": "Sports",
    "tags": [
@@ -6627,7 +6605,7 @@
   },
   {
    "id": 267,
-   "order": 269,
+   "order": 268,
    "name": "NFL Network",
    "category": "Sports",
    "tags": [
@@ -6652,7 +6630,7 @@
   },
   {
    "id": 268,
-   "order": 270,
+   "order": 269,
    "name": "NFL Channel",
    "category": "Sports",
    "tags": [
@@ -6677,7 +6655,7 @@
   },
   {
    "id": 269,
-   "order": 271,
+   "order": 270,
    "name": "NHL Network",
    "category": "Sports",
    "tags": [
@@ -6702,7 +6680,7 @@
   },
   {
    "id": 270,
-   "order": 272,
+   "order": 271,
    "name": "MNX HD",
    "category": "Movies",
    "tags": [
@@ -6723,7 +6701,7 @@
   },
   {
    "id": 271,
-   "order": 273,
+   "order": 272,
    "name": "MN+ HD",
    "category": "Movies",
    "tags": [
@@ -6744,7 +6722,7 @@
   },
   {
    "id": 272,
-   "order": 274,
+   "order": 273,
    "name": "NHL Network Stream 2",
    "category": "Sports",
    "tags": [
@@ -6769,7 +6747,7 @@
   },
   {
    "id": 273,
-   "order": 275,
+   "order": 274,
    "name": "Moonbug Kids",
    "category": "Kids",
    "tags": [
@@ -6791,7 +6769,7 @@
   },
   {
    "id": 274,
-   "order": 276,
+   "order": 275,
    "name": "MotoGP Channel",
    "category": "Sports",
    "tags": [
@@ -6816,7 +6794,7 @@
   },
   {
    "id": 275,
-   "order": 277,
+   "order": 276,
    "name": "MOR Entertainment",
    "category": "Entertainment",
    "tags": [
@@ -6840,7 +6818,7 @@
   },
   {
    "id": 276,
-   "order": 278,
+   "order": 277,
    "name": "Motorvision TV",
    "category": "Sports",
    "tags": [
@@ -6865,7 +6843,7 @@
   },
   {
    "id": 277,
-   "order": 279,
+   "order": 278,
    "name": "MovieBoxPH",
    "category": "Movies",
    "tags": [
@@ -6887,7 +6865,7 @@
   },
   {
    "id": 278,
-   "order": 280,
+   "order": 279,
    "name": "Halloween Nights",
    "category": "Movies",
    "tags": [
@@ -6911,7 +6889,7 @@
   },
   {
    "id": 279,
-   "order": 281,
+   "order": 280,
    "name": "Movies Action",
    "category": "Movies",
    "tags": [
@@ -6935,7 +6913,7 @@
   },
   {
    "id": 280,
-   "order": 282,
+   "order": 281,
    "name": "Movies Now",
    "category": "Movies",
    "tags": [
@@ -6956,7 +6934,7 @@
   },
   {
    "id": 281,
-   "order": 283,
+   "order": 282,
    "name": "Romedy Now",
    "category": "Movies",
    "tags": [
@@ -6977,7 +6955,7 @@
   },
   {
    "id": 282,
-   "order": 284,
+   "order": 283,
    "name": "Movie Sphere",
    "category": "Movies",
    "tags": [
@@ -6998,7 +6976,7 @@
   },
   {
    "id": 283,
-   "order": 285,
+   "order": 284,
    "name": "Movie Sphere Stream 2",
    "category": "Movies",
    "tags": [
@@ -7019,7 +6997,7 @@
   },
   {
    "id": 284,
-   "order": 286,
+   "order": 285,
    "name": "by Lionsgate",
    "category": "Movies",
    "tags": [
@@ -7040,7 +7018,7 @@
   },
   {
    "id": 285,
-   "order": 287,
+   "order": 286,
    "name": "Mr. Bean",
    "category": "Entertainment",
    "tags": [
@@ -7060,7 +7038,7 @@
   },
   {
    "id": 286,
-   "order": 288,
+   "order": 287,
    "name": "Mr Beast",
    "category": "Entertainment",
    "tags": [
@@ -7081,7 +7059,7 @@
   },
   {
    "id": 287,
-   "order": 289,
+   "order": 288,
    "name": "MTV",
    "category": "Music",
    "tags": [
@@ -7103,7 +7081,7 @@
   },
   {
    "id": 288,
-   "order": 290,
+   "order": 289,
    "name": "MUX DOS",
    "category": "Music",
    "tags": [
@@ -7125,7 +7103,7 @@
   },
   {
    "id": 289,
-   "order": 291,
+   "order": 290,
    "name": "MUX JUAN",
    "category": "Music",
    "tags": [
@@ -7147,7 +7125,7 @@
   },
   {
    "id": 290,
-   "order": 292,
+   "order": 291,
    "name": "MUX NEWS",
    "category": "Music",
    "tags": [
@@ -7169,7 +7147,7 @@
   },
   {
    "id": 291,
-   "order": 293,
+   "order": 292,
    "name": "MUX LIFE",
    "category": "Music",
    "tags": [
@@ -7191,7 +7169,7 @@
   },
   {
    "id": 292,
-   "order": 294,
+   "order": 293,
    "name": "Media Pilipinas TV",
    "category": "Entertainment",
    "tags": [
@@ -7213,7 +7191,7 @@
   },
   {
    "id": 293,
-   "order": 295,
+   "order": 294,
    "name": "MUX WORLD",
    "category": "Music",
    "tags": [
@@ -7235,7 +7213,7 @@
   },
   {
    "id": 294,
-   "order": 296,
+   "order": 295,
    "name": "Mythbusters",
    "category": "Documentary",
    "tags": [
@@ -7258,7 +7236,7 @@
   },
   {
    "id": 295,
-   "order": 297,
+   "order": 296,
    "name": "Mysterious Worlds",
    "category": "Documentary",
    "tags": [
@@ -7314,7 +7292,7 @@
   },
   {
    "id": 296,
-   "order": 298,
+   "order": 297,
    "name": "Ancient Aliens",
    "category": "Documentary",
    "tags": [
@@ -7370,7 +7348,7 @@
   },
   {
    "id": 297,
-   "order": 299,
+   "order": 298,
    "name": "Alien Nation by DUST",
    "category": "Documentary",
    "tags": [
@@ -7426,7 +7404,7 @@
   },
   {
    "id": 298,
-   "order": 300,
+   "order": 299,
    "name": "Haunt TV",
    "category": "Documentary",
    "tags": [
@@ -7482,7 +7460,7 @@
   },
   {
    "id": 299,
-   "order": 301,
+   "order": 300,
    "name": "Scares by Shudder",
    "category": "Documentary",
    "tags": [
@@ -7538,7 +7516,7 @@
   },
   {
    "id": 300,
-   "order": 302,
+   "order": 301,
    "name": "Mythbusters Stream 2",
    "category": "Documentary",
    "tags": [
@@ -7561,7 +7539,7 @@
   },
   {
    "id": 301,
-   "order": 303,
+   "order": 302,
    "name": "UnXplained Zone",
    "category": "Documentary",
    "tags": [
@@ -7617,7 +7595,7 @@
   },
   {
    "id": 302,
-   "order": 304,
+   "order": 303,
    "name": "MYX",
    "category": "News",
    "tags": [
@@ -7641,7 +7619,7 @@
   },
   {
    "id": 303,
-   "order": 305,
+   "order": 304,
    "name": "National Geographic",
    "category": "Documentary",
    "tags": [
@@ -7664,7 +7642,7 @@
   },
   {
    "id": 304,
-   "order": 306,
+   "order": 305,
    "name": "Nat Geo Wild",
    "category": "Documentary",
    "tags": [
@@ -7687,7 +7665,7 @@
   },
   {
    "id": 305,
-   "order": 307,
+   "order": 306,
    "name": "NBA TV",
    "category": "NBA Live",
    "tags": [
@@ -7709,7 +7687,7 @@
   },
   {
    "id": 306,
-   "order": 308,
+   "order": 307,
    "name": "New KMovies",
    "category": "Movies",
    "tags": [
@@ -7733,7 +7711,7 @@
   },
   {
    "id": 307,
-   "order": 309,
+   "order": 308,
    "name": "MYX PH",
    "category": "News",
    "tags": [
@@ -7757,7 +7735,7 @@
   },
   {
    "id": 308,
-   "order": 310,
+   "order": 309,
    "name": "KFood",
    "category": "Movies",
    "tags": [
@@ -7781,7 +7759,7 @@
   },
   {
    "id": 309,
-   "order": 311,
+   "order": 310,
    "name": "K Movie",
    "category": "Movies",
    "tags": [
@@ -7805,7 +7783,7 @@
   },
   {
    "id": 310,
-   "order": 312,
+   "order": 311,
    "name": "NBA TV Philippines",
    "category": "NBA Live",
    "tags": [
@@ -7830,7 +7808,7 @@
   },
   {
    "id": 311,
-   "order": 313,
+   "order": 312,
    "name": "Kpop",
    "category": "Movies",
    "tags": [
@@ -7854,7 +7832,7 @@
   },
   {
    "id": 312,
-   "order": 314,
+   "order": 313,
    "name": "NHK World Japan",
    "category": "News",
    "tags": [
@@ -7877,7 +7855,7 @@
   },
   {
    "id": 313,
-   "order": 315,
+   "order": 314,
    "name": "Net25",
    "category": "News",
    "tags": [
@@ -7899,7 +7877,7 @@
   },
   {
    "id": 314,
-   "order": 316,
+   "order": 315,
    "name": "Nickjr Stream 2",
    "category": "Kids",
    "tags": [
@@ -7924,7 +7902,7 @@
   },
   {
    "id": 315,
-   "order": 317,
+   "order": 316,
    "name": "NCAA NXT",
    "category": "Sports",
    "tags": [
@@ -7948,7 +7926,7 @@
   },
   {
    "id": 316,
-   "order": 318,
+   "order": 317,
    "name": "Nickelodeon",
    "category": "Kids",
    "tags": [
@@ -7972,7 +7950,7 @@
   },
   {
    "id": 317,
-   "order": 319,
+   "order": 318,
    "name": "Net25 Stream 2",
    "category": "News",
    "tags": [
@@ -7994,7 +7972,7 @@
   },
   {
    "id": 318,
-   "order": 320,
+   "order": 319,
    "name": "Nickelodeon Stream 3",
    "category": "Kids",
    "tags": [
@@ -8018,7 +7996,7 @@
   },
   {
    "id": 319,
-   "order": 321,
+   "order": 320,
    "name": "Nickjr",
    "category": "Kids",
    "tags": [
@@ -8043,7 +8021,7 @@
   },
   {
    "id": 320,
-   "order": 322,
+   "order": 321,
    "name": "Nickelodeon Toons",
    "category": "Kids",
    "tags": [
@@ -8067,7 +8045,7 @@
   },
   {
    "id": 321,
-   "order": 323,
+   "order": 322,
    "name": "Nicktoons",
    "category": "Kids",
    "tags": [
@@ -8091,7 +8069,7 @@
   },
   {
    "id": 322,
-   "order": 324,
+   "order": 323,
    "name": "Peppa Pig",
    "category": "Kids",
    "tags": [
@@ -8116,7 +8094,7 @@
   },
   {
    "id": 323,
-   "order": 325,
+   "order": 324,
    "name": "Spongebob Squarepants",
    "category": "Kids",
    "tags": [
@@ -8140,7 +8118,7 @@
   },
   {
    "id": 324,
-   "order": 326,
+   "order": 325,
    "name": "One News HD",
    "category": "News",
    "tags": [
@@ -8164,7 +8142,7 @@
   },
   {
    "id": 325,
-   "order": 327,
+   "order": 326,
    "name": "Nickelodeon Stream 2",
    "category": "Kids",
    "tags": [
@@ -8188,7 +8166,7 @@
   },
   {
    "id": 326,
-   "order": 328,
+   "order": 327,
    "name": "One PH",
    "category": "News",
    "tags": [
@@ -8212,7 +8190,7 @@
   },
   {
    "id": 327,
-   "order": 329,
+   "order": 328,
    "name": "Outdoor Channel",
    "category": "Documentary",
    "tags": [
@@ -8234,7 +8212,7 @@
   },
   {
    "id": 328,
-   "order": 330,
+   "order": 329,
    "name": "One PH Stream 2",
    "category": "News",
    "tags": [
@@ -8258,7 +8236,7 @@
   },
   {
    "id": 329,
-   "order": 331,
+   "order": 330,
    "name": "Oras ng Himala",
    "category": "Entertainment",
    "tags": [
@@ -8280,7 +8258,7 @@
   },
   {
    "id": 330,
-   "order": 332,
+   "order": 331,
    "name": "PBA Rush",
    "category": "Sports",
    "tags": [
@@ -8305,7 +8283,7 @@
   },
   {
    "id": 331,
-   "order": 333,
+   "order": 332,
    "name": "PBS Digital Studios",
    "category": "Kids",
    "tags": [
@@ -8329,7 +8307,7 @@
   },
   {
    "id": 332,
-   "order": 334,
+   "order": 333,
    "name": "One Sports",
    "category": "Sports",
    "tags": [
@@ -8355,7 +8333,7 @@
   },
   {
    "id": 333,
-   "order": 335,
+   "order": 334,
    "name": "Antiques Roadshow",
    "category": "Kids",
    "tags": [
@@ -8379,7 +8357,7 @@
   },
   {
    "id": 334,
-   "order": 336,
+   "order": 335,
    "name": "One Sports+ HD",
    "category": "Sports",
    "tags": [
@@ -8405,7 +8383,7 @@
   },
   {
    "id": 335,
-   "order": 337,
+   "order": 336,
    "name": "People Are Awesome",
    "category": "Entertainment",
    "tags": [
@@ -8427,7 +8405,7 @@
   },
   {
    "id": 336,
-   "order": 338,
+   "order": 337,
    "name": "Paramount Movie Channel",
    "category": "Movies",
    "tags": [
@@ -8448,7 +8426,7 @@
   },
   {
    "id": 337,
-   "order": 339,
+   "order": 338,
    "name": "Pilipinas Live",
    "category": "Sports",
    "tags": [
@@ -8475,7 +8453,7 @@
   },
   {
    "id": 338,
-   "order": 340,
+   "order": 339,
    "name": "Pilipinas Live 4",
    "category": "Sports",
    "tags": [
@@ -8502,7 +8480,7 @@
   },
   {
    "id": 339,
-   "order": 341,
+   "order": 340,
    "name": "Pilipinas Live 5",
    "category": "Sports",
    "tags": [
@@ -8529,7 +8507,7 @@
   },
   {
    "id": 340,
-   "order": 342,
+   "order": 341,
    "name": "Pilipinas Live 2",
    "category": "Sports",
    "tags": [
@@ -8556,7 +8534,7 @@
   },
   {
    "id": 341,
-   "order": 343,
+   "order": 342,
    "name": "Pilipinas Live 3",
    "category": "Sports",
    "tags": [
@@ -8583,7 +8561,7 @@
   },
   {
    "id": 342,
-   "order": 344,
+   "order": 343,
    "name": "Pilipinas Live 6",
    "category": "Sports",
    "tags": [
@@ -8610,7 +8588,7 @@
   },
   {
    "id": 343,
-   "order": 345,
+   "order": 344,
    "name": "Pilipinas Live 7",
    "category": "Sports",
    "tags": [
@@ -8637,7 +8615,7 @@
   },
   {
    "id": 344,
-   "order": 346,
+   "order": 345,
    "name": "Pilipinas Live 8",
    "category": "Sports",
    "tags": [
@@ -8664,7 +8642,7 @@
   },
   {
    "id": 345,
-   "order": 347,
+   "order": 346,
    "name": "Pilipinas Live 9",
    "category": "Sports",
    "tags": [
@@ -8691,7 +8669,7 @@
   },
   {
    "id": 346,
-   "order": 348,
+   "order": 347,
    "name": "Premier Sports",
    "category": "Entertainment",
    "tags": [
@@ -8713,7 +8691,7 @@
   },
   {
    "id": 347,
-   "order": 349,
+   "order": 348,
    "name": "Pilipinas Live 10",
    "category": "Sports",
    "tags": [
@@ -8740,7 +8718,7 @@
   },
   {
    "id": 348,
-   "order": 350,
+   "order": 349,
    "name": "Premier Sports 2",
    "category": "Entertainment",
    "tags": [
@@ -8762,7 +8740,7 @@
   },
   {
    "id": 349,
-   "order": 351,
+   "order": 350,
    "name": "Pinoy Box Office",
    "category": "Movies",
    "tags": [
@@ -8785,7 +8763,7 @@
   },
   {
    "id": 350,
-   "order": 352,
+   "order": 351,
    "name": "Premier Sports 2 Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -8807,7 +8785,7 @@
   },
   {
    "id": 351,
-   "order": 353,
+   "order": 352,
    "name": "Pinoy Xtreme",
    "category": "Music",
    "tags": [
@@ -8830,7 +8808,7 @@
   },
   {
    "id": 352,
-   "order": 354,
+   "order": 353,
    "name": "Premier Sports Stream 2",
    "category": "Entertainment",
    "tags": [
@@ -8852,7 +8830,7 @@
   },
   {
    "id": 353,
-   "order": 355,
+   "order": 354,
    "name": "Popular Science",
    "category": "Documentary",
    "tags": [
@@ -8875,7 +8853,7 @@
   },
   {
    "id": 354,
-   "order": 356,
+   "order": 355,
    "name": "Science is Amazing",
    "category": "Documentary",
    "tags": [
@@ -8898,7 +8876,7 @@
   },
   {
    "id": 355,
-   "order": 357,
+   "order": 356,
    "name": "Premier Football",
    "category": "Entertainment",
    "tags": [
@@ -8920,7 +8898,7 @@
   },
   {
    "id": 356,
-   "order": 358,
+   "order": 357,
    "name": "Real Disaster Channel",
    "category": "Documentary",
    "tags": [
@@ -8943,7 +8921,7 @@
   },
   {
    "id": 357,
-   "order": 359,
+   "order": 358,
    "name": "Real Wild",
    "category": "Documentary",
    "tags": [
@@ -8966,7 +8944,7 @@
   },
   {
    "id": 358,
-   "order": 360,
+   "order": 359,
    "name": "Retro Crush",
    "category": "Movies",
    "tags": [
@@ -8987,7 +8965,7 @@
   },
   {
    "id": 359,
-   "order": 361,
+   "order": 360,
    "name": "Peoples Television",
    "category": "News",
    "tags": [
@@ -9011,7 +8989,7 @@
   },
   {
    "id": 360,
-   "order": 362,
+   "order": 361,
    "name": "RedBull TV",
    "category": "Entertainment",
    "tags": [
@@ -9064,7 +9042,7 @@
   },
   {
    "id": 361,
-   "order": 363,
+   "order": 362,
    "name": "Peoples Television Stream 2",
    "category": "News",
    "tags": [
@@ -9088,7 +9066,7 @@
   },
   {
    "id": 362,
-   "order": 364,
+   "order": 363,
    "name": "RJ Digitv",
    "category": "Music",
    "tags": [
@@ -9111,7 +9089,7 @@
   },
   {
    "id": 363,
-   "order": 365,
+   "order": 364,
    "name": "Rock Action",
    "category": "Movies",
    "tags": [
@@ -9132,7 +9110,7 @@
   },
   {
    "id": 364,
-   "order": 366,
+   "order": 365,
    "name": "Radyo Bandido",
    "category": "News",
    "tags": [
@@ -9156,7 +9134,7 @@
   },
   {
    "id": 365,
-   "order": 367,
+   "order": 366,
    "name": "Rock Entertainment",
    "category": "Movies",
    "tags": [
@@ -9177,7 +9155,7 @@
   },
   {
    "id": 366,
-   "order": 368,
+   "order": 367,
    "name": "SBS K-Drama",
    "category": "Movies",
    "tags": [
@@ -9199,7 +9177,7 @@
   },
   {
    "id": 367,
-   "order": 369,
+   "order": 368,
    "name": "Rock MNL",
    "category": "Entertainment",
    "tags": [
@@ -9220,7 +9198,7 @@
   },
   {
    "id": 368,
-   "order": 370,
+   "order": 369,
    "name": "SBS Running Man",
    "category": "Movies",
    "tags": [
@@ -9242,7 +9220,7 @@
   },
   {
    "id": 369,
-   "order": 371,
+   "order": 370,
    "name": "TBS",
    "category": "Movies",
    "tags": [
@@ -9264,7 +9242,7 @@
   },
   {
    "id": 370,
-   "order": 372,
+   "order": 371,
    "name": "SineManila",
    "category": "Movies",
    "tags": [
@@ -9288,7 +9266,7 @@
   },
   {
    "id": 371,
-   "order": 373,
+   "order": 372,
    "name": "RPTV Stream 2",
    "category": "News",
    "tags": [
@@ -9314,7 +9292,7 @@
   },
   {
    "id": 372,
-   "order": 374,
+   "order": 373,
    "name": "F1 TV",
    "category": "Sports",
    "tags": [
@@ -9337,7 +9315,7 @@
   },
   {
    "id": 373,
-   "order": 375,
+   "order": 374,
    "name": "Sky Sports F1",
    "category": "Sports",
    "tags": [
@@ -9352,6 +9330,28 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 374,
+   "order": 375,
+   "name": "SMNI News Channel",
+   "category": "News",
+   "tags": [
+    "News",
+    "Philippines",
+    "Pinoy",
+    "local"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/smni_news_channel_233.png",
+   "url": "https://stream.kdlc.click/hls/stream.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
    "enabled": true,
    "drmType": "",
    "keyId": "",
