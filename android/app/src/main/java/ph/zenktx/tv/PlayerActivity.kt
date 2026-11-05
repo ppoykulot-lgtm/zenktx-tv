@@ -72,6 +72,16 @@ class PlayerActivity : Activity() {
     private var startedAt = 0L
     private var lastCode = ""
 
+    /** This channel's address and its mirrors, in the order they are tried. */
+    private var sources: List<String> = emptyList()
+    private var sourceIndex = 0
+
+    /** One fresh pull of the publisher's feed per channel, not more. */
+    private var liveRetried = false
+
+    /** Set from the HTTP failure so a dead link can be told apart from a codec. */
+    private var lastStatus: Int? = null
+
     private val main = Handler(Looper.getMainLooper())
 
     private val hideChip = Runnable {
@@ -162,16 +172,28 @@ class PlayerActivity : Activity() {
 
     private fun playCurrent() {
         val channel = queue.getOrNull(index) ?: return
+        sources = ChannelRepository.sourcesFor(channel)
+        sourceIndex = 0
+        liveRetried = false
+        binding.errorPanel.visibility = View.GONE
+        showChip(channel)
+        prepareSource()
+    }
+
+    /** Prepares the address at [sourceIndex]; a mirror swap leaves the rest alone. */
+    private fun prepareSource() {
+        val channel = queue.getOrNull(index) ?: return
+        val url = sources.getOrNull(sourceIndex) ?: channel.url
 
         failed = false
         hasVideo = false
         recoveries = 0
         lastCode = ""
+        lastStatus = null
         startedAt = SystemClock.elapsedRealtime()
 
         binding.errorPanel.visibility = View.GONE
         binding.buffering.visibility = View.VISIBLE
-        showChip(channel)
 
         val exo = player ?: buildPlayer().also { player = it }
 
@@ -179,7 +201,7 @@ class PlayerActivity : Activity() {
 
         binding.playerView.player = exo
         exo.clearMediaItems()
-        exo.setMediaItem(mediaItemFor(channel))
+        exo.setMediaItem(mediaItemFor(channel, url))
         exo.prepare()
         exo.playWhenReady = true
 
@@ -187,15 +209,27 @@ class PlayerActivity : Activity() {
         main.postDelayed(watchdog, 1_000)
     }
 
-    private fun mediaItemFor(channel: Channel): MediaItem {
-        val mime = when (channel.streamType) {
+    /**
+     * The address decides the container, not the feed's streamType: that field
+     * goes stale when a provider swaps a channel between HLS and DASH, and an
+     * .mpd handed to the HLS parser fails before it requests a single segment.
+     */
+    private fun mediaItemFor(channel: Channel, url: String): MediaItem {
+        val clean = url.substringBefore('?').lowercase()
+        val type = when {
+            clean.endsWith(".mpd") -> "mpd"
+            clean.endsWith(".m3u8") -> "hls"
+            clean.endsWith(".mp4") -> "mp4"
+            else -> channel.streamType
+        }
+        val mime = when (type) {
             "mpd" -> MimeTypes.APPLICATION_MPD
             "hls" -> MimeTypes.APPLICATION_M3U8
             "mp4" -> MimeTypes.VIDEO_MP4
             else -> null
         }
         return MediaItem.Builder()
-            .setUri(channel.url)
+            .setUri(url)
             .apply { if (mime != null) setMimeType(mime) }
             .build()
     }
@@ -232,7 +266,7 @@ class PlayerActivity : Activity() {
                 if (state == Player.STATE_ENDED) {
                     // A live playlist ends for a moment while the provider
                     // re-tokenises it. Try again before reporting it as gone.
-                    if (!retryQuietly()) {
+                    if (!retryQuietly() && !nextSource()) {
                         fail(getString(R.string.err_empty), "STREAM_ENDED")
                     }
                 }
@@ -240,7 +274,9 @@ class PlayerActivity : Activity() {
 
             override fun onPlayerError(error: PlaybackException) {
                 lastCode = error.errorCodeName
-                if (!retryQuietly()) fail(describe(error), error.errorCodeName)
+                lastStatus =
+                    (error.cause as? HttpDataSource.InvalidResponseCodeException)?.responseCode
+                if (!retryQuietly() && !nextSource()) fail(describe(error), error.errorCodeName)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -319,6 +355,59 @@ class PlayerActivity : Activity() {
         return true
     }
 
+    /**
+     * Windows walks this chain before it reports anything: another address for
+     * the same feed, then the publisher's feed pulled again when the link has
+     * expired. The error card is the last resort, not the first answer.
+     */
+    private fun nextSource(): Boolean {
+        if (sourceIndex + 1 < sources.size) {
+            sourceIndex++
+            prepareSource()
+            return true
+        }
+        if (!liveRetried && isLinkDead()) {
+            liveRetried = true
+            refreshLiveAndRetry()
+            return true
+        }
+        return false
+    }
+
+    /** 410 is the provider's "this token is gone"; the other three mean the same. */
+    private fun isLinkDead(): Boolean {
+        val status = lastStatus ?: return false
+        return status == 403 || status == 404 || status == 410 || status == 451
+    }
+
+    /**
+     * Pulls the feed again and retries with whatever address it carries now.
+     * The fetch is a network call, so it stays off the main thread and the
+     * result is applied back on it.
+     */
+    private fun refreshLiveAndRetry() {
+        val channel = queue.getOrNull(index) ?: return
+        binding.errorPanel.visibility = View.GONE
+        binding.buffering.visibility = View.VISIBLE
+
+        Thread {
+            val fresh = runCatching { ChannelRepository.refreshLive(this) }.getOrDefault(false)
+            main.post {
+                if (isFinishing) return@post
+                if (!fresh) {
+                    fail(getString(R.string.err_link), "LINK_EXPIRED")
+                    return@post
+                }
+
+                val updated = ChannelRepository.byKey(channel.key) ?: channel
+                queue = queue.toMutableList().also { it[index] = updated }
+                sources = ChannelRepository.sourcesFor(updated)
+                sourceIndex = 0
+                prepareSource()
+            }
+        }.start()
+    }
+
     /** Frames are back: drop the panel and let the watchdog guard again. */
     private fun clearFailure() {
         if (binding.errorPanel.visibility != View.VISIBLE) return
@@ -336,6 +425,9 @@ class PlayerActivity : Activity() {
     private fun describe(error: PlaybackException): String {
         val status = (error.cause as? HttpDataSource.InvalidResponseCodeException)?.responseCode
         return when {
+            status == 403 || status == 404 || status == 410 || status == 451 ->
+                getString(R.string.err_link)
+
             status != null -> getString(R.string.err_http, status)
             error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
                 error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ->

@@ -98,6 +98,7 @@
     <string name="player_channel">CH %1$d / %2$d</string>
     <string name="player_no_video">No video yet — the stream is silent or the device cannot decode it.</string>
     <string name="err_http">The stream server refused the request (HTTP %1$d).\nThe link may be expired, private or geo-blocked.</string>
+    <string name="err_link">This channel link has expired or is blocked.\nThese free providers rotate their addresses, so the channel often works again later.</string>
     <string name="err_network">Cannot reach the stream.\nCheck the internet connection on this device.</string>
     <string name="err_timeout">The stream took too long to answer.</string>
     <string name="err_codec">This device cannot decode this stream (codec not supported).</string>

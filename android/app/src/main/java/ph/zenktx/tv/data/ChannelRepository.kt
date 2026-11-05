@@ -25,6 +25,9 @@ object ChannelRepository {
     private const val KEY_LIVE_AT = "at"
     private const val LIVE_TTL_MS = 6 * 60 * 60 * 1000L
 
+    /** One address plus two mirrors, the same budget the Windows build uses. */
+    private const val MIRROR_LIMIT = 3
+
     // The one channel list every build reads. Publishing a change is a commit to
     // this file; the app picks it up on the next launch, so a new, fixed,
     // reordered or removed channel never waits for a new APK.
@@ -47,6 +50,14 @@ object ChannelRepository {
     /** Everything loaded from disk/network, before local edits are applied. */
     @Volatile
     private var base: List<Channel> = emptyList()
+
+    /** The rows as they were read, before the live feed rewrote their addresses. */
+    @Volatile
+    private var sourceList: List<Channel> = emptyList()
+
+    /** Kept so a live refresh can re-apply the hidden channels and logo overrides. */
+    @Volatile
+    private var libraryRef: LibraryStore? = null
 
     /** Set when a playlist source changed and the home screen should reload. */
     @Volatile
@@ -97,6 +108,9 @@ object ChannelRepository {
                 errors += "${playlist.name}: ${it.message ?: "unreachable"}"
             }
         }
+
+        sourceList = out
+        libraryRef = library
 
         // Deduplicate by URL, first source wins.
         val seen = HashSet<String>()
@@ -191,6 +205,11 @@ object ChannelRepository {
             json.keys().asSequence().associateWith { LiveEntry.from(json.getJSONObject(it)) }
         }.getOrNull() ?: return channels
 
+        return applyLive(channels, map)
+    }
+
+    /** Moves every bundled row onto the feed's current address and key pair. */
+    private fun applyLive(channels: List<Channel>, map: Map<String, LiveEntry>): List<Channel> {
         if (map.isEmpty()) return channels
         val patched = channels.map { channel ->
             if (!channel.key.startsWith("b:")) return@map channel
@@ -207,6 +226,61 @@ object ChannelRepository {
         }
         return patched + liveExtras(patched, map)
     }
+
+    /**
+     * Pulls the feed again, ignoring the six-hour cache. A link the guide cached
+     * this morning can answer 410 tonight while the channel itself is still
+     * alive, so the player calls this the moment a channel fails instead of
+     * waiting for the cache to expire.
+     */
+    fun refreshLive(context: Context): Boolean {
+        val original = sourceList
+        if (original.isEmpty()) return false
+
+        val map = runCatching { parseLive(Http.getText(LIVE_FEED)) }.getOrDefault(emptyMap())
+        if (map.isEmpty()) return false
+
+        runCatching {
+            val json = JSONObject()
+            map.forEach { (key, entry) -> json.put(key, entry.toJson()) }
+            context.applicationContext.getSharedPreferences(LIVE_PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putString(KEY_LIVE_MAP, json.toString())
+                .putLong(KEY_LIVE_AT, System.currentTimeMillis())
+                .apply()
+        }
+
+        val seen = HashSet<String>()
+        base = applyLive(original, map).filter { seen.add(it.url) }
+        cache = libraryRef?.let { refresh(it) } ?: base
+        dirty = true
+        return true
+    }
+
+    /**
+     * The address in the guide first, then the other rows that carry the same
+     * feed: a "Stream 2", an HD twin, a leftover duplicate from an imported
+     * playlist. Windows walks the same chain, which is why a channel whose first
+     * link is dead plays there and used to show the error card here.
+     */
+    fun sourcesFor(channel: Channel): List<String> {
+        val urls = ArrayList<String>(MIRROR_LIMIT)
+        urls += channel.url
+        val target = mirrorKey(channel.name)
+        for (other in cache) {
+            if (other.url.isBlank() || urls.contains(other.url)) continue
+            if (mirrorKey(other.name) != target) continue
+            urls += other.url
+            if (urls.size == MIRROR_LIMIT) break
+        }
+        return urls
+    }
+
+    private fun mirrorKey(name: String): String = name.lowercase()
+        .replace(Regex("\\b(hd|fhd|sd|uhd)\\b"), " ")
+        .replace(Regex("\\bstream\\s*\\d+\\b"), " ")
+        .replace(Regex("[^a-z0-9]+"), " ")
+        .trim()
 
     /**
      * The publisher adds an NBA game stream while the game is on and drops it the
