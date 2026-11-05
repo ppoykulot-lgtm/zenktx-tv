@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T02:07:34Z",
+ "updatedAt": "2026-11-05T02:10:15Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -119,8 +119,35 @@
    "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
-   "id": 5,
+   "id": 8,
    "order": 6,
+   "name": "Kapatid Live",
+   "category": "News",
+   "tags": [
+    "News",
+    "HD",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "tv 5",
+    "cignal",
+    "kapatid channel",
+    "kapatid tv"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/kapatid-live.svg",
+   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/pphd_sdi1/default/index.mpd",
+   "streamType": "mpd",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "clearkey",
+   "keyId": "dbf670bed2ea4905a114557e90e7ffb6",
+   "key": "616059bec8dfb27f3524b7e7c31b6cff",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+  },
+  {
+   "id": 5,
+   "order": 7,
    "name": "Kapatid Channel",
    "category": "News",
    "tags": [
@@ -147,7 +174,7 @@
   },
   {
    "id": 18,
-   "order": 7,
+   "order": 8,
    "name": "ALLTV2",
    "category": "News",
    "tags": [
@@ -170,7 +197,7 @@
   },
   {
    "id": 221,
-   "order": 8,
+   "order": 9,
    "name": "Jeepney TV",
    "category": "Movies",
    "tags": [
@@ -194,7 +221,7 @@
   },
   {
    "id": 26,
-   "order": 9,
+   "order": 10,
    "name": "ANC",
    "category": "News",
    "tags": [
@@ -222,7 +249,7 @@
   },
   {
    "id": 65,
-   "order": 10,
+   "order": 11,
    "name": "Bilyonaryo",
    "category": "News",
    "tags": [
@@ -247,7 +274,7 @@
   },
   {
    "id": 1,
-   "order": 11,
+   "order": 12,
    "name": "3RS SinePinoy",
    "category": "Movies",
    "tags": [
@@ -271,7 +298,7 @@
   },
   {
    "id": 2,
-   "order": 12,
+   "order": 13,
    "name": "3RSTV",
    "category": "Movies",
    "tags": [
@@ -295,7 +322,7 @@
   },
   {
    "id": 224,
-   "order": 13,
+   "order": 14,
    "name": "Kapamilya Channel",
    "category": "News",
    "tags": [
@@ -319,7 +346,7 @@
   },
   {
    "id": 6,
-   "order": 14,
+   "order": 15,
    "name": "Abante Radyo",
    "category": "News",
    "tags": [
@@ -343,7 +370,7 @@
   },
   {
    "id": 3,
-   "order": 15,
+   "order": 16,
    "name": "TV5 Stream 2",
    "category": "News",
    "tags": [
@@ -370,7 +397,7 @@
   },
   {
    "id": 7,
-   "order": 16,
+   "order": 17,
    "name": "A2Z",
    "category": "News",
    "tags": [
@@ -391,33 +418,6 @@
    "keyId": "",
    "key": "",
    "note": ""
-  },
-  {
-   "id": 8,
-   "order": 17,
-   "name": "Kapatid Live",
-   "category": "News",
-   "tags": [
-    "News",
-    "HD",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "tv 5",
-    "cignal",
-    "kapatid channel",
-    "kapatid tv"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/kapatid-live.svg",
-   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/pphd_sdi1/default/index.mpd",
-   "streamType": "mpd",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "clearkey",
-   "keyId": "dbf670bed2ea4905a114557e90e7ffb6",
-   "key": "616059bec8dfb27f3524b7e7c31b6cff",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 9,
@@ -5730,7 +5730,7 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
    "note": ""
