@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T01:09:01Z",
+ "updatedAt": "2026-11-05T01:13:40Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -95,107 +95,32 @@
    "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
-   "id": 1,
+   "id": 12,
    "order": 5,
-   "name": "3RS SinePinoy",
-   "category": "Movies",
-   "tags": [
-    "movies",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "local",
-    "entertainment"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/3rstv.svg",
-   "url": "https://live20.bozztv.com/giatvplayout7/giatv-210267/tracks-v1a1/mono.ts.m3u8",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 2,
-   "order": 6,
-   "name": "3RSTV",
-   "category": "Movies",
-   "tags": [
-    "movies",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "local",
-    "entertainment"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/3rstv.svg",
-   "url": "https://live20.bozztv.com/giatvplayout7/giatv-210631/tracks-v1a1/mono.ts.m3u8",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 3,
-   "order": 7,
-   "name": "TV5 Stream 2",
+   "name": "A2Z Stream 2",
    "category": "News",
    "tags": [
-    "News",
-    "HD",
+    "news",
     "Philippines",
     "Pinoy",
     "local",
-    "tv 5",
     "cignal",
-    "kapatid channel",
-    "kapatid tv"
+    "converge"
    ],
-   "logo": "https://iyadtv.pages.dev/images/tv5.svg",
-   "url": "https://ovh.rise2the.top/aldous/1793772001/25HWIuQwEch57r1pRqhLAQ/cv4/001/2/ch00000090990000001088/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2Boh0xOsaoSFLqA0PEh9gVjiytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 224,
-   "order": 8,
-   "name": "Kapamilya Channel",
-   "category": "News",
-   "tags": [
-    "Philippines",
-    "News",
-    "Pinoy",
-    "local",
-    "abs cbn",
-    "HD"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/kapamilya_channel_146.png",
-   "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01006-abs-cbn-kapcha-dash-abscbnono/index.mpd",
+   "logo": "https://iyadtv.pages.dev/images/a2z_4.png",
+   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/cg_a2z/default/index.mpd",
    "streamType": "mpd",
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "f3a8c9126e544d809b312c7f5a8e6140",
+   "key": "43f5361983896b47ff01b4f77c5dbf3f",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 5,
-   "order": 9,
+   "order": 6,
    "name": "Kapatid Channel",
    "category": "News",
    "tags": [
@@ -221,8 +146,103 @@
    "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
-   "id": 6,
+   "id": 18,
+   "order": 7,
+   "name": "ALLTV2",
+   "category": "News",
+   "tags": [
+    "news",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "converge"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/alltv2_12.png",
+   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/hls/alltv2/stream.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 1,
+   "order": 8,
+   "name": "3RS SinePinoy",
+   "category": "Movies",
+   "tags": [
+    "movies",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "local",
+    "entertainment"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/3rstv.svg",
+   "url": "https://live20.bozztv.com/giatvplayout7/giatv-210267/tracks-v1a1/mono.ts.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 2,
+   "order": 9,
+   "name": "3RSTV",
+   "category": "Movies",
+   "tags": [
+    "movies",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "local",
+    "entertainment"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/3rstv.svg",
+   "url": "https://live20.bozztv.com/giatvplayout7/giatv-210631/tracks-v1a1/mono.ts.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 224,
    "order": 10,
+   "name": "Kapamilya Channel",
+   "category": "News",
+   "tags": [
+    "Philippines",
+    "News",
+    "Pinoy",
+    "local",
+    "abs cbn",
+    "HD"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/kapamilya_channel_146.png",
+   "url": "https://cdn-ue1-prod.tsv2.amagi.tv/linear/amg01006-abs-cbn-kapcha-dash-abscbnono/index.mpd",
+   "streamType": "mpd",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "widevine",
+   "keyId": "",
+   "key": "",
+   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+  },
+  {
+   "id": 6,
+   "order": 11,
    "name": "Abante Radyo",
    "category": "News",
    "tags": [
@@ -245,8 +265,35 @@
    "note": ""
   },
   {
+   "id": 3,
+   "order": 12,
+   "name": "TV5 Stream 2",
+   "category": "News",
+   "tags": [
+    "News",
+    "HD",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "tv 5",
+    "cignal",
+    "kapatid channel",
+    "kapatid tv"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/tv5.svg",
+   "url": "https://ovh.rise2the.top/aldous/1793772001/25HWIuQwEch57r1pRqhLAQ/cv4/001/2/ch00000090990000001088/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2Boh0xOsaoSFLqA0PEh9gVjiytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
    "id": 7,
-   "order": 11,
+   "order": 13,
    "name": "A2Z",
    "category": "News",
    "tags": [
@@ -270,7 +317,7 @@
   },
   {
    "id": 8,
-   "order": 12,
+   "order": 14,
    "name": "Kapatid Live",
    "category": "News",
    "tags": [
@@ -297,7 +344,7 @@
   },
   {
    "id": 9,
-   "order": 13,
+   "order": 15,
    "name": "ABC Entertains",
    "category": "News",
    "tags": [
@@ -321,7 +368,7 @@
   },
   {
    "id": 10,
-   "order": 14,
+   "order": 16,
    "name": "ABC Australia",
    "category": "News",
    "tags": [
@@ -345,7 +392,7 @@
   },
   {
    "id": 11,
-   "order": 15,
+   "order": 17,
    "name": "ABC Kids",
    "category": "News",
    "tags": [
@@ -368,32 +415,8 @@
    "note": ""
   },
   {
-   "id": 12,
-   "order": 16,
-   "name": "A2Z Stream 2",
-   "category": "News",
-   "tags": [
-    "news",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "cignal",
-    "converge"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/a2z_4.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/cg_a2z/default/index.mpd",
-   "streamType": "mpd",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "clearkey",
-   "keyId": "f3a8c9126e544d809b312c7f5a8e6140",
-   "key": "43f5361983896b47ff01b4f77c5dbf3f",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
-  },
-  {
    "id": 13,
-   "order": 17,
+   "order": 18,
    "name": "Adventure Earth",
    "category": "Documentary",
    "tags": [
@@ -416,7 +439,7 @@
   },
   {
    "id": 14,
-   "order": 18,
+   "order": 19,
    "name": "Abante Radyo Stream 2",
    "category": "News",
    "tags": [
@@ -440,7 +463,7 @@
   },
   {
    "id": 15,
-   "order": 19,
+   "order": 20,
    "name": "Al Jazeera Stream 2",
    "category": "News",
    "tags": [
@@ -463,7 +486,7 @@
   },
   {
    "id": 16,
-   "order": 20,
+   "order": 21,
    "name": "ALIW23",
    "category": "News",
    "tags": [
@@ -486,7 +509,7 @@
   },
   {
    "id": 17,
-   "order": 21,
+   "order": 22,
    "name": "Aliwko",
    "category": "Movies",
    "tags": [
@@ -499,29 +522,6 @@
    ],
    "logo": "https://iyadtv.pages.dev/images/aliwko.png",
    "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/plex-epg/library/parts/5e20b730f2f8d5003d739db7-64d4ee537b323f6abbd19e59/?X-Plex-Token=z9-J-4imuPJVE9JXpQzP",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 18,
-   "order": 22,
-   "name": "ALLTV2",
-   "category": "News",
-   "tags": [
-    "news",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "converge"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/alltv2_12.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/hls/alltv2/stream.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
