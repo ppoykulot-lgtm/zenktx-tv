@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T01:48:29Z",
+ "updatedAt": "2026-11-05T01:49:32Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
