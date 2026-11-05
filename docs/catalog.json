@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T01:13:40Z",
+ "updatedAt": "2026-11-05T01:16:56Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -193,8 +193,36 @@
    "note": ""
   },
   {
-   "id": 2,
+   "id": 26,
    "order": 9,
+   "name": "ANC",
+   "category": "News",
+   "tags": [
+    "news",
+    "international",
+    "english",
+    "media",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "abs cbn",
+    "iwanttfc",
+    "HD"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/anc_26.png",
+   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/cv5/001/2/ch00000090990000001216/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2BoK2PIan60vhUUxnwtpVvgcytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
+  },
+  {
+   "id": 2,
+   "order": 10,
    "name": "3RSTV",
    "category": "Movies",
    "tags": [
@@ -218,7 +246,7 @@
   },
   {
    "id": 224,
-   "order": 10,
+   "order": 11,
    "name": "Kapamilya Channel",
    "category": "News",
    "tags": [
@@ -242,7 +270,7 @@
   },
   {
    "id": 6,
-   "order": 11,
+   "order": 12,
    "name": "Abante Radyo",
    "category": "News",
    "tags": [
@@ -266,7 +294,7 @@
   },
   {
    "id": 3,
-   "order": 12,
+   "order": 13,
    "name": "TV5 Stream 2",
    "category": "News",
    "tags": [
@@ -293,7 +321,7 @@
   },
   {
    "id": 7,
-   "order": 13,
+   "order": 14,
    "name": "A2Z",
    "category": "News",
    "tags": [
@@ -317,7 +345,7 @@
   },
   {
    "id": 8,
-   "order": 14,
+   "order": 15,
    "name": "Kapatid Live",
    "category": "News",
    "tags": [
@@ -344,7 +372,7 @@
   },
   {
    "id": 9,
-   "order": 15,
+   "order": 16,
    "name": "ABC Entertains",
    "category": "News",
    "tags": [
@@ -368,7 +396,7 @@
   },
   {
    "id": 10,
-   "order": 16,
+   "order": 17,
    "name": "ABC Australia",
    "category": "News",
    "tags": [
@@ -392,7 +420,7 @@
   },
   {
    "id": 11,
-   "order": 17,
+   "order": 18,
    "name": "ABC Kids",
    "category": "News",
    "tags": [
@@ -416,7 +444,7 @@
   },
   {
    "id": 13,
-   "order": 18,
+   "order": 19,
    "name": "Adventure Earth",
    "category": "Documentary",
    "tags": [
@@ -439,7 +467,7 @@
   },
   {
    "id": 14,
-   "order": 19,
+   "order": 20,
    "name": "Abante Radyo Stream 2",
    "category": "News",
    "tags": [
@@ -463,7 +491,7 @@
   },
   {
    "id": 15,
-   "order": 20,
+   "order": 21,
    "name": "Al Jazeera Stream 2",
    "category": "News",
    "tags": [
@@ -486,7 +514,7 @@
   },
   {
    "id": 16,
-   "order": 21,
+   "order": 22,
    "name": "ALIW23",
    "category": "News",
    "tags": [
@@ -509,7 +537,7 @@
   },
   {
    "id": 17,
-   "order": 22,
+   "order": 23,
    "name": "Aliwko",
    "category": "Movies",
    "tags": [
@@ -533,7 +561,7 @@
   },
   {
    "id": 19,
-   "order": 23,
+   "order": 24,
    "name": "AMC+",
    "category": "Movies",
    "tags": [
@@ -554,7 +582,7 @@
   },
   {
    "id": 20,
-   "order": 24,
+   "order": 25,
    "name": "AMC",
    "category": "Movies",
    "tags": [
@@ -575,7 +603,7 @@
   },
   {
    "id": 21,
-   "order": 25,
+   "order": 26,
    "name": "ALLTV2 Stream 2",
    "category": "News",
    "tags": [
@@ -598,7 +626,7 @@
   },
   {
    "id": 22,
-   "order": 26,
+   "order": 27,
    "name": "Al Jazeera",
    "category": "News",
    "tags": [
@@ -621,7 +649,7 @@
   },
   {
    "id": 23,
-   "order": 27,
+   "order": 28,
    "name": "AMC Break",
    "category": "Movies",
    "tags": [
@@ -642,7 +670,7 @@
   },
   {
    "id": 24,
-   "order": 28,
+   "order": 29,
    "name": "AMC Crime",
    "category": "Movies",
    "tags": [
@@ -663,7 +691,7 @@
   },
   {
    "id": 25,
-   "order": 29,
+   "order": 30,
    "name": "Aniplus",
    "category": "Kids",
    "tags": [
@@ -677,34 +705,6 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 26,
-   "order": 30,
-   "name": "ANC",
-   "category": "News",
-   "tags": [
-    "news",
-    "international",
-    "english",
-    "media",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "abs cbn",
-    "iwanttfc",
-    "HD"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/anc_26.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772004/2Q7Witv5YMz8mn5tKqOjrw/cv5/001/2/ch00000090990000001216/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2BoK2PIan60vhUUxnwtpVvgcytokK1MIobcue1ImXa0ZEA%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
    "enabled": true,
    "drmType": "",
    "keyId": "",
