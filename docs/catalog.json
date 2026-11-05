@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T00:57:27Z",
+ "updatedAt": "2026-11-05T01:01:20Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -21,6 +21,29 @@
    "key": "",
    "note": "",
    "tombstone": true
+  },
+  {
+   "id": 228,
+   "order": 2,
+   "name": "Kapamilya Channel HD",
+   "category": "News",
+   "tags": [
+    "Philippines",
+    "News",
+    "Pinoy",
+    "local",
+    "abs cbn"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/kapamilya_channel_hd.png",
+   "url": "https://ovh.rise2the.top/aldous/1793772021/8zmNnkZySWChtpziOBoqGQ/hls/kapamilyahd/stream.m3u8",
+   "streamType": "hls",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "",
+   "keyId": "",
+   "key": "",
+   "note": ""
   },
   {
    "id": 1,
@@ -116,9 +139,9 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "clearkey",
-   "keyId": "bd17afb5dc9648a39be79ee3634dd4b8",
-   "key": "b475084a1a58857e18480e30fbb0e544",
+   "drmType": "widevine",
+   "keyId": "",
+   "key": "",
    "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
   },
   {
@@ -5728,29 +5751,6 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
-   "note": ""
-  },
-  {
-   "id": 228,
-   "order": 2,
-   "name": "Kapamilya Channel HD",
-   "category": "News",
-   "tags": [
-    "Philippines",
-    "News",
-    "Pinoy",
-    "local",
-    "abs cbn"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/kapamilya_channel_hd.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772021/8zmNnkZySWChtpziOBoqGQ/hls/kapamilyahd/stream.m3u8",
-   "streamType": "hls",
-   "quality": "HD",
-   "isFilipino": true,
    "enabled": true,
    "drmType": "",
    "keyId": "",
