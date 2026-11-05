@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-05T01:07:32Z",
+ "updatedAt": "2026-11-05T01:09:01Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "This file is the channel list every ZENKTX build reads on launch. Edit it with admin.html or by hand and commit; the apps pick it up within a few minutes and never need a reinstall.",
  "channels": [
@@ -68,8 +68,35 @@
    "note": ""
   },
   {
-   "id": 1,
+   "id": 4,
    "order": 4,
+   "name": "TV5",
+   "category": "News",
+   "tags": [
+    "News",
+    "HD",
+    "Philippines",
+    "Pinoy",
+    "local",
+    "tv 5",
+    "cignal",
+    "kapatid channel",
+    "kapatid tv"
+   ],
+   "logo": "https://iyadtv.pages.dev/images/tv5.svg",
+   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/tv5_hd/default1/index.mpd",
+   "streamType": "mpd",
+   "quality": "HD",
+   "isFilipino": true,
+   "enabled": true,
+   "drmType": "clearkey",
+   "keyId": "9c3e7a516d824f04a9175b8c2e3d7040",
+   "key": "524a9c2cec98272f71c347345a3fd12e",
+   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+  },
+  {
+   "id": 1,
+   "order": 5,
    "name": "3RS SinePinoy",
    "category": "Movies",
    "tags": [
@@ -93,7 +120,7 @@
   },
   {
    "id": 2,
-   "order": 5,
+   "order": 6,
    "name": "3RSTV",
    "category": "Movies",
    "tags": [
@@ -117,7 +144,7 @@
   },
   {
    "id": 3,
-   "order": 6,
+   "order": 7,
    "name": "TV5 Stream 2",
    "category": "News",
    "tags": [
@@ -144,7 +171,7 @@
   },
   {
    "id": 224,
-   "order": 7,
+   "order": 8,
    "name": "Kapamilya Channel",
    "category": "News",
    "tags": [
@@ -165,33 +192,6 @@
    "keyId": "",
    "key": "",
    "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
-  },
-  {
-   "id": 4,
-   "order": 8,
-   "name": "TV5",
-   "category": "News",
-   "tags": [
-    "News",
-    "HD",
-    "Philippines",
-    "Pinoy",
-    "local",
-    "tv 5",
-    "cignal",
-    "kapatid channel",
-    "kapatid tv"
-   ],
-   "logo": "https://iyadtv.pages.dev/images/tv5.svg",
-   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/tv5_hd/default1/index.mpd",
-   "streamType": "mpd",
-   "quality": "HD",
-   "isFilipino": true,
-   "enabled": true,
-   "drmType": "clearkey",
-   "keyId": "9c3e7a516d824f04a9175b8c2e3d7040",
-   "key": "524a9c2cec98272f71c347345a3fd12e",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
   },
   {
    "id": 5,
