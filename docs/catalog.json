@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-11-05T02:51:15Z",
+  "updatedAt": "2026-11-06T03:01:10Z",
   "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
   "note": "Logos are served from this repository under /logos.",
   "channels": [
@@ -10,7 +10,7 @@
       "name": "Korean Central Television",
       "category": "Entertainment",
       "tags": [],
-      "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/9855771f.jpg",
+      "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoUYSyt5sGL32S1RuZp2_fN-f6HvBDton0XEPh3OJBJg&s=10",
       "url": "https://live.koryocdn.org/kctv/index.m3u8",
       "streamType": "hls",
       "quality": "HD",
@@ -292,8 +292,8 @@
       "isFilipino": true,
       "enabled": true,
       "drmType": "",
-      "keyId": "",
-      "key": "",
+      "keyId": "9c3e7a516d824f04a9175b8c2e3d7040",
+      "key": "524a9c2cec98272f71c347345a3fd12e",
       "note": ""
     },
     {
