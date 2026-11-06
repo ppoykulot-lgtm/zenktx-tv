@@ -599,7 +599,17 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.3.8 <span class="tagx">latest</span></h3>
+          <h3>1.3.9 <span class="tagx">latest</span></h3>
+          <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>The logos are ours now.</b> Every channel logo used to be pulled from a third-party host — <code>iyad.click</code>, <code>iyadtv.pages.dev</code>, Wikia, Plex — sitting behind bot protection that answers a browser and silently ignores the apps, which is why every tile fell back to its initials. Each picture is downloaded once, stored in this repository under <code>/logos</code> and served from here, so the TV, the phone, the Windows build and the admin page all show the same artwork.</li>
+            <li><b>Images load again.</b> The grid handed its requests to an image loader that had already been replaced, so neither the success nor the failure callback ever ran. One loader is now built once and passed to every request, with a caller identity and timeouts the logo hosts accept.</li>
+            <li><b>Bigger tiles on Windows.</b> The desktop grid drew a 44px logo inside a 132px card; it is a 84px logo in a 152px card with a 12px label now, the way the mobile guide looks.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.3.8</h3>
           <div class="meta">5 November 2026 · Android mobile (new guide) · Android TV (logos, fullscreen) · Windows unchanged on 1.3.3</div>
           <ul>
             <li><b>A guide built for a hand, not a sofa.</b> The phone build gets its own layout: a compact header, one scrollable row of categories instead of five stacked rows eating half the screen, a 54dp logo on every tile with an 11sp name that gets two lines, and a detail sheet where the channel name is no longer cut to “3RS Si…”. The TV keeps its six-column EPG.</li>
@@ -849,8 +859,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.3.8", mobile: "1.3.8", win: "1.3.3" };
-  const TAGS = { tv: "v1.3.8", mobile: "v1.3.8", win: "v1.3.3" };
+  const VERSIONS = { tv: "1.3.9", mobile: "1.3.9", win: "1.3.9" };
+  const TAGS = { tv: "v1.3.9", mobile: "v1.3.9", win: "v1.3.9" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

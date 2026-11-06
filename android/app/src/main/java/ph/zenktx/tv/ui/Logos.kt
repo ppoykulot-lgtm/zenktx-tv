@@ -6,10 +6,12 @@ import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import coil.Coil
 import coil.ImageLoader
 import coil.decode.SvgDecoder
 import coil.load
+import okhttp3.OkHttpClient
+import ph.zenktx.tv.net.Http
+import java.util.concurrent.TimeUnit
 
 /**
  * Channel logos come from third-party EPG feeds: some rows carry no logo at
@@ -47,53 +49,67 @@ object Logos {
             setColor(color)
         }
 
-    private var loaderReady = false
+    @Volatile
+    private var loader: ImageLoader? = null
 
     /**
-     * 45 of the catalogue's logos are SVGs, and the stock Coil build decodes
-     * none of them -- those channels fell back to their initials even though the
-     * admin page has a logo for them. The decoder is registered explicitly so a
-     * minified release cannot drop it.
+     * One loader for the whole app, handed to every request explicitly. Going
+     * through the global singleton left the tiles stuck on their initials: the
+     * requests were enqueued on a loader that had already been replaced, so
+     * neither the success nor the error callback ever ran.
+     *
+     * The decoder handles the catalogue's SVG logos, and the client sends the
+     * same caller the catalogue fetch uses -- a couple of these hosts sit
+     * behind Cloudflare and answer a bare OkHttp request with nothing at all.
      */
-    private fun install(context: Context) {
-        if (loaderReady) return
-        loaderReady = true
-        runCatching {
-            Coil.setImageLoader(
-                ImageLoader.Builder(context.applicationContext)
-                    .components { add(SvgDecoder.Factory()) }
-                    .crossfade(true)
-                    .build()
-            )
+    private fun loader(context: Context): ImageLoader =
+        loader ?: synchronized(this) {
+            loader ?: ImageLoader.Builder(context.applicationContext)
+                .components { add(SvgDecoder.Factory()) }
+                .okHttpClient {
+                    OkHttpClient.Builder()
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(10, TimeUnit.SECONDS)
+                        .callTimeout(20, TimeUnit.SECONDS)
+                        .addInterceptor { chain ->
+                            chain.proceed(
+                                chain.request().newBuilder()
+                                    .header("User-Agent", Http.USER_AGENT)
+                                    .header("Referer", "https://iyad.click/")
+                                    .header("Accept", "image/*,*/*")
+                                    .build()
+                            )
+                        }
+                        .build()
+                }
+                .crossfade(true)
+                .build()
+                .also { loader = it }
         }
-    }
 
     /**
      * Shows [url] when it loads and the caller's initials tile otherwise. The
      * monogram sits underneath, so a slow or dead URL never leaves a blank box.
      */
     fun apply(logo: ImageView, monogram: TextView, name: String, url: String) {
-        install(logo.context)
         monogram.text = initials(name)
         monogram.background = chip(monogram, tint(name))
         monogram.visibility = View.VISIBLE
 
         val address = url.trim()
-        if (address.isEmpty()) {
+        if (address.isEmpty() || !address.startsWith("http")) {
             logo.setImageDrawable(null)
             logo.visibility = View.GONE
             return
         }
 
-        logo.visibility = View.GONE
-        logo.load(address) {
-            crossfade(true)
+        logo.visibility = View.VISIBLE
+        logo.load(address, loader(logo.context)) {
             listener(
-                onSuccess = { _, _ ->
-                    logo.visibility = View.VISIBLE
-                    monogram.visibility = View.GONE
-                },
+                onSuccess = { _, _ -> monogram.visibility = View.GONE },
                 onError = { _, _ ->
+                    // Keep the image view in place but empty: the initials that
+                    // sit underneath are what the viewer sees.
                     logo.setImageDrawable(null)
                     logo.visibility = View.GONE
                     monogram.visibility = View.VISIBLE
