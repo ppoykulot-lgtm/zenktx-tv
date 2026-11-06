@@ -599,7 +599,17 @@
 
       <div class="log">
         <article class="entry">
-          <h3>1.3.7 <span class="tagx">latest</span></h3>
+          <h3>1.3.8 <span class="tagx">latest</span></h3>
+          <div class="meta">5 November 2026 · Android mobile (new guide) · Android TV (logos, fullscreen) · Windows unchanged on 1.3.3</div>
+          <ul>
+            <li><b>A guide built for a hand, not a sofa.</b> The phone build gets its own layout: a compact header, one scrollable row of categories instead of five stacked rows eating half the screen, a 54dp logo on every tile with an 11sp name that gets two lines, and a detail sheet where the channel name is no longer cut to “3RS Si…”. The TV keeps its six-column EPG.</li>
+            <li><b>Logos are back.</b> 45 of the catalogue's logos are SVGs, and the image loader had no SVG decoder, so those channels drew their initials even though the admin page has artwork for them. The decoder ships with the app now.</li>
+            <li><b>Playback goes fullscreen.</b> The status and navigation bars sat over the picture on a phone; they are hidden while a channel plays and a swipe from the edge brings them back for a moment.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>1.3.7</h3>
           <div class="meta">5 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
           <ul>
             <li><b>Channels that play on Windows now play on Android.</b> The free providers re-tokenise every address through the day, and a link the guide cached this morning answered <code>410 Gone</code> all evening. Windows pulled the feed again the moment a channel failed; Android waited for its six-hour cache to expire, so the same channel looked dead on the TV and fine on the PC.</li>
@@ -839,8 +849,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.3.7", mobile: "1.3.7", win: "1.3.3" };
-  const TAGS = { tv: "v1.3.7", mobile: "v1.3.7", win: "v1.3.3" };
+  const VERSIONS = { tv: "1.3.8", mobile: "1.3.8", win: "1.3.3" };
+  const TAGS = { tv: "v1.3.8", mobile: "v1.3.8", win: "v1.3.3" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

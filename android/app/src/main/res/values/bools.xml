@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The TV guide has the height to show every category at once. -->
+    <bool name="chips_wrap">true</bool>
+</resources>
