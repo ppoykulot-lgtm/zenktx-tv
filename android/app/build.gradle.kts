@@ -21,8 +21,8 @@ android {
         minSdk = 24          // Android TV 7.0 / Android 7.0
         targetSdk = 34
         // CI overrides these from the release tag: -PversionName=1.2.0 -PversionCode=42
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10307
-        versionName = (findProperty("versionName") as String?) ?: "1.3.7"
+        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10308
+        versionName = (findProperty("versionName") as String?) ?: "1.3.8"
 
         buildConfigField("String", "CERT_SHA256", "\"${keystoreProps.getProperty("certSha256", "")}\"")
         buildConfigField("String", "GITHUB_REPO", "\"ppoykulot-lgtm/zenktx-tv\"")
@@ -102,6 +102,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("com.google.android.flexbox:flexbox:3.0.0")   // wrapping category chips
     implementation("io.coil-kt:coil:2.6.0")   // channel logos
+    implementation("io.coil-kt:coil-svg:2.6.0")   // 45 catalogue logos are .svg
 
     implementation("androidx.media3:media3-exoplayer:$media3")
     implementation("androidx.media3:media3-exoplayer-hls:$media3")

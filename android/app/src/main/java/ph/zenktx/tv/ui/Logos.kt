@@ -1,10 +1,14 @@
 package ph.zenktx.tv.ui
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import coil.Coil
+import coil.ImageLoader
+import coil.decode.SvgDecoder
 import coil.load
 
 /**
@@ -43,11 +47,33 @@ object Logos {
             setColor(color)
         }
 
+    private var loaderReady = false
+
+    /**
+     * 45 of the catalogue's logos are SVGs, and the stock Coil build decodes
+     * none of them -- those channels fell back to their initials even though the
+     * admin page has a logo for them. The decoder is registered explicitly so a
+     * minified release cannot drop it.
+     */
+    private fun install(context: Context) {
+        if (loaderReady) return
+        loaderReady = true
+        runCatching {
+            Coil.setImageLoader(
+                ImageLoader.Builder(context.applicationContext)
+                    .components { add(SvgDecoder.Factory()) }
+                    .crossfade(true)
+                    .build()
+            )
+        }
+    }
+
     /**
      * Shows [url] when it loads and the caller's initials tile otherwise. The
      * monogram sits underneath, so a slow or dead URL never leaves a blank box.
      */
     fun apply(logo: ImageView, monogram: TextView, name: String, url: String) {
+        install(logo.context)
         monogram.text = initials(name)
         monogram.background = chip(monogram, tint(name))
         monogram.visibility = View.VISIBLE

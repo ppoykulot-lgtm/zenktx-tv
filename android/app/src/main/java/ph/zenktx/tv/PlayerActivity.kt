@@ -25,6 +25,9 @@ import androidx.media3.exoplayer.drm.ExoMediaDrm
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.data.ChannelRepository
@@ -115,6 +118,7 @@ class PlayerActivity : Activity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        goFullscreen()
 
         resolveQueue()
         if (queue.isEmpty()) {
@@ -130,6 +134,27 @@ class PlayerActivity : Activity() {
 
         wireControllerButtons()
         playCurrent()
+    }
+
+    /**
+     * Playback owns the whole screen. On a phone the status and navigation bars
+     * used to sit on top of the picture; a swipe from the edge brings them back
+     * for a moment without shrinking the video.
+     */
+    private fun goFullscreen() {
+        runCatching {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            WindowInsetsControllerCompat(window, binding.root).apply {
+                hide(WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) goFullscreen()
     }
 
     private fun resolveQueue() {

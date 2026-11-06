@@ -96,7 +96,14 @@ class MainActivity : Activity() {
             onSelected = { onChipSelected(it) },
             onFocused = { pos -> binding.chips.smoothScrollToPosition(pos) },
         )
-        binding.chips.layoutManager = FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
+        // The TV guide wraps every category onto its own rows; a phone scrolls a
+        // single row instead, because five chip rows ate half the screen.
+        binding.chips.layoutManager =
+            if (resources.getBoolean(R.bool.chips_wrap)) {
+                FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
+            } else {
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            }
         binding.chips.adapter = chips
 
         grid = ChannelGridAdapter(
