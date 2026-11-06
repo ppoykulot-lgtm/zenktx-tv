@@ -280,6 +280,13 @@ main { overflow-y: auto; padding: 16px 22px 22px; }
   width: 52px; height: 52px; border-radius: 12px; object-fit: contain;
   background: #101b2e; padding: 6px;
 }
+.pinfo-fav {
+  width: 46px; height: 46px; padding: 0; border-radius: 13px; font-size: 20px;
+  line-height: 1; color: #93a2be;
+}
+.pinfo-fav.on {
+  color: var(--mint); border-color: rgba(53, 231, 192, .5); background: rgba(53, 231, 192, .1);
+}
 .pinfo-text { flex: 1; min-width: 0; }
 .pinfo-text b { display: block; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pinfo-text small { font-size: 9.5px; letter-spacing: .14em; color: var(--muted); }
@@ -426,3 +433,63 @@ body[data-skin="studio"] .icon-btn:hover { background: rgba(255, 255, 255, .1); 
 body[data-skin="studio"] .seek { height: 5px; }
 body[data-skin="studio"] .quality { border-radius: 7px; }
 body[data-skin="studio"] .skin-chip { border-radius: 7px; }
+
+/* ---------------------------------------------------------------- welcome */
+/* Sits over the guide until boot() has fetched the catalogue. The mark is
+   extruded with stepped solid shadows and the wordmark with layered
+   text-shadows: a 3D logo here, flat everywhere else. */
+.splash {
+  position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  background: radial-gradient(60% 52% at 50% 40%, #0c1f28 0%, var(--bg) 64%);
+  transition: opacity .34s ease, transform .34s ease;
+}
+.splash.off { opacity: 0; transform: scale(1.04); pointer-events: none; }
+.splash-glow {
+  position: absolute; width: 560px; height: 560px; border-radius: 50%; top: 50%; left: 50%;
+  margin: -340px 0 0 -280px;
+  background: radial-gradient(circle, rgba(53,231,192,.30), rgba(53,231,192,.09) 46%, transparent 70%);
+  animation: splashBreathe 3.4s ease-in-out infinite;
+}
+@keyframes splashBreathe {
+  0%, 100% { opacity: .55; transform: scale(.94); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.splash-mark { position: relative; z-index: 1; animation: splashFloat 4.4s ease-in-out infinite; }
+.splash-mark img {
+  display: block; width: 104px; height: 104px; border-radius: 26px;
+  box-shadow:
+    0 4px 0 rgba(53,231,192,.55), 0 8px 0 rgba(53,231,192,.30),
+    0 12px 0 rgba(53,231,192,.16), 0 26px 52px rgba(0,0,0,.6);
+}
+@keyframes splashFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.splash-word {
+  position: relative; z-index: 1; margin: 30px 0 0;
+  font-size: 62px; font-weight: 800; letter-spacing: .14em; line-height: 1;
+  color: #f2f5ff;
+  text-shadow:
+    0 1px 0 #1ba98a, 0 2px 0 #189a7e, 0 3px 0 #157f6a, 0 4px 0 #106555,
+    0 6px 0 #0b4a3f, 0 12px 30px rgba(53,231,192,.5);
+}
+.splash-sub {
+  position: relative; z-index: 1; margin-top: 12px;
+  font-size: 10px; font-weight: 700; letter-spacing: .46em; color: var(--mint);
+}
+.splash-slogan { position: relative; z-index: 1; margin: 30px 0 0; font-size: 16px; color: #e8eefc; }
+.splash-free {
+  position: relative; z-index: 1; margin-top: 9px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: .1em; color: var(--mint);
+}
+.splash-loading {
+  position: relative; z-index: 1; margin-top: 34px; display: flex; align-items: center; gap: 10px;
+  font-size: 11px; letter-spacing: .08em; color: var(--muted);
+}
+.splash-loading i {
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 2px solid rgba(53,231,192,.25); border-top-color: var(--mint);
+  animation: splashSpin .8s linear infinite;
+}
+@keyframes splashSpin { to { transform: rotate(360deg); } }

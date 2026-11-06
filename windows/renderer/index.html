@@ -9,6 +9,20 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Welcome. Stays up until the published catalogue has been fetched, so a
+       launch always starts from the current channel list. -->
+  <div class="splash" id="splash">
+    <div class="splash-glow"></div>
+    <div class="splash-mark">
+      <img src="../assets/icon.png" alt="" />
+    </div>
+    <h1 class="splash-word">ZENKTX</h1>
+    <div class="splash-sub">TV STREAM</div>
+    <p class="splash-slogan">Your Entertainment, Anytime. Anywhere.</p>
+    <div class="splash-free">— 100% FREE!</div>
+    <div class="splash-loading"><i></i> Loading channels…</div>
+  </div>
+
   <div class="app">
     <header>
       <div class="brand">
@@ -114,6 +128,7 @@
           <b id="pInfoName">—</b>
           <small id="pInfoMeta">—</small>
         </div>
+        <button class="btn pinfo-fav" id="pFav" title="Toggle favourite">☆</button>
         <div class="pclock" title="Local time">
           <b id="clockTime">--:--:--</b>
           <span id="clockDate">—</span>

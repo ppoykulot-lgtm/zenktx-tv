@@ -1,11 +1,13 @@
 package ph.zenktx.tv
 
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,6 +48,9 @@ class MainActivity : Activity() {
         private val FAVOURITES = "\u2605 Favourites"
         private val PINOY = "Pinoy"
         private val ALL = "All"
+
+        /** Long enough to read the slogan, short enough not to feel in the way. */
+        private const val WELCOME_MIN_MS = 1_500L
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -65,6 +70,9 @@ class MainActivity : Activity() {
 
     private lateinit var chips: CategoryChipAdapter
     private lateinit var grid: ChannelGridAdapter
+
+    private var welcomeAt = 0L
+    private var welcomeAnim: ObjectAnimator? = null
 
     private val clockHandler = Handler(Looper.getMainLooper())
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -127,9 +135,47 @@ class MainActivity : Activity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
+        startWelcome()
         applyFilter(ALL)
         loadChannels()
         scheduleUpdateCheck()
+    }
+
+    // ---- welcome ----------------------------------------------------------
+
+    /**
+     * The guide stays behind this screen until the published catalogue has been
+     * fetched, so every launch starts from the current channel list: a channel
+     * added, renamed or fixed in the admin page is there the next time the app
+     * opens instead of after a cache that used to last half an hour (six, for
+     * the live addresses).
+     */
+    private fun startWelcome() {
+        welcomeAt = SystemClock.elapsedRealtime()
+        binding.welcomePanel.root.visibility = View.VISIBLE
+        welcomeAnim = ObjectAnimator.ofFloat(binding.welcomePanel.welcomeGlow, View.ALPHA, 0.55f, 1f)
+            .apply {
+                duration = 1_400
+                repeatCount = ObjectAnimator.INFINITE
+                repeatMode = ObjectAnimator.REVERSE
+                start()
+            }
+    }
+
+    private fun hideWelcome() {
+        if (!::binding.isInitialized) return
+        val panel = binding.welcomePanel.root
+        if (panel.visibility != View.VISIBLE) return
+        val remaining = WELCOME_MIN_MS - (SystemClock.elapsedRealtime() - welcomeAt)
+        panel.postDelayed({
+            if (isFinishing) return@postDelayed
+            welcomeAnim?.cancel()
+            welcomeAnim = null
+            panel.animate().alpha(0f).setDuration(280).withEndAction {
+                panel.visibility = View.GONE
+                panel.alpha = 1f
+            }.start()
+        }, remaining.coerceAtLeast(0L))
     }
 
     // ---- loading ----------------------------------------------------------
@@ -153,6 +199,7 @@ class MainActivity : Activity() {
             }
             applyFilter(if (filter in categories) filter else ALL)
             focusFirstTile()
+            hideWelcome()
         }
     }
 
@@ -348,6 +395,8 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
+        welcomeAnim?.cancel()
+        welcomeAnim = null
         clockHandler.removeCallbacksAndMessages(null)
     }
 }

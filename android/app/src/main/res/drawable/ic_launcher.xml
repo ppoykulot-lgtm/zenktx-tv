@@ -1,47 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ZENKTX mark. One geometry, drawn from the same numbers as tools/make-icons.py,
+  which produces the Windows icon and the TV banner.
+
+  Z: mint cap, mint diagonal, blue base. Signal: two concentric arcs centred on
+  the play triangle, inner mint, outer blue — this replaces the blue outlines
+  that used to be drawn over the arcs and made the old icon look hand-drawn.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
 
+    <!-- Tile -->
     <path
         android:fillColor="#0A1020"
-        android:pathData="M118,0h276a118,118 0 0 1 118,118v276a118,118 0 0 1 -118,118h-276a118,118 0 0 1 -118,-118v-276a118,118 0 0 1 118,-118z" />
+        android:pathData="M112,0h288a112,112 0 0 1 112,112v288a112,112 0 0 1 -112,112h-288a112,112 0 0 1 -112,-112v-288a112,112 0 0 1 112,-112z" />
 
+    <!-- Signal: outer arc, then inner arc -->
     <path
-        android:pathData="M284.6,152.3A84,84 0 0 1 353.7,242.3"
-        android:strokeAlpha="0.9"
+        android:pathData="M292.4,213.2A106,106 0 0 1 420.9,290.4"
+        android:strokeAlpha="0.92"
+        android:strokeColor="#5B8CFF"
+        android:strokeLineCap="round"
+        android:strokeWidth="15" />
+    <path
+        android:pathData="M300.6,246.1A72,72 0 0 1 387.9,298.6"
         android:strokeColor="#35E7C0"
         android:strokeLineCap="round"
-        android:strokeWidth="11" />
-    <path
-        android:pathData="M290.1,120.8A116,116 0 0 1 385.6,245.1"
-        android:strokeAlpha="0.35"
-        android:strokeColor="#35E7C0"
-        android:strokeLineCap="round"
-        android:strokeWidth="9" />
+        android:strokeWidth="18" />
 
-    <path
-        android:fillColor="#35E7C0"
-        android:pathData="M96,150h176a23,23 0 0 1 0,46h-176a23,23 0 0 1 0,-46z" />
-    <path
-        android:pathData="M272,173L170,311"
-        android:strokeColor="#35E7C0"
-        android:strokeLineCap="round"
-        android:strokeWidth="46" />
-    <path
-        android:fillColor="#5B8CFF"
-        android:pathData="M96,288h134a23,23 0 0 1 0,46h-134a23,23 0 0 1 0,-46z" />
-
-    <path
-        android:fillColor="#35E7C0"
-        android:pathData="M150,360h74a4,4 0 0 1 0,8h-74a4,4 0 0 1 0,-8z" />
-    <path
-        android:fillColor="#5B8CFF"
-        android:pathData="M236,360h54a4,4 0 0 1 0,8h-54a4,4 0 0 1 0,-8z" />
-
+    <!-- Play -->
     <path
         android:fillColor="#F2F5FF"
-        android:pathData="M296,286L352,314L296,342z" />
+        android:pathData="M296,292L350,318L296,344z" />
+
+    <!-- Z: base, cap, diagonal -->
+    <path
+        android:fillColor="#5B8CFF"
+        android:pathData="M119,290h110a23,23 0 0 1 0,46h-110a23,23 0 0 1 0,-46z" />
+    <path
+        android:fillColor="#35E7C0"
+        android:pathData="M119,150h130a23,23 0 0 1 0,46h-130a23,23 0 0 1 0,-46z" />
+    <path
+        android:pathData="M245,173L140,296"
+        android:strokeColor="#35E7C0"
+        android:strokeLineCap="round"
+        android:strokeWidth="44" />
+
+    <!-- Baseline accents -->
+    <path
+        android:fillColor="#35E7C0"
+        android:pathData="M156,374h64a4,4 0 0 1 0,8h-64a4,4 0 0 1 0,-8z" />
+    <path
+        android:fillColor="#5B8CFF"
+        android:pathData="M238,374h46a4,4 0 0 1 0,8h-46a4,4 0 0 1 0,-8z" />
 </vector>

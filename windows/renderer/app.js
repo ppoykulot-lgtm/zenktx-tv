@@ -378,7 +378,9 @@ async function boot() {
   reportPlaylistFailures();
   scheduleUpdateCheck();
   if (Date.now() - liveAt > LIVE_TTL) refreshLive();
-  if (Date.now() - catalogAt > CATALOG_TTL) refreshCatalog();
+  // Awaited: the welcome screen covers this fetch, and a launch starts from the
+  // current catalogue rather than from whatever was cached last time.
+  if (Date.now() - catalogAt > CATALOG_TTL) await refreshCatalog();
 }
 
 /* ------------------------------------------------------------ load failures */
@@ -1134,6 +1136,12 @@ function updatePlayerInfo(channel) {
   if (channel.isFilipino) bits.push('PH');
   $('pInfoMeta').textContent = `LIVE · ${bits.join(' · ')}`;
   $('pQuality').textContent = channel.streamType === 'mpd' ? 'AUTO · DASH' : 'AUTO · HLS';
+  const fav = $('pFav');
+  if (fav) {
+    const saved = prefs.favourites.includes(channel.key);
+    fav.textContent = saved ? '★' : '☆';
+    fav.classList.toggle('on', saved);
+  }
   $('pInfoLogo').style.visibility = channel.logo ? 'visible' : 'hidden';
   setImage($('pInfoLogo'), channel.logo);
   $('pTime').textContent = 'LIVE';
@@ -1515,6 +1523,18 @@ $('search').addEventListener('input', (event) => {
 $('watchBtn').addEventListener('click', () => state.selected && play(state.selected));
 $('favBtn').addEventListener('click', () => state.selected && toggleFavourite(state.selected));
 
+// The star in the player saves the channel that is playing, so it does not have
+// to be closed and found in the grid first.
+$('pFav').addEventListener('click', () => {
+  const channel = state.queue[state.index];
+  if (!channel) return;
+  toggleFavourite(channel);
+  const saved = prefs.favourites.includes(channel.key);
+  $('pFav').textContent = saved ? '★' : '☆';
+  $('pFav').classList.toggle('on', saved);
+  toast(saved ? 'Added to favourites.' : 'Removed from favourites.');
+});
+
 $('playlistsBtn').addEventListener('click', openPlaylists);
 $('addPlaylistBtn').addEventListener('click', addPlaylist);
 $('addSave').addEventListener('click', savePlaylist);
@@ -1704,4 +1724,20 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-boot();
+// The welcome screen is the launch: it stays up (and on screen for at least a
+// beat, so it never flashes) until the published catalogue has been fetched.
+(async function launch() {
+  const started = Date.now();
+  try {
+    // Never hold the guide hostage to a dead network: the cached list is fine
+    // after a few seconds.
+    await Promise.race([boot(), new Promise((resolve) => setTimeout(resolve, 9000))]);
+  } finally {
+    const splash = $('splash');
+    const wait = Math.max(0, 1200 - (Date.now() - started));
+    setTimeout(() => {
+      splash.classList.add('off');
+      setTimeout(() => splash.remove(), 400);
+    }, wait);
+  }
+})();

@@ -255,4 +255,9 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Sits on top until the current catalogue has been pulled. -->
+    <include
+        android:id="@+id/welcomePanel"
+        layout="@layout/view_welcome" />
 </FrameLayout>
