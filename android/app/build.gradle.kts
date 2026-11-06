@@ -21,8 +21,8 @@ android {
         minSdk = 24          // Android TV 7.0 / Android 7.0
         targetSdk = 34
         // CI overrides these from the release tag: -PversionName=1.2.0 -PversionCode=42
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10308
-        versionName = (findProperty("versionName") as String?) ?: "1.3.8"
+        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10309
+        versionName = (findProperty("versionName") as String?) ?: "1.3.9"
 
         buildConfigField("String", "CERT_SHA256", "\"${keystoreProps.getProperty("certSha256", "")}\"")
         buildConfigField("String", "GITHUB_REPO", "\"ppoykulot-lgtm/zenktx-tv\"")

@@ -35,3 +35,4 @@ dist-android.log
 channels/keycheck.json
 build.log
 .chk/
+android/build*.log
