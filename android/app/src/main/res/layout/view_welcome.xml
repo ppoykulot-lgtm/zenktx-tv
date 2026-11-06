@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Welcome screen, shared by the TV and the mobile guide.
+
+  The mark is drawn three times: two mint silhouettes stepped 4dp and 8dp below
+  the full-colour tile, so the logo reads as a lit 3D object here and stays flat
+  and readable everywhere else in the app. The wordmark stacks the same way —
+  dark, mid-mint, then the near-white face.
+
+  It sits on top of the guide until the published catalogue has been pulled, so
+  a launch always starts from the current channel list, and the wait is a brand
+  moment instead of an empty grid.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/welcome"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:clickable="true"
+    android:focusable="true">
+
+    <View
+        android:id="@+id/welcomeGlow"
+        android:layout_width="340dp"
+        android:layout_height="340dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_welcome_glow" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
+
+        <!-- 3D mark -->
+        <FrameLayout
+            android:id="@+id/welcomeMark"
+            android:layout_width="110dp"
+            android:layout_height="110dp">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="8dp"
+                android:alpha="0.22"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_mark"
+                android:tint="@color/mint" />
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="4dp"
+                android:alpha="0.45"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_mark"
+                android:tint="@color/mint" />
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal|top"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/ic_mark" />
+        </FrameLayout>
+
+        <!-- 3D wordmark -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:letterSpacing="0.14"
+                android:text="@string/brand_name"
+                android:textColor="#0B4A3E"
+                android:textSize="42sp"
+                android:textStyle="bold"
+                android:translationY="7dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:letterSpacing="0.14"
+                android:text="@string/brand_name"
+                android:textColor="#17947B"
+                android:textSize="42sp"
+                android:textStyle="bold"
+                android:translationY="3.5dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:letterSpacing="0.14"
+                android:shadowColor="#8035E7C0"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="18"
+                android:text="@string/brand_name"
+                android:textColor="@color/text"
+                android:textSize="42sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:letterSpacing="0.42"
+            android:text="@string/brand_sub"
+            android:textColor="@color/mint"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:gravity="center"
+            android:text="@string/welcome_slogan"
+            android:textColor="@color/text"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:letterSpacing="0.08"
+            android:text="@string/welcome_free"
+            android:textColor="@color/mint"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="34dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:indeterminateTint="@color/mint" />
+
+            <TextView
+                android:id="@+id/welcomeStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:letterSpacing="0.06"
+                android:text="@string/welcome_loading"
+                android:textColor="@color/muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

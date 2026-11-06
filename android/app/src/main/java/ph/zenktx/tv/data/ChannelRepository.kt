@@ -23,7 +23,10 @@ object ChannelRepository {
     private const val LIVE_PREFS = "zenktx_live"
     private const val KEY_LIVE_MAP = "map"
     private const val KEY_LIVE_AT = "at"
-    private const val LIVE_TTL_MS = 6 * 60 * 60 * 1000L
+    // Zero: every launch asks the feed for its current addresses. These links
+    // are re-tokenised through the day, and a catalogue channel that was fixed
+    // an hour ago must be in the guide now, not after a six-hour cache.
+    private const val LIVE_TTL_MS = 0L
 
     /** One address plus two mirrors, the same budget the Windows build uses. */
     private const val MIRROR_LIMIT = 3
@@ -35,7 +38,9 @@ object ChannelRepository {
     private const val CATALOG_PREFS = "zenktx_catalog"
     private const val KEY_CATALOG = "json"
     private const val KEY_CATALOG_AT = "at"
-    private const val CATALOG_TTL_MS = 30 * 60 * 1000L
+    // Zero for the same reason: the welcome screen covers the fetch, and the
+    // copies in SharedPreferences and the APK remain the offline fallback.
+    private const val CATALOG_TTL_MS = 0L
     private val STREAM_PLAYLIST =
         Regex("#EXT-X-(STREAM-INF|TARGETDURATION|MEDIA-SEQUENCE|I-FRAME-STREAM-INF)")
 
@@ -153,9 +158,16 @@ object ChannelRepository {
         )
     )
 
+    /** A cache buster: both hosts happily serve yesterday's copy without one. */
+    private fun stamped(url: String): String {
+        val separator = if (url.contains('?')) '&' else '?'
+        return "$url${separator}t=${System.currentTimeMillis()}"
+    }
+
     /**
-     * The published catalogue, cached for half an hour. Offline, or if the
-     * catalogue moved, the copy inside the APK keeps the app usable.
+     * The published catalogue, fetched on every launch. Offline, or if the
+     * catalogue moved, the cached copy and then the one inside the APK keep the
+     * app usable.
      */
     private fun catalog(context: Context): List<Channel> {
         val prefs = context.applicationContext
@@ -163,7 +175,7 @@ object ChannelRepository {
 
         if (System.currentTimeMillis() - prefs.getLong(KEY_CATALOG_AT, 0L) > CATALOG_TTL_MS) {
             runCatching {
-                val text = Http.getText(CATALOG_URL)
+                val text = Http.getText(stamped(CATALOG_URL))
                 if (fromJson(text, "b").isNotEmpty()) {
                     prefs.edit()
                         .putString(KEY_CATALOG, text)
@@ -187,7 +199,7 @@ object ChannelRepository {
 
         if (System.currentTimeMillis() - prefs.getLong(KEY_LIVE_AT, 0L) > LIVE_TTL_MS) {
             runCatching {
-                val map = parseLive(Http.getText(LIVE_FEED))
+                val map = parseLive(Http.getText(stamped(LIVE_FEED)))
                 if (map.isNotEmpty()) {
                     val json = JSONObject()
                     map.forEach { (key, entry) -> json.put(key, entry.toJson()) }
@@ -237,7 +249,7 @@ object ChannelRepository {
         val original = sourceList
         if (original.isEmpty()) return false
 
-        val map = runCatching { parseLive(Http.getText(LIVE_FEED)) }.getOrDefault(emptyMap())
+        val map = runCatching { parseLive(Http.getText(stamped(LIVE_FEED))) }.getOrDefault(emptyMap())
         if (map.isEmpty()) return false
 
         runCatching {
@@ -375,7 +387,6 @@ object ChannelRepository {
     }
 
     fun byKey(key: String): Channel? = cache.firstOrNull { it.key == key }
-
     // ---- parsing ----------------------------------------------------------
 
     private fun looksLikeM3u(text: String): Boolean =

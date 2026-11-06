@@ -18,10 +18,17 @@
     <string name="favourite_on">★</string>
     <string name="favourite_off">☆</string>
 
+    <!-- Welcome -->
+    <string name="welcome_slogan">Your Entertainment, Anytime. Anywhere.</string>
+    <string name="welcome_free">— 100% FREE!</string>
+    <string name="welcome_loading">Loading channels…</string>
+
     <!-- Channel actions -->
     <string name="actions_title">%1$s</string>
     <string name="action_fav_add">☆  Add to Favourites</string>
     <string name="action_fav_remove">★  Remove from Favourites</string>
+    <string name="action_fav_saved">★  %1$s added to Favourites</string>
+    <string name="action_fav_removed">☆  %1$s removed from Favourites</string>
     <string name="action_logo_set">🖼  Set logo URL</string>
     <string name="action_logo_clear">✕  Remove logo</string>
     <string name="action_hide">🚫  Hide this channel</string>

@@ -9,6 +9,7 @@ import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -31,6 +32,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.data.ChannelRepository
+import ph.zenktx.tv.data.LibraryStore
 import ph.zenktx.tv.databinding.ActivityPlayerBinding
 import ph.zenktx.tv.net.Http
 import ph.zenktx.tv.ui.Logos
@@ -61,6 +63,7 @@ class PlayerActivity : Activity() {
     }
 
     private lateinit var binding: ActivityPlayerBinding
+    private lateinit var library: LibraryStore
     private var player: ExoPlayer? = null
 
     /** Set per channel, before the media source is built. */
@@ -118,6 +121,7 @@ class PlayerActivity : Activity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        library = LibraryStore(this)
         goFullscreen()
 
         resolveQueue()
@@ -126,6 +130,7 @@ class PlayerActivity : Activity() {
             return
         }
 
+        binding.btnFav.setOnClickListener { toggleCurrentFavourite() }
         binding.btnRetry.setOnClickListener { playCurrent() }
         binding.btnNext.setOnClickListener {
             if (queue.size < 2) finish() else switchChannel(1)
@@ -182,6 +187,11 @@ class PlayerActivity : Activity() {
         index = intent.getIntExtra(EXTRA_INDEX, 0).coerceIn(0, queue.lastIndex)
     }
 
+    /**
+     * The controller is inflated the first time it is shown, which is after
+     * onCreate, so its buttons are wired again whenever a channel loads instead
+     * of once at launch — a listener attached too early lands on nothing.
+     */
     private fun wireControllerButtons() {
         binding.playerView.post {
             binding.playerView.findViewById<View>(R.id.btnPrev)?.setOnClickListener {
@@ -191,6 +201,27 @@ class PlayerActivity : Activity() {
                 switchChannel(1)
             }
         }
+    }
+
+    // ---- favourites -------------------------------------------------------
+
+    /** The star follows the channel on screen, including after a channel hop. */
+    private fun showFavouriteState() {
+        val channel = queue.getOrNull(index) ?: return
+        val saved = library.isFavourite(channel.key)
+        binding.btnFav.text = getString(if (saved) R.string.favourite_on else R.string.favourite_off)
+        binding.btnFav.alpha = if (saved) 1f else 0.72f
+    }
+
+    private fun toggleCurrentFavourite() {
+        val channel = queue.getOrNull(index) ?: return
+        val saved = library.toggleFavourite(channel.key)
+        showFavouriteState()
+        Toast.makeText(
+            this,
+            getString(if (saved) R.string.action_fav_saved else R.string.action_fav_removed, channel.name),
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     // ---- playback ---------------------------------------------------------
@@ -511,6 +542,9 @@ class PlayerActivity : Activity() {
 
         main.removeCallbacks(hideChip)
         main.postDelayed(hideChip, CHIP_MS)
+
+        wireControllerButtons()
+        showFavouriteState()
     }
 
     // ---- input ------------------------------------------------------------

@@ -50,6 +50,9 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
+        <!-- The favourite star lives in activity_player.xml, outside this
+             controller: this bar is inflated and hidden by Media3, which made
+             a button here unreliable to reach. -->
         <TextView
             android:id="@+id/btnPrev"
             style="@style/PlayerChipButton"

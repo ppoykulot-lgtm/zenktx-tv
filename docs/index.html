@@ -9,7 +9,7 @@
 <meta property="og:title" content="ZENKTX TV Stream" />
 <meta property="og:description" content="A remote-first live TV player for Android TV, Android and Windows." />
 <meta property="og:type" content="website" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='118' fill='%230A1020'/%3E%3Crect x='96' y='150' width='176' height='46' rx='23' fill='%2335E7C0'/%3E%3Cpath d='M272 173L170 311' stroke='%2335E7C0' stroke-width='46' stroke-linecap='round'/%3E%3Crect x='96' y='288' width='134' height='46' rx='23' fill='%235B8CFF'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230A1020'/%3E%3Cpath d='M292.4 213.2A106 106 0 0 1 420.9 290.4' fill='none' stroke='%235B8CFF' stroke-width='15' stroke-linecap='round' opacity='.92'/%3E%3Cpath d='M300.6 246.1A72 72 0 0 1 387.9 298.6' fill='none' stroke='%2335E7C0' stroke-width='18' stroke-linecap='round'/%3E%3Cpath d='M296 292L350 318L296 344z' fill='%23F2F5FF'/%3E%3Crect x='96' y='290' width='156' height='46' rx='23' fill='%235B8CFF'/%3E%3Crect x='96' y='150' width='176' height='46' rx='23' fill='%2335E7C0'/%3E%3Cpath d='M245 173L140 296' stroke='%2335E7C0' stroke-width='44' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   :root {
     --bg: #060911;
@@ -249,6 +249,8 @@
   }
   .entry ul { margin: 0; padding-left: 18px; color: #a3aec4; font-size: 13.5px; }
   .entry li { margin-bottom: 5px; }
+  .log-more { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+  .log-more a { color: var(--mint); }
 
   /* footer */
   footer { border-top: 1px solid var(--line); padding: 40px 0 54px; color: var(--muted); font-size: 12.5px; }
@@ -594,21 +596,31 @@
       <div class="section-head">
         <div class="kicker">Version history &amp; changelogs</div>
         <h2>What changed, release by release.</h2>
-        <p>Every tag in the repository publishes these notes automatically.</p>
+        <p>The five newest releases. Everything older lives on the releases page.</p>
       </div>
 
       <div class="log">
+<article class="entry">
+          <h3>1.4.0 <span class="tagx">latest</span></h3>
+          <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>A new mark.</b> The logo had a pair of blue outlines scribbled over its broadcast arcs, which read as a drawing mistake at every size. The mark is rebuilt from one geometry: a clean Z, two concentric signal arcs centred on the play triangle, and no overlapping outlines. The same numbers draw the launcher icon, the TV banner, the Windows icon and the favicon, so the four can no longer drift apart.</li>
+            <li><b>A welcome screen on all three builds.</b> The mark sits in a lit halo, stepped in 3D just for this screen, over <i>Your Entertainment, Anytime. Anywhere. — 100% FREE!</i>, with <i>Loading channels…</i> underneath, then the app gets out of the way.</li>
+            <li><b>The channel list refreshes on every launch.</b> The catalogue used to be held for half an hour — and the live stream addresses for six hours — so a channel added, renamed, fixed or removed in the admin page could take the rest of the day to appear. Every open pulls the current file and the current feed now; the welcome screen covers the fetch, and the cached and bundled copies stay as the offline fallback.</li>
+            <li><b>A star in the player.</b> The channel that is playing can be saved or dropped from the same row as its name and logo — on the TV, the phone and the desktop — instead of closing the player and finding the tile again.</li>
+            <li><b>This page keeps the five newest releases</b>, so the version history stays readable; the rest of the archive lives on the releases page.</li>
+          </ul>
+        </article>
+
         <article class="entry">
-          <h3>1.3.9 <span class="tagx">latest</span></h3>
+          <h3>1.3.9</h3>
           <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
             <li><b>The logos are ours now.</b> Every channel logo used to be pulled from a third-party host — <code>iyad.click</code>, <code>iyadtv.pages.dev</code>, Wikia, Plex — sitting behind bot protection that answers a browser and silently ignores the apps, which is why every tile fell back to its initials. Each picture is downloaded once, stored in this repository under <code>/logos</code> and served from here, so the TV, the phone, the Windows build and the admin page all show the same artwork.</li>
             <li><b>Images load again.</b> The grid handed its requests to an image loader that had already been replaced, so neither the success nor the failure callback ever ran. One loader is now built once and passed to every request, with a caller identity and timeouts the logo hosts accept.</li>
             <li><b>Bigger tiles on Windows.</b> The desktop grid drew a 44px logo inside a 132px card; it is a 84px logo in a 152px card with a 12px label now, the way the mobile guide looks.</li>
           </ul>
-        </article>
-
-        <article class="entry">
+        </article><article class="entry">
           <h3>1.3.8</h3>
           <div class="meta">5 November 2026 · Android mobile (new guide) · Android TV (logos, fullscreen) · Windows unchanged on 1.3.3</div>
           <ul>
@@ -616,9 +628,7 @@
             <li><b>Logos are back.</b> 45 of the catalogue's logos are SVGs, and the image loader had no SVG decoder, so those channels drew their initials even though the admin page has artwork for them. The decoder ships with the app now.</li>
             <li><b>Playback goes fullscreen.</b> The status and navigation bars sat over the picture on a phone; they are hidden while a channel plays and a swipe from the edge brings them back for a moment.</li>
           </ul>
-        </article>
-
-        <article class="entry">
+        </article><article class="entry">
           <h3>1.3.7</h3>
           <div class="meta">5 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
           <ul>
@@ -627,9 +637,7 @@
             <li><b>The address decides the format.</b> The guide's <code>hls</code> / <code>mpd</code> flag goes stale when a provider swaps a channel between the two, and an <code>.mpd</code> handed to the HLS parser fails before it requests a single segment. The container is read from the URL now.</li>
             <li><b>An expired link says so.</b> 403, 404, 410 and 451 used to read “refused the request (HTTP 410)”; they now explain that the provider rotates addresses and the channel usually comes back.</li>
           </ul>
-        </article>
-
-        <article class="entry">
+        </article><article class="entry">
           <h3>1.3.6</h3>
           <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
           <ul>
@@ -637,186 +645,8 @@
           </ul>
         </article>
 
-        <article class="entry">
-          <h3>1.3.5</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>The error card no longer sits on a playing channel.</b> A live playlist that ends, or one segment that fails while the provider re-tokenises it, froze the last frame and parked <i>Channel unavailable</i> on top for good. The player now re-prepares the same channel twice before it reports anything, and it drops the card the moment frames come back.</li>
-            <li><b>Every tile shows something.</b> A channel whose logo URL is missing or dead fell back to an empty play glyph. Those tiles show their initials on a per-channel colour instead, so the grid never looks unfinished.</li>
-            <li><b>All categories are visible.</b> The filter row scrolled sideways and cut off everything past the third chip, which left the rest unreachable on a phone. The chips wrap onto new rows now.</li>
-            <li><b>The last row is no longer covered.</b> A half-scrolled tile drew its name over the detail strip; the grid clips to its own bounds and keeps room below the last row.</li>
-            <li><b>The detail strip survives a narrow phone.</b> The category tag was squeezed until “MOVIES” stacked one letter per line. The meta text takes the remaining width now and the tag stays on one line.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.3.4</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>The APKs are signed with all three schemes now.</b> Every Android build up to 1.3.3 carried only the v2 signature block; Android 7 and 8 installers — and several file managers — refuse an APK with no v1 (JAR) signature and show a bare <i>App not installed</i> with no reason. The release APK now verifies against v1, v2 and v3.</li>
-            <li><b>If the copy already on the device was signed with another key</b> (an old build made before the release keystore existed), Android still refuses to replace it. Uninstall ZENKTX first, then install this APK.</li>
-            <li><b>Play Protect will warn about any sideloaded IPTV app</b> — <i>“Harmful app blocked”</i> is a reputation warning, not a virus report. Choose <b>Install anyway</b>; tapping <i>Got it</i> cancels the install, which ends as “App not installed”.</li>
-            <li>Windows stays on 1.3.3: a tag only rebuilds the platforms it changed, so the Android fix did not rename the Windows build.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.3.3</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
-          <ul>
-            <li><b>Channels no longer open paused.</b> The play call ran before the player had attached the stream, so it was rejected and the channel sat still until you pressed play. The app now asks again the moment the stream is ready, and remembers whether you paused it yourself.</li>
-            <li><b>A change published in the admin page shows up on the next launch.</b> The app cached the channel list for half an hour and skipped the download when the cache was fresh, so a reorder, a rename or a removal looked like it never happened. Every launch now fetches the current file, with the cache kept for offline use.</li>
-            <li><b>Switching a channel back on works.</b> The <i>on</i> toggle did not clear the removal marker, and the apps skip any row that carries one — that is why 3RS SinePinoy stayed hidden. Enabling a row, single or bulk, clears the tombstone now.</li>
-            <li><b>A 410 is retried with the current link.</b> These providers re-tokenise addresses through the day, so a cached copy can answer <i>HTTP 410</i> while the channel is alive — which is why a second window played it. The app pulls the feed again and retries once before showing the error.</li>
-            <li><b>Admin page:</b> a password gate, an editable <b>channel number</b> that renumbers the rest, per-channel <b>logo</b>, <b>DRM</b>, <b>key id</b> and <b>key</b> fields, and publishing now re-reads the file so the table shows what actually landed.</li>
-            <li><b>Android updates explain a refused install.</b> If the downloaded APK is signed with a different certificate than the installed app — the usual cause of <i>App not installed</i> — the app says so and asks for an uninstall instead of leaving the system dialog to fail silently.</li>
-            <li><b>Each platform keeps its own version number.</b> A tag only rebuilds the platforms whose files changed, and each card on this page keeps the version and tag of the release that last touched it — a Windows fix no longer renames the Android build. Tags stay in the plain <code>v1.3.4</code> form on purpose: the updater inside the installed app compares the tag with its own version, and a prefixed tag reads as no version at all, which is exactly why the update notice stopped appearing after 1.3.2.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.3.2</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
-          <ul>
-            <li><b>The 1.3.1 installers shipped without Shaka Player</b>, so the encrypted channels still failed there with <i>the provider rotated this channel's Clearkey key</i>. The packaged builds vendor only what the build script copies, and that script never fetched Shaka — it existed only in the development tree, where the change was tested. The build now installs <code>shaka-player</code> and copies its bundle next to hls.js and dash.js, so an installer can no longer be produced without it.</li>
-            <li>When the player for protected streams is genuinely absent, the app says so instead of blaming the stream: <i>“This copy of the app is missing the player for protected streams. Install the latest version.”</i></li>
-            <li>The guide ignores a channel list that arrives <b>implausibly short</b> — a truncated publish once left three channels cached for half an hour, and the fallback list now stays in place until a complete one arrives.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.3.1</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
-          <ul>
-            <li><b>The encrypted channels play now — including NBA TV and NBA TV Philippines.</b> 1.3.0 called 65 channels Widevine because their manifests only advertise Widevine and PlayReady. That was wrong: the manifest names a key id and the feed ships the matching key, so <b>145 channels are ClearKey</b> and can be decrypted with no licence server. Every one of them now carries its key in the catalogue, and the check is the key id against the manifest's <code>default_KID</code> — not the advertised protection list.</li>
-            <li>Windows plays those through <b>Shaka Player</b>. dash.js insists on the key systems the manifest advertises, so it asked Chromium for Widevine, which Electron does not ship, and failed with <i>KeySystem Access Denied</i>.</li>
-            <li>Android decrypts ClearKey through the platform <code>MediaDrm</code> clear-key session — it previously had no DRM support at all, so every encrypted channel failed there too.</li>
-            <li>New <b>NBA Live</b> category. The publisher posts each game stream to the feed while the game is on and removes it the next day, so the guide now pulls anything the feed calls NBA into that category on every refresh — no reinstall, no catalogue edit.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.3.0</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows</div>
-          <ul>
-            <li><b>Channels update without reinstalling.</b> All three builds read the published channel list (<code>catalog.json</code>) on launch and cache it for half an hour. Adding, fixing, hiding, retitling or reordering a channel is now one edit in the new <a href="admin.html">channel admin</a> — no APK, installer or portable copy.</li>
-            <li>Fixed <b>subtitles from the previous channel staying on screen</b>: the media element kept the old text tracks and their cues across a switch, so every track is disabled and cleared before the next stream is attached.</li>
-            <li><b>Add playlist accepts a single <code>.mpd</code></b> as well as <code>.m3u8</code>, and a DASH address is recognised from its manifest, not only from the suffix. JSON lists keep their ClearKey id/key fields.</li>
-            <li>Why some MPD links "did not work": of the 101 DASH channels in the feed, <b>65 are Widevine/PlayReady</b> with no licence the app can use, so the key ids in circulation do nothing for them. 15 more addresses were already dead and now ship disabled.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.5</h3>
-          <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
-          <ul>
-            <li>Fixed the guide showing <b>every tile highlighted</b>. The ClearKey value added in 1.2.3 was stored under <code>key</code>, which is the channel's identity, so the whole bundled list ended up sharing one empty key and the selected-channel style matched every tile.</li>
-            <li>That same clash silently broke <b>favourites, hidden channels and per-channel logo edits</b> for bundled channels — they were all filed under that empty key. They work again, and existing favourites are matched by the restored <code>b:&lt;id&gt;</code> keys.</li>
-            <li>The DRM value now travels as <code>drmKey</code>, so the player still hands ClearKey ids to dash.js without touching channel identity.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.4</h3>
-          <div class="meta">4 November 2026 · Windows · Android builds unchanged</div>
-          <ul>
-            <li>A playlist whose link has died no longer dumps a raw <code>Error invoking remote method</code> message and a full manifest URL into a toast on every launch. The app now says one short sentence — <i>“232 did not load — the link is dead (HTTP 410). Open Playlists to fix or remove it.”</i> — and stays quiet once you deal with it.</li>
-            <li>The Playlists dialog marks that row <b>LINK DEAD</b> and offers <b>Fix link</b>, which asks for the new address in place instead of making you delete the playlist and type it in again.</li>
-            <li>Connection failures are named for what they are: dead link, refused request, rate limit, timeout or an address that does not resolve. A failed GitHub pull uses the same wording.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.3</h3>
-          <div class="meta">4 November 2026 · Windows · Android TV · Android Mobile</div>
-          <ul>
-            <li>Dead channels are fixed at the root. The bundled list carried stream addresses whose access tokens had already expired, which is why a channel played in other apps but not here. The app now pulls the publisher's current list on launch, keeps a six-hour cache, and falls back to the bundled copy offline — Kapamilya Channel HD plays again.</li>
-            <li>The bundled guide was rebuilt from that feed: 503 channels, with the current artwork and stream type for each.</li>
-            <li>Adding a single <code>.m3u8</code> stream no longer names it "Channel 1": a media playlist is recognised as one channel and keeps the title you typed.</li>
-            <li>Add playlist now has an optional logo URL field.</li>
-            <li>Two player designs, switched from the control bar: <b>Glass</b> (default) floats the controls as a translucent capsule over the picture, <b>Studio</b> is a solid full-width deck with square keys.</li>
-            <li>The play/pause button is a small round control instead of the 44&nbsp;px mint square, and every transport icon is a drawn glyph that matches the rest of the UI.</li>
-            <li>Scrollbars follow the dark theme instead of the bright Windows rail.</li>
-            <li>Android TV and Mobile get the same rebuilt guide and the same on-launch refresh; a single <code>.m3u8</code> added as a playlist keeps its title there too, and Add playlist takes the optional logo URL.</li>
-            <li>Android's player bar floats as a rounded translucent deck with a small round play key instead of the old full-width strip.</li>
-            <li>The player asks for streams with a browser user agent and allows cross-origin media, matching what the working third-party clients do, so fewer channels are refused outright.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.2</h3>
-          <div class="meta">3 November 2026 · Windows · Android TV · Android Mobile</div>
-          <ul>
-            <li>Fullscreen is picture-only now: the now-playing strip, the clock and the channel rail are gone, and the floating controls fade away until the mouse moves or a key is pressed.</li>
-            <li>A new build announces itself with a card that lists what changed, on Windows, Android TV and Android Mobile.</li>
-            <li>When a channel has a second listing (a <code>Stream 2</code>, an HD twin), a dead or DRM-locked first address falls through to the next one instead of stopping at the error card.</li>
-            <li>Android update checks read the whole release feed, so a Windows-only tag no longer hides the next APK release from Android viewers.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.1</h3>
-          <div class="meta">3 November 2026 · Windows only · Android builds unchanged</div>
-          <ul>
-            <li>Fullscreen now fills the whole player: the channel rail collapses, the window goes fullscreen, and <code>Esc</code> steps back out before closing the player.</li>
-            <li>The now-playing strip stays visible on smaller windows — it used to be cut off below the control bar.</li>
-            <li>A Windows build is published only when the Windows code changes, so the desktop updater never offers a release with no new code in it.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.2.0</h3>
-          <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
-          <ul>
-            <li>Adding one playlist no longer clones its channels, and removing it clears them from the guide immediately instead of after a restart. Duplicate entries saved by older builds are cleaned up on launch.</li>
-            <li>Add playlist now asks for a title, and re-adding the same URL renames the existing entry rather than creating a second one.</li>
-            <li>A single stream link works as a playlist: an <code>.mpd</code> manifest, a lone <code>.m3u8</code>, or an M3U master playlist becomes one channel instead of failing to parse.</li>
-            <li>New player: channel rail with search and a live count, transport bar with volume and an accurate timeline, and a now-playing strip with the local clock.</li>
-            <li>Update checks run at launch, and pressing the update button installs the new build in place — the app downloads it with a progress bar, closes, and reopens on the new version. Portable copies stay portable.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.1.1</h3>
-          <div class="meta">3 November 2026 · Windows · Android builds unchanged</div>
-          <ul>
-            <li>Unplayable channels now say why: a Widevine/PlayReady channel is named as DRM-protected, and a dead provider token is named as an expired link.</li>
-            <li>The error panel wraps long manifest URLs instead of spilling them past the card.</li>
-            <li>A DRM refusal shows up immediately. dash.js used to retry it about twenty times, so the panel arrived roughly ten seconds late.</li>
-            <li>DASH playback starts on a shorter buffer, and the guide reads <code>CONNECTING…</code> until the first frame instead of looking frozen.</li>
-            <li>The player CSP allows the blob worker both engines spawn.</li>
-            <li>The in-app update check points at the right repository again — it had been answered with HTTP 404 on every run — and no longer prints the raw IPC error when it fails.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.1.0</h3>
-          <div class="meta">2 November 2026 · Android TV, Android Mobile, Windows</div>
-          <ul>
-            <li>Fixed the filter chip alignment — the focused chip no longer clips its top corners.</li>
-            <li>Channel up / down while playing, without leaving the player.</li>
-            <li>Stream failures now explain themselves: HTTP status, geo-block, codec or timeout.</li>
-            <li>Stall watchdog catches silent streams instead of leaving a black screen.</li>
-            <li>Browser user-agent + retries fix most <code>error_code_io_bad_http_status</code> failures.</li>
-            <li>Favourites with a dedicated chip and star badges.</li>
-            <li>Playlist manager: add or remove M3U/JSON sources, GitHub pull and push.</li>
-            <li>Logo editor — set a URL for missing artwork or remove it entirely.</li>
-            <li>Automatic updates from GitHub Releases, plus in-app download and install.</li>
-            <li>Release builds are signed and pinned; modified copies refuse to run.</li>
-            <li>New Android Mobile build alongside the TV build.</li>
-          </ul>
-        </article>
-
-        <article class="entry">
-          <h3>1.0.0</h3>
-          <div class="meta">1 November 2026 · Android TV</div>
-          <ul>
-            <li>First release: Guide home screen with category chips, EPG grid and detail strip.</li>
-            <li>485 channels across 8 categories, with 128 Philippines channels flagged.</li>
-            <li>HLS and DASH playback through Media3 / ExoPlayer.</li>
-            <li>Android TV launcher banner and leanback support for Shield, Google TV and sticks.</li>
-          </ul>
-        </article>
+        <p class="log-more">Older release notes are kept on the
+          <a href="https://github.com/ppoykulot-lgtm/zenktx-tv/releases">GitHub releases page</a>.</p>
       </div>
     </div>
   </section>
@@ -859,8 +689,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.3.9", mobile: "1.3.9", win: "1.3.9" };
-  const TAGS = { tv: "v1.3.9", mobile: "v1.3.9", win: "v1.3.9" };
+  const VERSIONS = { tv: "1.4.0", mobile: "1.4.0", win: "1.4.0" };
+  const TAGS = { tv: "v1.4.0", mobile: "v1.4.0", win: "v1.4.0" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

@@ -78,6 +78,24 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- Favourite, top-right. It is not part of the Media3 controller: that bar
+         is inflated and hidden by Media3, which left a button there hard to
+         reach. This one is always on screen, remote- and touch-friendly. -->
+    <TextView
+        android:id="@+id/btnFav"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_gravity="end|top"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/bg_player_chip"
+        android:contentDescription="@string/favourites"
+        android:focusable="true"
+        android:gravity="center"
+        android:text="@string/favourite_off"
+        android:textColor="@color/text"
+        android:textSize="20sp" />
+
     <ProgressBar
         android:id="@+id/buffering"
         android:layout_width="46dp"
