@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Player corner buttons. A phone overrides these in src/mobile/res/values,
+     because a 46dp star and ✕ are read from 40cm and sit over the picture. -->
+<resources>
+    <dimen name="player_corner_size">46dp</dimen>
+    <dimen name="player_corner_glyph">20sp</dimen>
+    <dimen name="player_corner_pad">12dp</dimen>
+</resources>

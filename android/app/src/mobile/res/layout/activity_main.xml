@@ -2,8 +2,9 @@
 <!-- Mobile guide. The TV layout keeps its 6-column EPG: on a phone that grid
      left 8sp names and a 42dp logo inside a 130dp card, and the chips wrapped
      into five rows that ate half the screen. This one scrolls the categories in
-     a single row, gives every tile room to breathe and docks a proper detail
-     sheet at the bottom. -->
+     a single row, gives every tile room to breathe, and searches in place: the
+     field sits under the chips where the keyboard cannot cover it, so there is
+     no dialog to open before a channel can be found. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -63,19 +64,6 @@
                 android:layout_weight="1" />
 
             <TextView
-                android:id="@+id/searchButton"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_btn_ghost"
-                android:contentDescription="@string/search"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="⌕"
-                android:textColor="@color/text"
-                android:textSize="17sp" />
-
-            <TextView
                 android:id="@+id/channelCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -122,11 +110,65 @@
             android:paddingBottom="4dp"
             android:scrollbars="none" />
 
+        <!-- Search, where the whole phone can see it: under the categories, on
+             the same card surface as the tiles, with the count of what it found
+             as you type. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_search"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="6dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/search"
+                android:text="⌕"
+                android:textColor="@color/mint"
+                android:textSize="17sp" />
+
+            <EditText
+                android:id="@+id/searchInput"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/search_hint"
+                android:imeOptions="actionSearch"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:singleLine="true"
+                android:textColor="@color/text"
+                android:textColorHint="@color/muted"
+                android:textSize="12.5sp" />
+
+            <TextView
+                android:id="@+id/searchClear"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_btn_ghost"
+                android:contentDescription="@string/player_close"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="✕"
+                android:textColor="@color/muted"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="6dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/muted"
@@ -144,115 +186,6 @@
             android:paddingTop="2dp"
             android:paddingBottom="8dp"
             android:scrollbars="none" />
-
-        <!-- Detail sheet: the whole card is the target, and the name gets two
-             lines instead of being cut to "3RS Si…". -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_hero"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="10dp">
-
-            <FrameLayout
-                android:layout_width="54dp"
-                android:layout_height="54dp">
-
-                <ImageView
-                    android:id="@+id/detailLogo"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/app_name"
-                    android:padding="4dp"
-                    android:visibility="gone" />
-            </FrameLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/detailName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:textColor="@color/text"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/detailTag"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_tag"
-                        android:ellipsize="end"
-                        android:letterSpacing="0.1"
-                        android:maxLines="1"
-                        android:paddingStart="6dp"
-                        android:paddingTop="2dp"
-                        android:paddingEnd="6dp"
-                        android:paddingBottom="2dp"
-                        android:singleLine="true"
-                        android:textColor="#8FE7D6"
-                        android:textSize="8sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/detailMeta"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:textColor="@color/muted"
-                        android:textSize="9.5sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/detailFav"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_btn_ghost"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="☆"
-                android:textColor="@color/text"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/detailWatch"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_btn_primary"
-                android:focusable="true"
-                android:gravity="center"
-                android:minWidth="96dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:text="@string/watch_short"
-                android:textColor="@color/btn_primary_text"
-                android:textSize="11.5sp"
-                android:textStyle="bold" />
-        </LinearLayout>
     </LinearLayout>
 
     <!-- Sits on top until the current catalogue has been pulled. -->

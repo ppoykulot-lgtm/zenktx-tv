@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mobile tile: three across, an 84dp logo inside a 118dp card — the tight
+<!-- Mobile tile: three across, an 84dp logo inside a 132dp card — the tight
      thumbnail grid phone users expect, with the logo big enough to read at a
-     glance instead of shrinking the artwork to a dot. -->
+     glance instead of shrinking the artwork to a dot.
+
+     The card is 132dp, not 118dp: an 84dp logo plus two 10sp lines came to more
+     than the old height, so the second line of a name like "Cartoonito Stream
+     2" was painted past the card edge and chopped in half. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="118dp"
+    android:layout_height="132dp"
     android:layout_margin="4dp"
     android:background="@drawable/bg_card"
     android:focusable="true"
     android:paddingStart="7dp"
-    android:paddingTop="7dp"
+    android:paddingTop="8dp"
     android:paddingEnd="7dp"
     android:paddingBottom="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center_horizontal|bottom"
         android:orientation="vertical">
 
         <ImageView
@@ -30,10 +34,11 @@
             android:id="@+id/tileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:gravity="center"
-            android:lineSpacingExtra="0dp"
+            android:includeFontPadding="false"
+            android:lineSpacingExtra="1dp"
             android:maxLines="2"
             android:textColor="#C7D2E6"
             android:textSize="10sp" />
