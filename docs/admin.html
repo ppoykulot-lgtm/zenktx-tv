@@ -43,13 +43,20 @@
   .note code { color: var(--mint); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #141f33; vertical-align: middle; }
-  th { color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; position: sticky; top: 57px; background: var(--bg); }
+  th {
+    color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; position: sticky; top: var(--head, 57px); background: var(--bg);
+    z-index: 2; box-shadow: inset 0 -1px 0 #141f33;
+  }
   tr.off td { opacity: .45; }
   tr.drm td.name::after { content: " · WIDEVINE"; font-size: 9px; letter-spacing: .1em; color: var(--warn); }
   td.name input { width: 100%; min-width: 150px; }
   td.url input { width: 100%; min-width: 260px; font-size: 12px; color: #a9bdd8; }
   td.num { color: var(--muted); font-variant-numeric: tabular-nums; width: 44px; }
-  td.acts { white-space: nowrap; width: 96px; }
+  td.acts { white-space: nowrap; width: 96px; text-align: right; }
+  td.on { width: 44px; text-align: center; }
+  td.pick { width: 30px; text-align: center; }
+  td.num input { width: 52px; }
   td.acts button { padding: 4px 8px; margin-right: 4px; }
   #status { font-size: 12.5px; color: var(--muted); }
   #status.ok { color: var(--mint); }
@@ -60,7 +67,12 @@
   }
   dialog::backdrop { background: rgba(2,5,10,.7); }
   dialog label { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
-  dialog input { width: 100%; }
+  dialog input, dialog textarea { width: 100%; }
+  dialog textarea { font: inherit; color: var(--text); background: #0b1220; border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; resize: vertical; }
+  .check { display: flex; gap: 9px; align-items: center; margin-top: 12px; }
+  .check input { width: 16px; height: 16px; }
+  .check label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--text); }
+  .stopcard { border: 1px solid rgba(255,107,107,.35); background: rgba(255,107,107,.06); border-radius: 10px; padding: 10px 12px; margin-top: 12px; color: #ffc9c9; font-size: 12.5px; }
   .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
   .tablewrap { overflow-x: auto; }
   /* The page is public, so the catalogue waits behind a passphrase. */
@@ -105,6 +117,7 @@
   <button id="load" class="primary">Load catalogue</button>
   <button id="add">Add channel</button>
   <button id="publish">Publish</button>
+  <button id="statusBtn" class="ghost" title="Stop, or restart, every build">Project status</button>
   <button id="settings" class="ghost" title="Repository and token">⚙</button>
   <button id="lock" class="ghost" title="Lock this page">🔒</button>
 </header>
@@ -171,7 +184,28 @@
   <label for="newPass">New admin password</label>
   <input id="newPass" type="password" placeholder="Leave empty to keep the current one" />
   <div class="row">
+    <button id="cancelSettings" class="ghost">Cancel</button>
     <button id="saveSettings" class="primary">Save</button>
+  </div>
+</dialog>
+
+<dialog id="dlgStatus">
+  <h3 style="margin:0 0 4px">Project status</h3>
+  <p style="font-size:12.5px;color:#8496b5;margin:0">
+    Publishing this writes <code>status.json</code>, which every build checks before it loads a
+    channel. The answer is cached on the device, so turning the network off does not bring an app
+    back — only publishing again with the switch off does.
+  </p>
+  <div class="check">
+    <input id="msStop" type="checkbox" />
+    <label for="msStop">Stop every build (Android TV, Android mobile, Windows)</label>
+  </div>
+  <label for="msMsg">Message on the welcome screen</label>
+  <textarea id="msMsg" rows="4" placeholder="ZENKTX has stopped. Thank you for watching."></textarea>
+  <div class="stopcard" id="msCurrent">Loading current status…</div>
+  <div class="row">
+    <button id="msCancel" class="ghost">Cancel</button>
+    <button id="msPublish" class="primary">Publish status</button>
   </div>
 </dialog>
 
@@ -179,6 +213,7 @@
 'use strict';
 
 const SETTINGS_KEY = 'zenktx.admin.v1';
+const statusPath = () => settings.path.replace(/[^/]*$/, 'status.json');
 const RAW = (cfg) =>
   `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
 
@@ -379,8 +414,9 @@ function render() {
       // Switching the row back on must clear the removal marker, or the apps
       // keep hiding a channel this table says is live.
       if (on.checked) delete channel.tombstone;
+      tr.classList.toggle('off', !on.checked);
       markDirty();
-      render();
+      updateCount();
     });
     onCell.appendChild(on);
 
@@ -399,6 +435,7 @@ function render() {
     del.className = 'danger';
     del.title = 'Remove from the apps (tombstone)';
     del.addEventListener('click', () => {
+      if (!window.confirm(`Hide “${channel.name || 'this channel'}” from every app?`)) return;
       channel.enabled = false;
       channel.tombstone = true;
       markDirty();
@@ -407,11 +444,21 @@ function render() {
     acts.append(up, down, del);
 
     tr.append(document.createElement('td'), order, nameCell, urlCell, logoCell, drmCell, kidCell, keyCell, groupCell, onCell, acts);
+    tr.firstChild.className = 'pick';
     tr.firstChild.appendChild(check);
+    onCell.className = 'on';
     body.appendChild(tr);
   });
 
-  $('count').textContent = `${shown} of ${list.length} shown · ${list.filter((c) => c.enabled !== false).length} live`;
+  $('all').checked = false;
+  updateCount(shown);
+}
+
+function updateCount(shown) {
+  const list = (catalog && catalog.channels) || [];
+  const visible = shown === undefined ? list.length : shown;
+  $('count').textContent =
+    `${visible} of ${list.length} shown · ${list.filter((c) => c.enabled !== false).length} live`;
 }
 
 function moveTo(index, target) {
@@ -488,9 +535,19 @@ function mergeCatalogs(base, ours, theirs) {
     const untouched = local && before.has(key) && JSON.stringify(local) === JSON.stringify(before.get(key));
     rows.push(!local || untouched ? row : local);
   }
-  const seen = new Set(rows.map((row) => String(row.id)));
-  const added = ((ours && ours.channels) || []).filter((c) => !before.has(String(c.id)) && !seen.has(String(c.id)));
-  return Object.assign({}, theirs, ours, { channels: [...added, ...rows] });
+  const merged = new Map(rows.map((row) => [String(row.id), row]));
+  const ordered = [];
+  for (const channel of (ours && ours.channels) || []) {
+    const key = String(channel.id);
+    if (merged.has(key)) {
+      ordered.push(merged.get(key));
+      merged.delete(key);
+    } else if (!before.has(key)) {
+      ordered.push(channel);
+    }
+  }
+  for (const row of merged.values()) ordered.push(row);
+  return Object.assign({}, theirs, ours, { channels: ordered });
 }
 
 async function publish() {
@@ -506,7 +563,10 @@ async function publish() {
       'X-GitHub-Api-Version': '2022-11-28',
     };
     const readRemote = async () => {
-      const head = await fetch(`${api}?ref=${encodeURIComponent(settings.branch)}`, { headers });
+      const head = await fetch(
+        `${api}?ref=${encodeURIComponent(settings.branch)}&t=${Date.now()}`,
+        { headers, cache: 'no-store' }
+      );
       if (!head.ok) throw new Error(`read failed (HTTP ${head.status})`);
       const body = await head.json();
       return { sha: body.sha, text: decodeBase64(body.content || '') };
@@ -561,6 +621,92 @@ async function publish() {
   }
 }
 
+/* ------------------------------------------------------------ kill switch */
+
+// Writes one file to the repository. The status file and the catalogue use the
+// same path, so a wrong token or branch is reported the same way in both.
+async function commitFile(path, text, message) {
+  const api = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${path}`;
+  const headers = {
+    Authorization: `Bearer ${settings.token}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  const head = await fetch(`${api}?ref=${encodeURIComponent(settings.branch)}&t=${Date.now()}`, {
+    headers,
+    cache: 'no-store',
+  });
+  if (!head.ok) throw new Error(`could not read ${path} (HTTP ${head.status})`);
+  const body = await head.json();
+  const put = await fetch(api, {
+    method: 'PUT',
+    headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+    body: JSON.stringify({
+      message,
+      content: encode(text),
+      sha: body.sha,
+      branch: settings.branch,
+    }),
+  });
+  if (!put.ok) {
+    const detail = await put.json().catch(() => ({}));
+    throw new Error(detail.message || `HTTP ${put.status}`);
+  }
+}
+
+async function openStatus() {
+  $('msMsg').value = '';
+  $('msStop').checked = false;
+  $('msCurrent').textContent = 'Loading current status…';
+  $('dlgStatus').showModal();
+
+  try {
+    const response = await fetch(`${RAW(settings).replace(/[^/]*$/, 'status.json')}?t=${Date.now()}`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    $('msStop').checked = Boolean(data.maintenance);
+    $('msMsg').value = data.message || '';
+    $('msCurrent').textContent = data.maintenance
+      ? `Every build is stopped right now. Message: “${data.message || '—'}”`
+      : 'The apps are running.';
+  } catch (error) {
+    $('msCurrent').textContent =
+      'Could not read status.json — publishing will create it if it is missing.';
+  }
+}
+
+async function publishStatus() {
+  if (!settings.token) {
+    $('dlgStatus').close();
+    openSettings();
+    return setStatus('A token is needed to publish the status.', 'bad');
+  }
+  const payload = {
+    maintenance: $('msStop').checked,
+    message: $('msMsg').value.trim(),
+    updatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+  };
+  setStatus('Publishing the project status…');
+  try {
+    await commitFile(
+      statusPath(),
+      JSON.stringify(payload, null, 1) + '\n',
+      payload.maintenance ? 'Stop every build' : 'Restart every build'
+    );
+    $('dlgStatus').close();
+    setStatus(
+      payload.maintenance
+        ? 'Published: every build now shows the stop notice on its welcome screen.'
+        : 'Published: the apps are running again.',
+      'ok'
+    );
+  } catch (error) {
+    setStatus(`Status publish failed: ${error.message}`, 'bad');
+  }
+}
+
 $('load').addEventListener('click', load);
 $('add').addEventListener('click', addChannel);
 $('publish').addEventListener('click', publish);
@@ -589,6 +735,20 @@ $('lock').addEventListener('click', () => {
   sessionStorage.removeItem(UNLOCK_KEY);
   document.body.classList.add('locked');
 });
+$('statusBtn').addEventListener('click', openStatus);
+$('msCancel').addEventListener('click', () => $('dlgStatus').close());
+$('msPublish').addEventListener('click', publishStatus);
+$('cancelSettings').addEventListener('click', () => $('dlgSettings').close());
+
+// The header wraps to two rows on a narrow window; the table headings used a
+// hard-coded 57px offset and slid over the first rows.
+function measureHeader() {
+  const header = document.querySelector('header');
+  if (header) document.documentElement.style.setProperty('--head', `${header.offsetHeight}px`);
+}
+window.addEventListener('resize', measureHeader);
+measureHeader();
+
 $('search').addEventListener('input', render);
 $('all').addEventListener('change', (event) => {
   document.querySelectorAll('.pick').forEach((box) => { box.checked = event.target.checked; });
@@ -597,8 +757,11 @@ $('bulk').addEventListener('change', (event) => {
   const action = event.target.value;
   event.target.value = '';
   if (!action) return;
+  if (!catalog) return setStatus('Load the catalogue first.', 'bad');
   const picked = Array.from(document.querySelectorAll('.pick:checked'))
     .map((box) => catalog.channels[Number(box.dataset.index)]);
+  if (!picked.length) return setStatus('Select a row first (the box on the left).', 'bad');
+  if (action === 'delete' && !window.confirm(`Hide ${picked.length} channel(s) from every app?`)) return;
   for (const channel of picked) {
     if (action === 'enable') { channel.enabled = true; delete channel.tombstone; }
     if (action === 'disable') channel.enabled = false;

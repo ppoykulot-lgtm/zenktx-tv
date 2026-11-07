@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mobile tile: a 54dp logo and an 11sp name inside a 112dp card. The TV tile
-     packs a 42dp logo and an 8sp name into 84dp, which is fine across the room
-     and unreadable in the hand. -->
+<!-- Mobile tile. Sized like the Windows one: an 84px logo inside a 152px card,
+     instead of a 54dp logo inside 112dp that made every logo look shrunken. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="112dp"
-    android:layout_margin="4dp"
+    android:layout_height="152dp"
+    android:layout_margin="5dp"
     android:background="@drawable/bg_card"
     android:focusable="true"
-    android:paddingStart="8dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="8dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="10dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="9dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,40 +18,24 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="54dp"
-            android:layout_height="54dp">
-
-            <TextView
-                android:id="@+id/tileMonogram"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:letterSpacing="0.04"
-                android:maxLines="1"
-                android:textColor="#F2F6FF"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/tileLogo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/app_name"
-                android:visibility="gone" />
-        </FrameLayout>
+        <ImageView
+            android:id="@+id/tileLogo"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:contentDescription="@string/app_name"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="10dp"
             android:ellipsize="end"
             android:gravity="center"
-            android:maxLines="2"
             android:lineSpacingExtra="1dp"
+            android:maxLines="2"
             android:textColor="#C7D2E6"
-            android:textSize="11sp" />
+            android:textSize="12sp" />
     </LinearLayout>
 
     <TextView
@@ -61,6 +44,6 @@
         android:layout_height="wrap_content"
         android:text="★"
         android:textColor="@color/mint"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:visibility="gone" />
 </FrameLayout>

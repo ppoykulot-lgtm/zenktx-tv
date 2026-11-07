@@ -2,4 +2,10 @@
 <resources>
     <!-- A phone cannot afford five chip rows above the guide. -->
     <bool name="chips_wrap">false</bool>
+
+    <!-- A phone taps to pick and double taps to play, like the desktop build. -->
+    <bool name="double_tap_play">true</bool>
+
+    <!-- Draw behind the system bars so the guide uses the whole phone screen. -->
+    <bool name="full_view">true</bool>
 </resources>

@@ -62,7 +62,7 @@
     <string name="playlist_name">Playlist name</string>
     <string name="playlist_url">M3U / M3U8 / JSON URL</string>
     <string name="playlist_logo">Logo URL (optional)</string>
-    <string name="playlist_hint">Tap a playlist to enable or disable it. Long-press to remove it.</string>
+    <string name="playlist_hint">Tap a playlist to fix its name, URL or logo. Long-press to enable, disable or remove it.</string>
     <string name="playlist_added">Playlist added.</string>
     <string name="playlist_removed">Playlist removed.</string>
     <string name="playlist_remove_title">Remove playlist?</string>
@@ -122,4 +122,19 @@
     <!-- Integrity -->
     <string name="integrity_title">Unofficial build</string>
     <string name="integrity_close">Close</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search channels…</string>
+    <string name="search_empty">No channel matches “%1$s”.</string>
+    <string name="welcome_credit">Created by: Kurochan</string>
+    <string name="player_quality">Quality</string>
+    <string name="player_quality_auto">Auto</string>
+    <string name="player_volume">Volume</string>
+    <string name="player_close">Close the player</string>
+    <string name="maintenance_title">ZENKTX has stopped</string>
+    <string name="maintenance_body">This project is no longer running. Thank you for watching.</string>
+    <string name="playlist_edit">Edit playlist</string>
+    <string name="playlist_actions">Playlist actions</string>
+    <string name="playlist_enable">Enable</string>
+    <string name="playlist_disable">Disable</string>
+    <string name="playlist_remove">Remove</string>
 </resources>

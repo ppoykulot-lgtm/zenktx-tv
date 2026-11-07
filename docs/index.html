@@ -104,9 +104,11 @@
   .grid-mock { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .tile {
     background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    height: 74px; display: flex; align-items: center; justify-content: center;
-    font-size: 10px; letter-spacing: .06em; color: #9fb0cd; text-align: center; padding: 6px;
+    height: 74px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 5px; font-size: 9px; letter-spacing: .05em; color: #9fb0cd; text-align: center; padding: 6px;
   }
+  .tile img { max-height: 30px; max-width: 62px; object-fit: contain; }
+  .tile span { display: block; line-height: 1.2; }
   .tile.active { border-color: var(--mint); box-shadow: 0 0 0 1px var(--mint), 0 14px 30px -14px rgba(53,231,192,.7); color: var(--text); }
   .mock-bar { display: flex; gap: 8px; margin-bottom: 14px; }
   .pill { height: 22px; border-radius: 7px; background: var(--card-hi); border: 1px solid var(--line); }
@@ -117,7 +119,8 @@
   /* ---------- stats ---------- */
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 64px; }
   .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
-  .stat b { display: block; font-size: 24px; letter-spacing: -.02em; }
+  .stat b { display: block; font-size: 24px; letter-spacing: -.02em; margin-top: 9px; }
+  .stat svg { width: 18px; height: 18px; color: var(--mint); }
   .stat span { font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
   @media (max-width: 900px) {
     .hero-inner { grid-template-columns: 1fr; }
@@ -135,9 +138,10 @@
   .alt { background: linear-gradient(180deg, transparent, rgba(13,21,36,.6) 22%, rgba(13,21,36,.6) 78%, transparent); }
 
   /* screens */
-  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
   .screens figure { margin: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); }
   .screens img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .screens figure.tall img { aspect-ratio: 9 / 16; object-fit: contain; background: var(--bg); }
   .screens figcaption { font-size: 11.5px; color: var(--muted); padding: 11px 14px; border-top: 1px solid var(--line); }
   @media (max-width: 860px) { .screens { grid-template-columns: 1fr; } }
 
@@ -297,7 +301,7 @@
       <div class="hero-inner">
         <div>
           <span class="eyebrow"><span class="dot"></span> Live channels · no subscription</span>
-          <h1>One player for the couch, the pocket and the desk.</h1>
+          <h1>Your Entertainment, Without Limits.</h1>
           <p class="lede">
             ZENKTX is a remote-first live TV app built for Android TV boxes, phones and
             Windows. Real channel logos, instant channel hopping, favourites, and a
@@ -315,19 +319,27 @@
             <div class="pill y"></div><div class="pill y"></div>
           </div>
           <div class="grid-mock">
-            <div class="tile active">TV5</div><div class="tile">GMA</div><div class="tile">A2Z</div>
-            <div class="tile">CNN</div><div class="tile">PBA TV</div><div class="tile">KAPATID</div>
-            <div class="tile">Cartoon</div><div class="tile">Discovery</div><div class="tile">MTV</div>
-            <div class="tile">ABS-CBN</div><div class="tile">PTV 4</div><div class="tile">ONE PH</div>
+            <div class="tile active"><img src="logos/ch0004.svg" alt="" loading="lazy" /><span>TV5</span></div>
+            <div class="tile"><img src="logos/ch0174.png" alt="" loading="lazy" /><span>GMA</span></div>
+            <div class="tile"><img src="logos/ch0012.png" alt="" loading="lazy" /><span>A2Z</span></div>
+            <div class="tile"><img src="logos/ch0115.png" alt="" loading="lazy" /><span>CNN HD</span></div>
+            <div class="tile"><img src="logos/ch0008.svg" alt="" loading="lazy" /><span>Kapatid</span></div>
+            <div class="tile"><img src="logos/ch0092.png" alt="" loading="lazy" /><span>Cartoon</span></div>
+            <div class="tile"><img src="logos/ch0134.svg" alt="" loading="lazy" /><span>Discovery</span></div>
+            <div class="tile"><img src="logos/ch0172.svg" alt="" loading="lazy" /><span>GMA News</span></div>
+            <div class="tile"><img src="logos/ch0101.svg" alt="" loading="lazy" /><span>CinemaOne</span></div>
+            <div class="tile"><img src="logos/ch0007.png" alt="" loading="lazy" /><span>A2Z HD</span></div>
+            <div class="tile"><img src="logos/ch0090.png" alt="" loading="lazy" /><span>Cartoon HD</span></div>
+            <div class="tile"><img src="logos/ch0128.svg" alt="" loading="lazy" /><span>Discovery</span></div>
           </div>
         </div>
       </div>
 
       <div class="stats">
-        <div class="stat"><b id="statChannels">485</b><span>Channels bundled</span></div>
-        <div class="stat"><b>9</b><span>Categories + Pinoy</span></div>
-        <div class="stat"><b>3</b><span>Platforms</span></div>
-        <div class="stat"><b>1-tap</b><span>Channel hopping</span></div>
+        <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.4h16v10.2H4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.4 20h7.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><b id="statChannels">485</b><span>Channels bundled</span></div>
+        <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 5.6h6v6h-6zM13.6 5.6h6v6h-6zM4.4 14.4h6v4.4h-6zM13.6 14.4h6v4.4h-6z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>9</b><span>Categories + Pinoy</span></div>
+        <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.4" y="5" width="11.4" height="8.4" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.4" y="10.4" width="4.4" height="8.6" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 17.4h4.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><b>3</b><span>Platforms</span></div>
+        <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 8.2h13.2l-3-3M19.4 15.8H6.2l3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><b>1-tap</b><span>Channel hopping</span></div>
       </div>
     </div>
   </section>
@@ -408,21 +420,21 @@
     <div class="wrap">
       <div class="section-head">
         <div class="kicker">Screens</div>
-        <h2>The actual TV build, not a mockup.</h2>
-        <p>Captured on an Android TV emulator running the release candidate.</p>
+        <h2>Three builds. One channel list.</h2>
+        <p>Windows x86_64, Android mobile and Android TV, each captured from the shipped build.</p>
       </div>
       <div class="screens">
         <figure>
-          <img src="assets/screens/tv-guide.png" alt="ZENKTX guide screen with category chips and channel grid" loading="lazy" />
-          <figcaption>Guide — chips, 6-column grid, detail strip</figcaption>
+          <img src="assets/screens/win-player.png" alt="ZENKTX Windows player with the Glass control bar" loading="lazy" />
+          <figcaption>Windows x86_64 — Glass player, volume, clock, quality</figcaption>
+        </figure>
+        <figure class="tall">
+          <img src="assets/screens/mobile-guide.png" alt="ZENKTX Android mobile guide with two-column channel tiles" loading="lazy" />
+          <figcaption>Android mobile — two-column tiles, tap to pick, double tap to play</figcaption>
         </figure>
         <figure>
-          <img src="assets/screens/tv-player.png" alt="ZENKTX player playing a live channel" loading="lazy" />
-          <figcaption>Player — CH ▲ / CH ▼, live badge</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/screens/tv-settings.png" alt="ZENKTX settings screen" loading="lazy" />
-          <figcaption>Settings — playlists, GitHub sync, updates</figcaption>
+          <img src="assets/screens/tv-guide.png" alt="ZENKTX Android TV guide with category chips and a six-column grid" loading="lazy" />
+          <figcaption>Android TV — six-column guide, D-pad remote</figcaption>
         </figure>
       </div>
     </div>
@@ -601,7 +613,17 @@
 
       <div class="log">
 <article class="entry">
-          <h3>1.4.0 <span class="tagx">latest</span></h3>
+          <h3>1.5.0 <span class="tagx">latest</span></h3>
+          <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>The phone guide behaves like the desktop one.</b> A tile is picked with one tap and played with a double tap, the thumbnails are the size of the Windows tiles instead of postage stamps, and the header has a search button that filters the whole catalogue.</li>
+            <li><b>The player has a real control bar.</b> The star, the volume wheel, the running time, a quality switch with <i>Auto</i> and a close button — the same row the Windows build has — replacing the bare LIVE badge. Close is the ✕ in the corner, and Esc closes it from a keyboard.</li>
+            <li><b>Channels are re-checked every ten minutes.</b> Every launch already pulled a fresh list; a session left open now re-reads the catalogue and the publisher's feed on a timer, so a link that dies while you are watching is replaced instead of failing for ever.</li>
+            <li><b>Playlists can be fixed.</b> A source saved with the wrong stream URL or logo is edited in place, and the truncated “menu” rows are gone: no GitHub sync, no hidden-channel list, no logo edits, and no right-click sheet on the tiles.</li>
+            <li><b>Logos appear on their own.</b> The initials that stood in for every channel while its logo loaded are gone, so a guide of 450 tiles no longer paints and repaints itself.</li>
+          </ul>
+
+          <h3>1.4.0</h3>
           <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
             <li><b>A new mark.</b> The logo had a pair of blue outlines scribbled over its broadcast arcs, which read as a drawing mistake at every size. The mark is rebuilt from one geometry: a clean Z, two concentric signal arcs centred on the play triangle, and no overlapping outlines. The same numbers draw the launcher icon, the TV banner, the Windows icon and the favicon, so the four can no longer drift apart.</li>
@@ -638,26 +660,6 @@
             <li><b>An expired link says so.</b> 403, 404, 410 and 451 used to read “refused the request (HTTP 410)”; they now explain that the provider rotates addresses and the channel usually comes back.</li>
           </ul>
         </article><article class="entry">
-          <h3>1.3.6</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>The strip and the player chip use the same fallback as the tiles.</b> 1.3.5 fixed the grid but left the empty play glyph in the detail strip underneath it and in the chip that appears over playback. Both show the channel's initials on its colour now, so a channel without a working logo looks the same everywhere.</li>
-          </ul>
-        </article>
-
-        <p class="log-more">Older release notes are kept on the
-          <a href="https://github.com/ppoykulot-lgtm/zenktx-tv/releases">GitHub releases page</a>.</p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap">
-    <div class="foot">
-      <div>
-        <div class="brand" style="margin-bottom:8px">
-          <b style="font-size:14px">ZENKTX TV STREAM</b>
         </div>
         <div>Remote-first live TV for Android TV, Android and Windows.</div>
       </div>
@@ -689,8 +691,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.4.0", mobile: "1.4.0", win: "1.4.0" };
-  const TAGS = { tv: "v1.4.0", mobile: "v1.4.0", win: "v1.4.0" };
+  const VERSIONS = { tv: "1.5.0", mobile: "1.5.0", win: "1.5.0" };
+  const TAGS = { tv: "v1.5.0", mobile: "v1.5.0", win: "v1.5.0" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

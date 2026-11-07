@@ -4,11 +4,18 @@ import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.View
+import android.view.Window
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.flexbox.FlexDirection
@@ -27,11 +34,12 @@ import ph.zenktx.tv.data.GitHubStore
 import ph.zenktx.tv.data.Integrity
 import ph.zenktx.tv.data.LibraryStore
 import ph.zenktx.tv.data.PlaylistStore
+import ph.zenktx.tv.data.ProjectStatus
 import ph.zenktx.tv.databinding.ActivityMainBinding
 import ph.zenktx.tv.ui.CategoryChipAdapter
 import ph.zenktx.tv.ui.ChannelGridAdapter
-import ph.zenktx.tv.ui.Dialogs
 import ph.zenktx.tv.ui.Logos
+import ph.zenktx.tv.ui.Dialogs
 import ph.zenktx.tv.ui.Ui
 import ph.zenktx.tv.ui.Updater
 import java.text.SimpleDateFormat
@@ -49,8 +57,11 @@ class MainActivity : Activity() {
         private val PINOY = "Pinoy"
         private val ALL = "All"
 
-        /** Long enough to read the slogan, short enough not to feel in the way. */
-        private const val WELCOME_MIN_MS = 1_500L
+        /** Long enough to read the slogan and the credit under it. */
+        private const val WELCOME_MIN_MS = 10_000L
+
+        /** A channel that dies while the guide is open is replaced this often. */
+        private const val REFRESH_EVERY_MS = 10 * 60 * 1000L
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -67,6 +78,7 @@ class MainActivity : Activity() {
     private var filter: String = ALL
     private var detail: Channel? = null
     private var loadError: String? = null
+    private var query: String = ""
 
     private lateinit var chips: CategoryChipAdapter
     private lateinit var grid: ChannelGridAdapter
@@ -83,6 +95,14 @@ class MainActivity : Activity() {
         }
     }
 
+    /** Replaces the catalogue in place while the guide stays usable. */
+    private val refreshTick = object : Runnable {
+        override fun run() {
+            loadChannels(silent = true)
+            clockHandler.postDelayed(this, REFRESH_EVERY_MS)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -94,6 +114,7 @@ class MainActivity : Activity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applyFullView()
 
         library = LibraryStore(this)
         playlists = PlaylistStore(this)
@@ -115,10 +136,11 @@ class MainActivity : Activity() {
         binding.chips.adapter = chips
 
         grid = ChannelGridAdapter(
-            onClick = { openPlayer(it) },
-            onLongClick = { showChannelActions(it) },
+            onSelect = { showDetail(it) },
+            onOpen = { openPlayer(it) },
             onFocused = { showDetail(it) },
             isFavourite = { library.isFavourite(it) },
+            doubleTapToPlay = resources.getBoolean(R.bool.double_tap_play),
         )
         val columns = resources.getInteger(R.integer.grid_columns)
         binding.grid.layoutManager = GridLayoutManager(this, columns)
@@ -128,17 +150,51 @@ class MainActivity : Activity() {
         Ui.attachFocusEffect(binding.detailWatch)
         Ui.attachFocusEffect(binding.detailFav, scale = 1.04f)
         Ui.attachFocusEffect(binding.menuButton, scale = 1.04f)
+        Ui.attachFocusEffect(binding.searchButton, scale = 1.04f)
 
         binding.detailWatch.setOnClickListener { detail?.let { openPlayer(it) } }
         binding.detailFav.setOnClickListener { detail?.let { toggleFavourite(it) } }
         binding.menuButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        binding.searchButton.setOnClickListener { showSearch() }
 
         startWelcome()
         applyFilter(ALL)
         loadChannels()
         scheduleUpdateCheck()
+    }
+
+    // ---- full view --------------------------------------------------------
+
+    /**
+     * Edge to edge: the guide runs behind the status and navigation bars and
+     * pads itself by their height instead of leaving two dead strips at the top
+     * and bottom of the screen.
+     */
+    private fun applyFullView() {
+        if (!resources.getBoolean(R.bool.full_view)) return
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        @Suppress("DEPRECATION")
+        window.statusBarColor = Color.TRANSPARENT
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = Color.TRANSPARENT
+        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = false
+
+        val baseTop = binding.content.paddingTop
+        val baseBottom = binding.content.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(binding.content) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                view.paddingLeft,
+                bars.top + baseTop,
+                view.paddingRight,
+                bars.bottom + baseBottom,
+            )
+            insets
+        }
+        binding.content.requestApplyInsets()
     }
 
     // ---- welcome ----------------------------------------------------------
@@ -147,8 +203,7 @@ class MainActivity : Activity() {
      * The guide stays behind this screen until the published catalogue has been
      * fetched, so every launch starts from the current channel list: a channel
      * added, renamed or fixed in the admin page is there the next time the app
-     * opens instead of after a cache that used to last half an hour (six, for
-     * the live addresses).
+     * opens instead of after a cache that used to last half an hour.
      */
     private fun startWelcome() {
         welcomeAt = SystemClock.elapsedRealtime()
@@ -178,13 +233,39 @@ class MainActivity : Activity() {
         }, remaining.coerceAtLeast(0L))
     }
 
+    /**
+     * The kill switch: the welcome screen becomes the notice and nothing else
+     * loads. There is no "continue" button, and the state survives a restart
+     * without a network, because the last published answer is cached.
+     */
+    private fun showStopped(message: String) {
+        clockHandler.removeCallbacks(refreshTick)
+        binding.welcomePanel.welcomeLoading.visibility = View.GONE
+        binding.welcomePanel.welcomeNotice.visibility = View.VISIBLE
+        binding.welcomePanel.welcomeNotice.text =
+            message.ifBlank { getString(R.string.maintenance_body) }
+
+        binding.content.visibility = View.GONE
+    }
+
     // ---- loading ----------------------------------------------------------
 
-    private fun loadChannels() {
-        binding.status.visibility = View.VISIBLE
-        binding.status.text = getString(R.string.loading)
+    private fun loadChannels(silent: Boolean = false) {
+        if (!silent) {
+            binding.status.visibility = View.VISIBLE
+            binding.status.text = getString(R.string.loading)
+        }
 
         scope.launch {
+            val stopped = withContext(Dispatchers.IO) {
+                runCatching { ProjectStatus.current(this@MainActivity) }.getOrNull()
+            }
+            if (isFinishing) return@launch
+            if (stopped?.stopped == true) {
+                showStopped(stopped.message)
+                return@launch
+            }
+
             val result = withContext(Dispatchers.IO) {
                 runCatching { ChannelRepository.load(this@MainActivity, playlists, library) }
                     .getOrElse { ChannelRepository.Result(emptyList(), listOf(it.message ?: "load failed")) }
@@ -198,8 +279,11 @@ class MainActivity : Activity() {
                 getString(R.string.playlist_errors, it.size, it.first())
             }
             applyFilter(if (filter in categories) filter else ALL)
-            focusFirstTile()
+            if (!silent) focusFirstTile()
             hideWelcome()
+
+            clockHandler.removeCallbacks(refreshTick)
+            clockHandler.postDelayed(refreshTick, REFRESH_EVERY_MS)
         }
     }
 
@@ -213,10 +297,51 @@ class MainActivity : Activity() {
         return listOf(ALL, FAVOURITES, PINOY) + ordered
     }
 
+    // ---- search -----------------------------------------------------------
+
+    /**
+     * A plain query dialog rather than a search field in the header: on a phone
+     * the keyboard covers the grid anyway, and on the TV a field in the header
+     * is one more stop for the D-pad before the guide.
+     */
+    private fun showSearch() {
+        Dialogs.prompt(
+            this,
+            getString(R.string.search),
+            getString(R.string.search_hint),
+            initial = query,
+            uri = false,
+        ) { value ->
+            query = value.trim()
+            if (query.isBlank()) {
+                applyFilter(if (filter in categories) filter else ALL)
+            } else {
+                showResults(query)
+            }
+        }
+    }
+
+    private fun showResults(text: String) {
+        val needle = text.lowercase()
+        visible = all.filter {
+            it.name.lowercase().contains(needle) || it.category.lowercase().contains(needle)
+        }
+        grid.submit(visible)
+        binding.grid.scrollToPosition(0)
+        binding.channelCount.text = getString(R.string.channel_count, visible.size)
+        binding.status.visibility = View.VISIBLE
+        binding.status.text = if (visible.isEmpty()) {
+            getString(R.string.search_empty, text)
+        } else {
+            "\u201c$text\u201d  \u00b7  ${visible.size}"
+        }
+        showDetail(visible.firstOrNull())
+    }
+
     // ---- filtering --------------------------------------------------------
 
     private fun onChipSelected(category: String) {
-        if (category == filter) return
+        query = ""
         applyFilter(category)
         focusFirstTile()
     }
@@ -263,8 +388,7 @@ class MainActivity : Activity() {
             binding.detailTag.text = ""
             binding.detailMeta.text = ""
             binding.detailLogo.setImageDrawable(null)
-            binding.detailMonogram.text = ""
-            binding.detailMonogram.visibility = View.GONE
+            binding.detailLogo.visibility = View.GONE
             binding.detailFav.text = getString(R.string.favourite_off)
             return
         }
@@ -279,65 +403,14 @@ class MainActivity : Activity() {
         binding.detailFav.text = getString(
             if (library.isFavourite(channel.key)) R.string.favourite_on else R.string.favourite_off
         )
-        Logos.apply(binding.detailLogo, binding.detailMonogram, channel.name, channel.logo)
+        Logos.apply(binding.detailLogo, channel.logo)
     }
 
     private fun toggleFavourite(channel: Channel) {
         library.toggleFavourite(channel.key)
         if (detail?.key == channel.key) showDetail(channel)
         grid.refreshBadges()
-        if (filter == FAVOURITES) applyFilter(FAVOURITES)
-    }
-
-    // ---- channel actions --------------------------------------------------
-
-    private fun showChannelActions(channel: Channel) {
-        val actions = ArrayList<Pair<String, () -> Unit>>()
-
-        actions += if (library.isFavourite(channel.key)) {
-            getString(R.string.action_fav_remove) to { toggleFavourite(channel) }
-        } else {
-            getString(R.string.action_fav_add) to { toggleFavourite(channel) }
-        }
-
-        actions += getString(R.string.action_logo_set) to {
-            Dialogs.prompt(
-                this,
-                channel.name,
-                getString(R.string.logo_hint),
-                initial = library.logoOverride(channel.key) ?: channel.logo,
-            ) { url ->
-                library.setLogoOverride(channel.key, url.ifBlank { "" })
-                afterChannelEdit(channel, getString(if (url.isBlank()) R.string.logo_cleared else R.string.logo_saved))
-            }
-        }
-
-        if (channel.logo.isNotBlank() || library.logoOverride(channel.key) != null) {
-            actions += getString(R.string.action_logo_clear) to {
-                library.setLogoOverride(channel.key, "")
-                afterChannelEdit(channel, getString(R.string.logo_cleared))
-            }
-        }
-
-        actions += getString(R.string.action_hide) to {
-            library.setHidden(channel.key, true)
-            ChannelRepository.refresh(library)
-            all = ChannelRepository.cached()
-            categories = buildCategories(all)
-            applyFilter(if (filter in categories) filter else ALL)
-        }
-
-        Dialogs.choose(this, channel.name, actions.map { it.first }) { index ->
-            actions.getOrNull(index)?.second?.invoke()
-        }
-    }
-
-    private fun afterChannelEdit(channel: Channel, message: String) {
-        all = ChannelRepository.refresh(library)
-        grid.submit(visible.map { edited -> all.firstOrNull { it.key == edited.key } ?: edited })
-        val updated = all.firstOrNull { it.key == channel.key } ?: channel
-        showDetail(updated)
-        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+        if (filter == FAVOURITES && query.isBlank()) applyFilter(FAVOURITES)
     }
 
     // ---- player -----------------------------------------------------------
@@ -383,7 +456,7 @@ class MainActivity : Activity() {
         // Playlist sources or GitHub pushes changed: reload in the background.
         if (ChannelRepository.dirty) {
             ChannelRepository.dirty = false
-            loadChannels()
+            loadChannels(silent = true)
         }
     }
 

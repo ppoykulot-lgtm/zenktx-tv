@@ -27,15 +27,9 @@ const prefs = Object.assign(
     playlists: [],
     volume: 100,
     skin: 'glass',
-    github: { owner: '', repo: '', path: 'channels.m3u', branch: 'main', token: '' },
-  },
+    },
   JSON.parse(localStorage.getItem(PREFS_KEY) || '{}')
 );
-prefs.github = Object.assign(
-  { owner: '', repo: '', path: 'channels.m3u', branch: 'main', token: '' },
-  prefs.github || {}
-);
-
 // Older builds stored the same playlist once per add, so an existing profile can
 // carry repeats. Keep the first entry for each URL.
 const seenPlaylistUrls = new Set();
@@ -598,11 +592,6 @@ function renderGrid() {
 
     tile.addEventListener('click', () => select(channel));
     tile.addEventListener('dblclick', () => play(channel));
-    tile.addEventListener('contextmenu', (event) => {
-      event.preventDefault();
-      select(channel);
-      openMenu(event.clientX, event.clientY, channel);
-    });
 
     $('grid').appendChild(tile);
   });
@@ -646,38 +635,7 @@ function select(channel) {
   $('favBtn').textContent = prefs.favourites.includes(channel.key) ? '★' : '☆';
 }
 
-/* -------------------------------------------------------------------- menu */
-
-function openMenu(x, y, channel) {
-  const menu = $('menu');
-  const isFav = prefs.favourites.includes(channel.key);
-  menu.innerHTML = '';
-
-  const actions = [
-    [isFav ? '★ Remove from favourites' : '☆ Add to favourites', () => toggleFavourite(channel)],
-    ['🖼 Set logo URL…', () => editLogo(channel)],
-    ['✕ Remove logo', () => setLogo(channel, '')],
-    ['🚫 Hide this channel', () => hideChannel(channel)],
-  ];
-
-  for (const [label, run] of actions) {
-    const button = document.createElement('button');
-    button.textContent = label;
-    button.addEventListener('click', () => {
-      menu.classList.remove('on');
-      run();
-    });
-    menu.appendChild(button);
-  }
-
-  menu.style.left = `${Math.min(x, window.innerWidth - 230)}px`;
-  menu.style.top = `${Math.min(y, window.innerHeight - 190)}px`;
-  menu.classList.add('on');
-}
-
-document.addEventListener('click', (event) => {
-  if (!event.target.closest('#menu')) $('menu').classList.remove('on');
-});
+/* --------------------------------------------------------------- favourite */
 
 function toggleFavourite(channel) {
   const i = prefs.favourites.indexOf(channel.key);
@@ -686,26 +644,6 @@ function toggleFavourite(channel) {
   savePrefs();
   rebuild();
   select(channel);
-}
-
-function setLogo(channel, url) {
-  prefs.logos[channel.key] = url;
-  savePrefs();
-  rebuild();
-  toast(url ? 'Logo updated.' : 'Logo removed.');
-}
-
-function editLogo(channel) {
-  ask('Set logo URL', 'Paste an image URL, or leave it empty to remove the logo.', channel.logo, (value) => {
-    setLogo(channel, value);
-  });
-}
-
-function hideChannel(channel) {
-  prefs.hidden.push(channel.key);
-  savePrefs();
-  rebuild();
-  toast('Channel hidden. Restore it from Playlists → Hidden.');
 }
 
 /* ------------------------------------------------------------------ player */
@@ -1311,69 +1249,6 @@ function savePlaylist() {
   toast(existing ? 'Playlist updated.' : 'Playlist added.');
 }
 
-/* ------------------------------------------------------------ github sync */
-
-function openGithub() {
-  $('ghOwner').value = prefs.github.owner;
-  $('ghRepo').value = prefs.github.repo;
-  $('ghPath').value = prefs.github.path;
-  $('ghBranch').value = prefs.github.branch;
-  $('ghToken').value = prefs.github.token;
-  $('dlgGithub').showModal();
-}
-
-function readGithub() {
-  prefs.github = {
-    owner: $('ghOwner').value.trim(),
-    repo: $('ghRepo').value.trim(),
-    path: $('ghPath').value.trim() || 'channels.m3u',
-    branch: $('ghBranch').value.trim() || 'main',
-    token: $('ghToken').value.trim(),
-  };
-  savePrefs();
-  return prefs.github;
-}
-
-async function githubPull() {
-  const cfg = readGithub();
-  if (!cfg.owner || !cfg.repo) return toast('Set the owner and repository first.');
-  const rawUrl = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
-  const label = `GitHub · ${cfg.owner}/${cfg.repo}`;
-  try {
-    const text = await window.zenk.fetchText(rawUrl);
-    const channels = parseSource(text, { id: 'gh', name: label, url: rawUrl });
-    const existing = prefs.playlists.find((p) => p.name === label);
-    if (existing) existing.url = rawUrl;
-    else prefs.playlists.push({ id: hash(cfg.owner + cfg.repo), name: label, url: rawUrl, enabled: true });
-    savePrefs();
-    await reloadAll();
-    toast(`Pulled ${channels.length} channels.`);
-  } catch (error) {
-    toast(`Pull failed: ${describeLoadError(cleanError(error))}.`);
-  }
-}
-
-async function githubPush() {
-  const cfg = readGithub();
-  if (!cfg.owner || !cfg.repo) return toast('Set the owner and repository first.');
-  if (!cfg.token) return toast('A token is required to push.');
-  const channels = applyLocalState(state.base);
-  const m3u = ['#EXTM3U']
-    .concat(
-      channels.map((c) => {
-        const logo = c.logo ? ` tvg-logo="${c.logo}"` : '';
-        return `#EXTINF:-1${logo} group-title="${c.category}",${c.name}\n${c.url}`;
-      })
-    )
-    .join('\n');
-  try {
-    await window.zenk.githubPush(cfg, m3u, `Sync ${channels.length} channels from ZENKTX`);
-    toast(`Pushed ${channels.length} channels.`);
-  } catch (error) {
-    toast(`Push failed: ${error.message}`);
-  }
-}
-
 /* ----------------------------------------------------------------- updates */
 
 function isNewer(current, remote) {
@@ -1542,10 +1417,6 @@ $('addCancel').addEventListener('click', () => $('dlgAddPlaylist').close());
 $('addUrl').addEventListener('keydown', (event) => { if (event.key === 'Enter') savePlaylist(); });
 $('closePlaylists').addEventListener('click', () => $('dlgPlaylists').close());
 
-$('githubBtn').addEventListener('click', openGithub);
-$('ghPull').addEventListener('click', githubPull);
-$('ghPush').addEventListener('click', githubPush);
-$('closeGithub').addEventListener('click', () => $('dlgGithub').close());
 $('promptCancel').addEventListener('click', () => $('dlgPrompt').close());
 
 $('updateBtn').addEventListener('click', checkUpdates);
@@ -1724,20 +1595,68 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-// The welcome screen is the launch: it stays up (and on screen for at least a
-// beat, so it never flashes) until the published catalogue has been fetched.
+/* ------------------------------------------------------------ kill switch */
+
+// The admin page publishes a status.json beside the catalogue. When it says the
+// project has stopped, the welcome screen becomes that notice and the guide
+// never loads. The answer is cached, so an offline launch cannot bypass it.
+const STATUS_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/status.json';
+const STATUS_KEY = 'zenktx.status.v1';
+
+async function projectStatus() {
+  try {
+    const text = await window.zenk.fetchText(`${STATUS_URL}?t=${Date.now()}`);
+    const data = JSON.parse(text);
+    const status = {
+      stopped: Boolean(data.maintenance),
+      message: String(data.message || ''),
+    };
+    localStorage.setItem(STATUS_KEY, JSON.stringify(status));
+    return status;
+  } catch (error) {
+    try {
+      return JSON.parse(localStorage.getItem(STATUS_KEY) || 'null') || { stopped: false, message: '' };
+    } catch (inner) {
+      return { stopped: false, message: '' };
+    }
+  }
+}
+
+function showStopped(message) {
+  const splash = $('splash');
+  splash.classList.add('stopped');
+  $('splashLoading').hidden = true;
+  const notice = $('splashNotice');
+  notice.hidden = false;
+  notice.textContent = message || 'This project is no longer running. Thank you for watching.';
+  document.querySelector('.app').hidden = true;
+}
+
+// The welcome screen is the launch: it stays up for ten seconds so the slogan
+// and the credit can be read, while the published catalogue is fetched.
 (async function launch() {
   const started = Date.now();
+  const status = await projectStatus();
+  if (status.stopped) {
+    showStopped(status.message);
+    return;
+  }
   try {
     // Never hold the guide hostage to a dead network: the cached list is fine
     // after a few seconds.
     await Promise.race([boot(), new Promise((resolve) => setTimeout(resolve, 9000))]);
   } finally {
     const splash = $('splash');
-    const wait = Math.max(0, 1200 - (Date.now() - started));
+    const wait = Math.max(0, 10000 - (Date.now() - started));
     setTimeout(() => {
       splash.classList.add('off');
       setTimeout(() => splash.remove(), 400);
     }, wait);
   }
+  // A channel link that dies while the app is open is replaced ten minutes
+  // later, and the feed's freshly tokenised addresses come with it.
+  setInterval(async () => {
+    await refreshCatalog();
+    refreshLive();
+  }, 10 * 60 * 1000);
 })();

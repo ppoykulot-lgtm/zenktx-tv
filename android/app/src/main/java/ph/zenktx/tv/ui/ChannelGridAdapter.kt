@@ -1,6 +1,8 @@
 package ph.zenktx.tv.ui
 
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -9,14 +11,18 @@ import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.databinding.ItemGridChannelBinding
 
 /**
- * EPG-style channel grid. Focus drives the detail strip below the grid,
- * a long press opens the per-channel actions.
+ * EPG-style channel grid. Focus drives the detail strip below the grid.
+ *
+ * On a phone a tap picks the channel and a double tap starts it, which is what
+ * the Windows build does with a double click; on the TV a single click with the
+ * D-pad still opens the player, because a remote has no double tap.
  */
 class ChannelGridAdapter(
-    private val onClick: (Channel) -> Unit,
-    private val onLongClick: (Channel) -> Unit,
+    private val onSelect: (Channel) -> Unit,
+    private val onOpen: (Channel) -> Unit,
     private val onFocused: (Channel) -> Unit,
     private val isFavourite: (String) -> Boolean,
+    private val doubleTapToPlay: Boolean,
 ) : RecyclerView.Adapter<ChannelGridAdapter.TileVH>() {
 
     private var channels: List<Channel> = emptyList()
@@ -43,14 +49,30 @@ class ChannelGridAdapter(
     inner class TileVH(val binding: ItemGridChannelBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(channel: Channel) {
             binding.tileName.text = channel.name
-            Logos.apply(binding.tileLogo, binding.tileMonogram, channel.name, channel.logo)
+            Logos.apply(binding.tileLogo, channel.logo)
             binding.tileStar.visibility =
                 if (isFavourite(channel.key)) View.VISIBLE else View.GONE
 
-            binding.root.setOnClickListener { onClick(channel) }
-            binding.root.setOnLongClickListener {
-                onLongClick(channel)
-                true
+            if (doubleTapToPlay) {
+                // A tap selects (the detail sheet fills in), a double tap plays.
+                val detector = GestureDetector(
+                    binding.root.context,
+                    object : GestureDetector.SimpleOnGestureListener() {
+                        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                            onSelect(channel)
+                            return true
+                        }
+
+                        override fun onDoubleTap(e: MotionEvent): Boolean {
+                            onOpen(channel)
+                            return true
+                        }
+                    },
+                )
+                binding.root.setOnClickListener(null)
+                binding.root.setOnTouchListener { _, event -> detector.onTouchEvent(event) }
+            } else {
+                binding.root.setOnClickListener { onOpen(channel) }
             }
             Ui.attachFocusEffect(binding.root) { onFocused(channel) }
         }

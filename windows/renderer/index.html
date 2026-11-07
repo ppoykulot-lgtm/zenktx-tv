@@ -20,7 +20,9 @@
     <div class="splash-sub">TV STREAM</div>
     <p class="splash-slogan">Your Entertainment, Anytime. Anywhere.</p>
     <div class="splash-free">— 100% FREE!</div>
-    <div class="splash-loading"><i></i> Loading channels…</div>
+    <div class="splash-loading" id="splashLoading"><i></i> Loading channels…</div>
+    <div class="splash-notice" id="splashNotice" hidden></div>
+    <div class="splash-credit">Created by: Kurochan</div>
   </div>
 
   <div class="app">
@@ -33,7 +35,6 @@
       <div class="spacer"></div>
       <div class="meta" id="count">— CHANNELS</div>
       <button class="btn" id="playlistsBtn">Playlists</button>
-      <button class="btn" id="githubBtn">GitHub Sync</button>
       <button class="btn mint" id="updateBtn">Check updates</button>
     </header>
 
@@ -138,9 +139,6 @@
     </section>
   </div>
 
-  <!-- context menu -->
-  <div class="menu" id="menu"></div>
-
   <!-- playlists dialog -->
   <dialog id="dlgPlaylists">
     <h3>Playlists</h3>
@@ -162,22 +160,6 @@
     <div class="row">
       <button class="btn" id="addCancel">Cancel</button>
       <button class="btn mint" id="addSave">Add playlist</button>
-    </div>
-  </dialog>
-
-  <!-- github dialog -->
-  <dialog id="dlgGithub">
-    <h3>GitHub Sync</h3>
-    <p>Point at a repository file, then pull it here or push your current list back.</p>
-    <div class="field"><label>Owner</label><input id="ghOwner" placeholder="zenktx" /></div>
-    <div class="field"><label>Repository</label><input id="ghRepo" placeholder="zenktx-tv" /></div>
-    <div class="field"><label>Path</label><input id="ghPath" placeholder="channels.m3u" /></div>
-    <div class="field"><label>Branch</label><input id="ghBranch" placeholder="main" /></div>
-    <div class="field"><label>Token (only needed to push)</label><input id="ghToken" type="password" placeholder="github_pat_…" /></div>
-    <div class="row">
-      <button class="btn" id="ghPull">↓ Pull</button>
-      <button class="btn" id="ghPush">↑ Push</button>
-      <button class="btn mint" id="closeGithub">Done</button>
     </div>
   </dialog>
 

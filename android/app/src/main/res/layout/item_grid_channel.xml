@@ -16,30 +16,12 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- The monogram sits under the logo: channels without one, and logos
-             whose host is gone, show their initials instead of a play glyph. -->
-        <FrameLayout
+        <ImageView
+            android:id="@+id/tileLogo"
             android:layout_width="42dp"
-            android:layout_height="42dp">
-
-            <TextView
-                android:id="@+id/tileMonogram"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:letterSpacing="0.04"
-                android:maxLines="1"
-                android:textColor="#F2F6FF"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/tileLogo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/app_name"
-                android:visibility="gone" />
-        </FrameLayout>
+            android:layout_height="42dp"
+            android:contentDescription="@string/app_name"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tileName"
