@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phone sizes for the player's corner buttons. The TV keeps the larger pair
+     from values/dimens.xml: it is read from across a room, a phone is not. -->
+<resources>
+    <dimen name="player_corner_size">38dp</dimen>
+    <dimen name="player_corner_glyph">16sp</dimen>
+    <dimen name="player_corner_pad">10dp</dimen>
+</resources>

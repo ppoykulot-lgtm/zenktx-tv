@@ -11,6 +11,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.View
 import android.view.Window
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -83,6 +86,17 @@ class MainActivity : Activity() {
     private lateinit var chips: CategoryChipAdapter
     private lateinit var grid: ChannelGridAdapter
 
+    // The detail strip and the header search icon belong to the TV guide. The
+    // phone dropped both — it searches in a field under the categories and a tap
+    // plays — so every view here is looked up and may be null.
+    private var detailNameView: TextView? = null
+    private var detailTagView: TextView? = null
+    private var detailMetaView: TextView? = null
+    private var detailLogoView: ImageView? = null
+    private var detailFavView: TextView? = null
+    private var searchField: EditText? = null
+    private var searchClearView: View? = null
+
     private var welcomeAt = 0L
     private var welcomeAnim: ObjectAnimator? = null
 
@@ -139,6 +153,7 @@ class MainActivity : Activity() {
             onSelect = { showDetail(it) },
             onOpen = { openPlayer(it) },
             onFocused = { showDetail(it) },
+            onLongPress = { toggleFavourite(it) },
             isFavourite = { library.isFavourite(it) },
         )
         val columns = resources.getInteger(R.integer.grid_columns)
@@ -146,17 +161,11 @@ class MainActivity : Activity() {
         binding.grid.adapter = grid
         binding.grid.itemAnimator = null
 
-        Ui.attachFocusEffect(binding.detailWatch)
-        Ui.attachFocusEffect(binding.detailFav, scale = 1.04f)
         Ui.attachFocusEffect(binding.menuButton, scale = 1.04f)
-        Ui.attachFocusEffect(binding.searchButton, scale = 1.04f)
-
-        binding.detailWatch.setOnClickListener { detail?.let { openPlayer(it) } }
-        binding.detailFav.setOnClickListener { detail?.let { toggleFavourite(it) } }
         binding.menuButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        binding.searchButton.setOnClickListener { showSearch() }
+        bindGuideViews()
 
         startWelcome()
         applyFilter(ALL)
@@ -366,7 +375,15 @@ class MainActivity : Activity() {
 
     private fun onChipSelected(category: String) {
         query = ""
-        applyFilter(category)
+        val field = searchField
+        if (field != null && !field.text.isNullOrEmpty()) {
+            // The phone's search field is the filter too: emptying it runs the
+            // watcher, which applies the category that was just tapped.
+            filter = category
+            field.setText("")
+        } else {
+            applyFilter(category)
+        }
         focusFirstTile()
     }
 
@@ -405,29 +422,79 @@ class MainActivity : Activity() {
 
     // ---- detail strip -----------------------------------------------------
 
+    /**
+     * Binds whatever this build's guide actually has. The TV keeps the detail
+     * strip under the grid and the search icon in the header; the phone has
+     * neither, so every lookup is optional instead of assumed.
+     */
+    private fun bindGuideViews() {
+        detailNameView = optionalView("detailName")
+        detailTagView = optionalView("detailTag")
+        detailMetaView = optionalView("detailMeta")
+        detailLogoView = optionalView("detailLogo")
+        detailFavView = optionalView("detailFav")
+
+        optionalView<View>("detailWatch")?.let { view ->
+            Ui.attachFocusEffect(view)
+            view.setOnClickListener { detail?.let { openPlayer(it) } }
+        }
+        detailFavView?.let { view ->
+            Ui.attachFocusEffect(view, scale = 1.04f)
+            view.setOnClickListener { detail?.let { toggleFavourite(it) } }
+        }
+        optionalView<View>("searchButton")?.let { view ->
+            Ui.attachFocusEffect(view, scale = 1.04f)
+            view.setOnClickListener { showSearch() }
+        }
+
+        searchField = optionalView("searchInput")
+        searchClearView = optionalView("searchClear")
+        searchClearView?.setOnClickListener { searchField?.setText("") }
+        // The phone filters as it types: a dialog in front of the guide made a
+        // search a two-step errand and hid the results behind the keyboard.
+        searchField?.doAfterTextChanged { text ->
+            val value = text?.toString()?.trim().orEmpty()
+            searchClearView?.visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+            query = value
+            if (value.isEmpty()) applyFilter(if (filter in categories) filter else ALL)
+            else showResults(value)
+        }
+    }
+
+    /**
+     * A view only one flavour's layout carries. Looking it up by name keeps the
+     * shared activity off R.id, which is generated per flavour: the id of a view
+     * the phone no longer has would not compile there at all.
+     */
+    private fun <T : View> optionalView(name: String): T? {
+        val id = resources.getIdentifier(name, "id", packageName)
+        @Suppress("UNCHECKED_CAST")
+        return if (id == 0) null else findViewById(id) as T?
+    }
+
     private fun showDetail(channel: Channel?) {
         if (channel == null) {
             detail = null
-            binding.detailName.text = ""
-            binding.detailTag.text = ""
-            binding.detailMeta.text = ""
-            binding.detailLogo.setImageDrawable(null)
-            binding.detailLogo.visibility = View.GONE
-            binding.detailFav.text = getString(R.string.favourite_off)
+            detailNameView?.text = ""
+            detailTagView?.text = ""
+            detailMetaView?.text = ""
+            detailLogoView?.setImageDrawable(null)
+            detailLogoView?.visibility = View.GONE
+            detailFavView?.text = getString(R.string.favourite_off)
             return
         }
         detail = channel
-        binding.detailName.text = channel.name
-        binding.detailTag.text = channel.category.uppercase()
-        binding.detailMeta.text = listOf(
+        detailNameView?.text = channel.name
+        detailTagView?.text = channel.category.uppercase()
+        detailMetaView?.text = listOf(
             channel.quality,
             channel.streamType.uppercase(),
             if (channel.isFilipino) "PH" else "",
         ).filter { it.isNotBlank() }.joinToString("  \u00b7  ")
-        binding.detailFav.text = getString(
+        detailFavView?.text = getString(
             if (library.isFavourite(channel.key)) R.string.favourite_on else R.string.favourite_off
         )
-        Logos.apply(binding.detailLogo, channel.logo)
+        detailLogoView?.let { Logos.apply(it, channel.logo) }
     }
 
     private fun toggleFavourite(channel: Channel) {

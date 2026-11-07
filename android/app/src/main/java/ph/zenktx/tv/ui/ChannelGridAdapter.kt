@@ -13,11 +13,15 @@ import ph.zenktx.tv.databinding.ItemGridChannelBinding
  *
  * One click is all it takes on either build: a tap opens the player on a phone,
  * a D-pad click on the TV. Tapping twice to watch was a step nobody asked for.
+ *
+ * A long press toggles the favourite. The phone guide dropped its detail strip,
+ * so that star has to live on the tile itself.
  */
 class ChannelGridAdapter(
     private val onSelect: (Channel) -> Unit,
     private val onOpen: (Channel) -> Unit,
     private val onFocused: (Channel) -> Unit,
+    private val onLongPress: ((Channel) -> Unit)? = null,
     private val isFavourite: (String) -> Boolean,
 ) : RecyclerView.Adapter<ChannelGridAdapter.TileVH>() {
 
@@ -52,6 +56,11 @@ class ChannelGridAdapter(
             binding.root.setOnClickListener {
                 onSelect(channel)
                 onOpen(channel)
+            }
+            binding.root.setOnLongClickListener {
+                val handler = onLongPress ?: return@setOnLongClickListener false
+                handler(channel)
+                true
             }
             Ui.attachFocusEffect(binding.root) { onFocused(channel) }
         }

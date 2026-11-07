@@ -73,27 +73,29 @@
         android:layout_marginEnd="18dp"
         android:orientation="horizontal">
 
+        <!-- Sized from values/dimens.xml, which the phone flavour shrinks: a
+             46dp star over the picture is a button built for a TV, not a thumb. -->
         <TextView
             android:id="@+id/btnFav"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="@dimen/player_corner_size"
+            android:layout_height="@dimen/player_corner_size"
             android:background="@drawable/bg_player_chip"
             android:contentDescription="@string/favourites"
             android:focusable="true"
             android:gravity="center"
             android:text="@string/favourite_off"
             android:textColor="@color/text"
-            android:textSize="20sp" />
+            android:textSize="@dimen/player_corner_glyph" />
 
         <ImageButton
             android:id="@+id/btnClose"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_marginStart="10dp"
+            android:layout_width="@dimen/player_corner_size"
+            android:layout_height="@dimen/player_corner_size"
+            android:layout_marginStart="8dp"
             android:background="@drawable/bg_player_chip"
             android:contentDescription="@string/player_close"
             android:focusable="true"
-            android:padding="12dp"
+            android:padding="@dimen/player_corner_pad"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_close" />
     </LinearLayout>
