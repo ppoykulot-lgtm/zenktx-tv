@@ -58,13 +58,18 @@ check, driven by the keyboard (`Ctrl+F` search, `↑ ↓` channel hopping, `Esc`
 
 ## Downloads
 
-Every tag publishes three assets:
+Every tag publishes the assets of the platforms it actually changed:
 
 | Platform | Asset | Notes |
 |---|---|---|
 | Android TV | `ZENKTX-TV-<version>.apk` | `ph.zenktx.tv`, leanback banner, landscape |
 | Android Mobile | `ZENKTX-Mobile-<version>.apk` | `ph.zenktx.mobile`, portrait, 3-column grid |
 | Windows x86_64 | `ZENKTX-Setup-<version>.exe` + `ZENKTX-Portable-<version>.exe` | Windows 10/11 64-bit |
+
+Android TV and Android Mobile are separate apps with separate version lines, kept in
+[`android/versions.properties`](android/versions.properties). A tag is only the release
+train: each APK carries its own number, and a platform whose files did not change is not
+rebuilt, so a TV fix never hands the phone a new version or a new download.
 
 The landing page in [`docs/index.html`](docs/index.html) links to
 `releases/latest/download/<asset>`; edit `REPO` and `VERSION` at the top of its script
@@ -90,10 +95,12 @@ cd android
 Outputs land in `app/build/outputs/apk/<flavor>/<buildType>/`.
 
 `build.sh` finds JDK 17 and the SDK, writes `local.properties` on first run and calls the
-committed Gradle 8.7 wrapper. Version fields can be overridden:
+committed Gradle 8.7 wrapper. Each flavour reads its own pair from
+`android/versions.properties`, and either one can be overridden for a single build:
 
 ```bash
-./gradlew assembleTvRelease -PversionName=1.2.0 -PversionCode=12
+./gradlew assembleTvRelease -Ptv.versionName=1.6.0 -Ptv.versionCode=10600
+./gradlew assembleMobileRelease -Pmobile.versionName=1.5.7 -Pmobile.versionCode=10507
 ```
 
 ### Release signing
@@ -169,15 +176,19 @@ any static host. Publish it as-is or copy the `<style>`/sections into an existin
    repo in the app if you fork (`Settings → GitHub Sync`, or the `GITHUB_REPO`
    buildConfig field).
 
-4. Cut a release:
+4. Cut a release. Bump only the line you changed in `android/versions.properties`, then
+   tag with a number that has never been published before (see the note in that file):
 
    ```bash
-   git tag v1.1.0
-   git push origin v1.1.0
+   # TV fix: tv.versionName=1.5.7, tv.versionCode=10507; mobile untouched
+   git tag v1.5.7
+   git push origin v1.5.7
    ```
 
-   `release.yml` builds both APKs and the Windows installer, then attaches all three to
-   the release. The in-app updater reads that release.
+   `release.yml` works out which platforms that tag touched — `src/main`, the catalogue and
+   the Gradle files reach both apps, `src/tv` and `src/mobile` reach only their own — and
+   builds just those. The release then carries only those assets, so the phone's updater
+   stays quiet until the phone itself changes.
 
 ---
 

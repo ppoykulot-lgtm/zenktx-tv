@@ -13,6 +13,19 @@ val keystoreProps = Properties().apply {
 val releaseKeystore = keystoreProps.getProperty("storeFile")?.let { rootProject.file(it) }
 val hasReleaseKey = releaseKeystore?.exists() == true
 
+// Android TV and Android Mobile carry their own version, so an update to one
+// app never renames the other. android/versions.properties holds both lines;
+// -Ptv.versionName=1.6.0 (or -Pmobile.versionName=…) overrides a single build.
+val appVersions = Properties().apply {
+    val file = rootProject.file("versions.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+fun versionOf(flavor: String, key: String, fallback: String): String =
+    (findProperty("$flavor.$key") as String?)
+        ?: appVersions.getProperty("$flavor.$key")
+        ?: fallback
+
 android {
     namespace = "ph.zenktx.tv"
     compileSdk = 34
@@ -20,9 +33,9 @@ android {
     defaultConfig {
         minSdk = 24          // Android TV 7.0 / Android 7.0
         targetSdk = 34
-        // CI overrides these from the release tag: -PversionName=1.2.0 -PversionCode=42
-        versionCode = (findProperty("versionCode") as String?)?.toIntOrNull() ?: 10506
-        versionName = (findProperty("versionName") as String?) ?: "1.5.6"
+        // Each flavour sets its own pair below, from android/versions.properties.
+        versionCode = 1
+        versionName = "0.0.0"
 
         buildConfigField("String", "CERT_SHA256", "\"${keystoreProps.getProperty("certSha256", "")}\"")
         buildConfigField("String", "GITHUB_REPO", "\"ppoykulot-lgtm/zenktx-tv\"")
@@ -65,12 +78,16 @@ android {
         create("tv") {
             dimension = "device"
             applicationId = "ph.zenktx.tv"
+            versionName = versionOf("tv", "versionName", "1.5.6")
+            versionCode = versionOf("tv", "versionCode", "10506").toIntOrNull() ?: 10506
             manifestPlaceholders["orientation"] = "landscape"
             resValue("string", "device_label", "ZENKTX TV Stream")
         }
         create("mobile") {
             dimension = "device"
             applicationId = "ph.zenktx.mobile"
+            versionName = versionOf("mobile", "versionName", "1.5.6")
+            versionCode = versionOf("mobile", "versionCode", "10506").toIntOrNull() ?: 10506
             manifestPlaceholders["orientation"] = "unspecified"
             resValue("string", "device_label", "ZENKTX Mobile")
         }

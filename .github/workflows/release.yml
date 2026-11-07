@@ -3,8 +3,13 @@ name: Release
 # Plain "v1.3.4" tags only. The installed apps compare the tag with their own
 # version, and a platform prefix (win-v1.3.4) reads as no version at all to the
 # builds already on people's machines — they then never offer the update.
-# The job below still rebuilds only the platforms whose files changed, so each
-# card on the site keeps its own version and tag.
+# The job below rebuilds only the platforms whose files changed, so each card on
+# the site keeps its own version and tag.
+#
+# Android TV and Android Mobile are versioned separately in
+# android/versions.properties. A tag is only the release train: the APKs inside
+# carry their own flavour's number, and a flavour that did not change is not
+# rebuilt at all, so a TV fix never hands the phone a new download.
 on:
   push:
     tags:
@@ -28,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.meta.outputs.version }}
+      tv_version: ${{ steps.meta.outputs.tv_version }}
+      mobile_version: ${{ steps.meta.outputs.mobile_version }}
       windows: ${{ steps.meta.outputs.windows }}
       tv: ${{ steps.meta.outputs.tv }}
       mobile: ${{ steps.meta.outputs.mobile }}
@@ -58,16 +65,32 @@ jobs:
               CHANGED="$(git diff --name-only "$PREV" "$GITHUB_SHA")"
             fi
             if grep -q '^windows/' <<< "$CHANGED"; then windows=true; else windows=false; fi
-            if grep -q '^android/' <<< "$CHANGED"; then android=true; else android=false; fi
-            tv="$android"
-            mobile="$android"
+            # Shared Android code (src/main, the catalogue, Gradle files) ships in
+            # both APKs; a change confined to one flavour ships in that one only.
+            ANDROID="$(grep '^android/' <<< "$CHANGED" || true)"
+            tv=false
+            mobile=false
+            if [ -n "$ANDROID" ]; then
+              if grep -Evq '^android/app/src/(tv|mobile)/' <<< "$ANDROID"; then
+                tv=true
+                mobile=true
+              else
+                if grep -q '^android/app/src/tv/' <<< "$ANDROID"; then tv=true; fi
+                if grep -q '^android/app/src/mobile/' <<< "$ANDROID"; then mobile=true; fi
+              fi
+            fi
           fi
 
+          TV_VERSION="$(sed -n 's/^tv\.versionName=//p' android/versions.properties)"
+          MOBILE_VERSION="$(sed -n 's/^mobile\.versionName=//p' android/versions.properties)"
+
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tv_version=$TV_VERSION" >> "$GITHUB_OUTPUT"
+          echo "mobile_version=$MOBILE_VERSION" >> "$GITHUB_OUTPUT"
           echo "windows=$windows" >> "$GITHUB_OUTPUT"
           echo "tv=$tv" >> "$GITHUB_OUTPUT"
           echo "mobile=$mobile" >> "$GITHUB_OUTPUT"
-          echo "$TAG -> $VERSION (windows=$windows tv=$tv mobile=$mobile)"
+          echo "$TAG -> $VERSION (windows=$windows tv=$tv@$TV_VERSION mobile=$mobile@$MOBILE_VERSION)"
 
   android:
     name: Android APKs
@@ -107,35 +130,49 @@ jobs:
             echo "certSha256=$CERT_SHA256"
           } > android/keystore.properties
 
-      # versionCode is derived from the version (1.1.0 -> 10100) so it always
-      # increases across releases; the tag decides which flavours run.
+      # Each flavour takes its own version from versions.properties, so the two
+      # APKs never share a number. versionCode is derived from that flavour's
+      # version (1.5.7 -> 10507) exactly as the tag used to do it.
       - name: Build requested release APKs
         working-directory: android
         env:
           VERSION: ${{ needs.changes.outputs.version }}
+          TV_VERSION: ${{ needs.changes.outputs.tv_version }}
+          MOBILE_VERSION: ${{ needs.changes.outputs.mobile_version }}
           BUILD_TV: ${{ needs.changes.outputs.tv }}
           BUILD_MOBILE: ${{ needs.changes.outputs.mobile }}
         run: |
-          IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
-          CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+          code_of() {
+            local major minor patch
+            IFS=. read -r major minor patch <<< "${1#v}"
+            echo $((major * 10000 + minor * 100 + patch))
+          }
           TASKS=""
-          if [ "$BUILD_TV" = "true" ]; then TASKS="$TASKS assembleTvRelease"; fi
-          if [ "$BUILD_MOBILE" = "true" ]; then TASKS="$TASKS assembleMobileRelease"; fi
-          echo "Building $VERSION (versionCode $CODE):$TASKS"
-          ./gradlew --no-daemon $TASKS -PversionName="$VERSION" -PversionCode="$CODE"
+          ARGS=""
+          if [ "$BUILD_TV" = "true" ]; then
+            TASKS="$TASKS assembleTvRelease"
+            ARGS="$ARGS -Ptv.versionName=$TV_VERSION -Ptv.versionCode=$(code_of "$TV_VERSION")"
+          fi
+          if [ "$BUILD_MOBILE" = "true" ]; then
+            TASKS="$TASKS assembleMobileRelease"
+            ARGS="$ARGS -Pmobile.versionName=$MOBILE_VERSION -Pmobile.versionCode=$(code_of "$MOBILE_VERSION")"
+          fi
+          echo "Tag $VERSION; building tv=$BUILD_TV@$TV_VERSION mobile=$BUILD_MOBILE@$MOBILE_VERSION:$TASKS"
+          ./gradlew --no-daemon $TASKS $ARGS
 
       - name: Collect artifacts
         env:
-          VERSION: ${{ needs.changes.outputs.version }}
+          TV_VERSION: ${{ needs.changes.outputs.tv_version }}
+          MOBILE_VERSION: ${{ needs.changes.outputs.mobile_version }}
           BUILD_TV: ${{ needs.changes.outputs.tv }}
           BUILD_MOBILE: ${{ needs.changes.outputs.mobile }}
         run: |
           mkdir -p out
           if [ "$BUILD_TV" = "true" ]; then
-            cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${VERSION}.apk"
+            cp android/app/build/outputs/apk/tv/release/app-tv-release.apk "out/ZENKTX-TV-${TV_VERSION}.apk"
           fi
           if [ "$BUILD_MOBILE" = "true" ]; then
-            cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${VERSION}.apk"
+            cp android/app/build/outputs/apk/mobile/release/app-mobile-release.apk "out/ZENKTX-Mobile-${MOBILE_VERSION}.apk"
           fi
           ls -lh out
 
@@ -244,6 +281,8 @@ jobs:
       - name: Compose release notes
         env:
           VERSION: ${{ needs.changes.outputs.version }}
+          TV_VERSION: ${{ needs.changes.outputs.tv_version }}
+          MOBILE_VERSION: ${{ needs.changes.outputs.mobile_version }}
           TV: ${{ needs.changes.outputs.tv }}
           MOBILE: ${{ needs.changes.outputs.mobile }}
           WINDOWS: ${{ needs.changes.outputs.windows }}
@@ -255,10 +294,10 @@ jobs:
             echo "| Platform | Asset |"
             echo "| --- | --- |"
             if [ "$TV" = "true" ]; then
-              echo "| Android TV (7.0+) | \`ZENKTX-TV-$VERSION.apk\` |"
+              echo "| Android TV (7.0+) | \`ZENKTX-TV-$TV_VERSION.apk\` |"
             fi
             if [ "$MOBILE" = "true" ]; then
-              echo "| Android mobile (7.0+) | \`ZENKTX-Mobile-$VERSION.apk\` |"
+              echo "| Android mobile (7.0+) | \`ZENKTX-Mobile-$MOBILE_VERSION.apk\` |"
             fi
             if [ "$WINDOWS" = "true" ]; then
               echo "| Windows 10/11 x86_64 (installer) | \`ZENKTX-Setup-$VERSION.exe\` |"
@@ -267,6 +306,8 @@ jobs:
             echo
             echo "Only the platforms edited in this tag are rebuilt; the others keep their"
             echo "previous release, so their updater stays quiet until their code changes."
+            echo "Android TV and Android mobile carry separate version numbers:"
+            echo "a phone build only ships when the phone itself changed."
             if [ "$TV" = "true" ] || [ "$MOBILE" = "true" ]; then
               echo "Every APK is signed with the ZENKTX release certificate."
             fi
