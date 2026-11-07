@@ -57,6 +57,19 @@ class PlaylistStore(context: Context) {
     fun setEnabled(id: String, on: Boolean) =
         save(list().map { if (it.id == id) it.copy(enabled = on) else it })
 
+    /** Fixes a source that was saved with the wrong name, URL or logo. */
+    fun update(id: String, name: String, url: String, logo: String) =
+        save(
+            list().map {
+                if (it.id != id) it
+                else it.copy(
+                    name = name.ifBlank { defaultName(url) },
+                    url = url.trim(),
+                    logo = logo.trim(),
+                )
+            }
+        )
+
     fun setUrl(id: String, url: String) =
         save(list().map { if (it.id == id) it.copy(url = url.trim()) else it })
 

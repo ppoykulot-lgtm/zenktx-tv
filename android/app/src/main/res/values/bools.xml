@@ -2,4 +2,10 @@
 <resources>
     <!-- The TV guide has the height to show every category at once. -->
     <bool name="chips_wrap">true</bool>
+
+    <!-- A remote has no double tap: one click opens the channel. -->
+    <bool name="double_tap_play">false</bool>
+
+    <!-- A TV is always fullscreen already. -->
+    <bool name="full_view">false</bool>
 </resources>

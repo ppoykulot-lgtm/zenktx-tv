@@ -1,14 +1,17 @@
 package ph.zenktx.tv
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Base64
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -38,12 +41,15 @@ import ph.zenktx.tv.net.Http
 import ph.zenktx.tv.ui.Logos
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * Full-screen live player.
  *
  * - streams HLS (.m3u8) and DASH (.mpd) through Media3
  * - CH+ / CH- (or D-pad up/down) hops between channels in the current filter
+ * - the ZENKTX control bar carries the star, the volume wheel, the time, the
+ *   quality switch and the close button, so it matches the desktop player
  * - a watchdog turns a silent black screen into an actionable message
  */
 @UnstableApi
@@ -58,6 +64,7 @@ class PlayerActivity : Activity() {
 
         private const val STALL_MS = 18_000L
         private const val CHIP_MS = 3_500L
+        private const val CONTROLS_MS = 5_000L
         private const val MAX_RECOVERIES = 2
         private const val RECOVER_DELAY_MS = 900L
     }
@@ -88,12 +95,27 @@ class PlayerActivity : Activity() {
     /** Set from the HTTP failure so a dead link can be told apart from a codec. */
     private var lastStatus: Int? = null
 
+    /** Height chosen in the quality menu; 0 means Auto. */
+    private var qualityHeight = 0
+    private var draggingSeek = false
+    private var savedVolume = 1f
+
     private val main = Handler(Looper.getMainLooper())
 
     private val hideChip = Runnable {
         binding.channelChip.animate().alpha(0f).setDuration(250).withEndAction {
             binding.channelChip.visibility = View.GONE
         }.start()
+    }
+
+    private val hideControls = Runnable { setControlsVisible(false) }
+
+    /** Keeps the clock and the seek bar honest without touching the video. */
+    private val ticker = object : Runnable {
+        override fun run() {
+            updateTime()
+            main.postDelayed(this, 500)
+        }
     }
 
     private val watchdog = object : Runnable {
@@ -131,14 +153,55 @@ class PlayerActivity : Activity() {
         }
 
         binding.btnFav.setOnClickListener { toggleCurrentFavourite() }
+        binding.btnClose.setOnClickListener { finish() }
         binding.btnRetry.setOnClickListener { playCurrent() }
         binding.btnNext.setOnClickListener {
             if (queue.size < 2) finish() else switchChannel(1)
         }
         binding.btnBack.setOnClickListener { finish() }
+        binding.btnPrevChannel.setOnClickListener { switchChannel(-1) }
+        binding.btnNextChannel.setOnClickListener { switchChannel(1) }
+        binding.btnPlay.setOnClickListener { togglePlayback() }
+        binding.btnMute.setOnClickListener { toggleMute() }
+        binding.btnQuality.setOnClickListener { showQuality() }
 
-        wireControllerButtons()
+        binding.volBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                player?.volume = value / 100f
+                savedVolume = if (value == 0) savedVolume else value / 100f
+                binding.btnMute.setImageResource(
+                    if (value == 0) R.drawable.ic_mute else R.drawable.ic_volume
+                )
+            }
+
+            override fun onStartTrackingTouch(bar: SeekBar) = Unit
+            override fun onStopTrackingTouch(bar: SeekBar) = Unit
+        })
+
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) = Unit
+            override fun onStartTrackingTouch(bar: SeekBar) {
+                draggingSeek = true
+            }
+
+            override fun onStopTrackingTouch(bar: SeekBar) {
+                draggingSeek = false
+                val exo = player ?: return
+                val duration = exo.duration
+                if (duration > 0) exo.seekTo((duration * bar.progress) / 1000L)
+            }
+        })
+
+        // A tap on the picture shows or hides the bar.
+        binding.playerView.setOnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_UP) toggleControls()
+            true
+        }
+
         playCurrent()
+        showControls()
+        main.post(ticker)
     }
 
     /**
@@ -187,20 +250,137 @@ class PlayerActivity : Activity() {
         index = intent.getIntExtra(EXTRA_INDEX, 0).coerceIn(0, queue.lastIndex)
     }
 
-    /**
-     * The controller is inflated the first time it is shown, which is after
-     * onCreate, so its buttons are wired again whenever a channel loads instead
-     * of once at launch — a listener attached too early lands on nothing.
-     */
-    private fun wireControllerButtons() {
-        binding.playerView.post {
-            binding.playerView.findViewById<View>(R.id.btnPrev)?.setOnClickListener {
-                switchChannel(-1)
+    // ---- controls ---------------------------------------------------------
+
+    private fun showControls() {
+        setControlsVisible(true)
+        main.removeCallbacks(hideControls)
+        main.postDelayed(hideControls, CONTROLS_MS)
+    }
+
+    private fun toggleControls() = setControlsVisible(binding.controls.visibility != View.VISIBLE)
+
+    private fun setControlsVisible(visible: Boolean) {
+        binding.controls.visibility = if (visible) View.VISIBLE else View.GONE
+        if (visible) {
+            main.removeCallbacks(hideControls)
+            main.postDelayed(hideControls, CONTROLS_MS)
+        }
+    }
+
+    private fun togglePlayback() {
+        val exo = player ?: return
+        if (exo.isPlaying) exo.pause() else exo.play()
+        showPlayState()
+        showControls()
+    }
+
+    private fun showPlayState() {
+        val playing = player?.isPlaying == true || player?.playWhenReady == true
+        binding.btnPlay.setImageResource(if (playing) R.drawable.ic_pause else R.drawable.ic_play)
+    }
+
+    private fun toggleMute() {
+        val exo = player ?: return
+        if (exo.volume > 0f) {
+            savedVolume = exo.volume
+            exo.volume = 0f
+        } else {
+            exo.volume = if (savedVolume > 0f) savedVolume else 1f
+        }
+        binding.volBar.progress = (exo.volume * 100).toInt()
+        binding.btnMute.setImageResource(
+            if (exo.volume == 0f) R.drawable.ic_mute else R.drawable.ic_volume
+        )
+        showControls()
+    }
+
+    /** Clock, or position when the stream lets us seek. */
+    private fun updateTime() {
+        val exo = player ?: return
+        val duration = exo.duration
+        val position = exo.currentPosition.coerceAtLeast(0L)
+
+        if (duration > 0) {
+            binding.pTime.text = clock(position)
+            binding.pTotal.text = clock(duration)
+            if (!draggingSeek) {
+                binding.seekBar.progress = ((position * 1000) / duration).toInt()
             }
-            binding.playerView.findViewById<View>(R.id.btnNextChannel)?.setOnClickListener {
-                switchChannel(1)
+            binding.liveBadge.visibility = View.GONE
+        } else {
+            // A live playlist rarely exposes a duration; the wall clock is the
+            // only time that means anything, and the badge says it is live.
+            binding.pTime.text = clock(System.currentTimeMillis())
+            binding.pTotal.text = "LIVE"
+            binding.seekBar.progress = 0
+            binding.liveBadge.visibility = View.VISIBLE
+        }
+        showPlayState()
+    }
+
+    private fun clock(ms: Long): String {
+        val total = ms / 1000
+        val hours = total / 3600
+        val minutes = (total % 3600) / 60
+        val seconds = total % 60
+        return if (hours > 0) {
+            String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format(Locale.US, "%02d:%02d", minutes, seconds)
+        }
+    }
+
+    /**
+     * Quality follows the desktop bar: Auto lets Media3 pick, and a number pins
+     * the tallest track at or below that height. A live HLS master playlist
+     * carries its variants, so this is the same ladder the player already has.
+     */
+    private fun showQuality() {
+        val exo = player ?: return
+        val heights = linkedSetOf<Int>()
+        for (group in exo.currentTracks.groups) {
+            for (i in 0 until group.length) {
+                val format = group.getTrackFormat(i)
+                if (format.height > 0) heights += format.height
             }
         }
+
+        val options = ArrayList<String>()
+        val values = ArrayList<Int>()
+        options += getString(R.string.player_quality_auto)
+        values += 0
+        heights.sortedDescending().forEach {
+            options += "${it}p"
+            values += it
+        }
+
+        val checked = values.indexOf(qualityHeight).coerceAtLeast(0)
+        AlertDialog.Builder(this, R.style.Theme_Zenktx_Dialog)
+            .setTitle(R.string.player_quality)
+            .setSingleChoiceItems(options.toTypedArray(), checked) { dialog, which ->
+                qualityHeight = values[which]
+                applyQuality(qualityHeight)
+                dialog.dismiss()
+                showControls()
+            }
+            .show()
+    }
+
+    private fun applyQuality(height: Int) {
+        val exo = player ?: return
+        val params = exo.trackSelectionParameters.buildUpon()
+        if (height <= 0) {
+            params.clearOverrides()
+            params.setMaxVideoSize(Int.MAX_VALUE, Int.MAX_VALUE)
+            params.setMaxVideoBitrate(Int.MAX_VALUE)
+            binding.btnQuality.text = getString(R.string.player_quality_auto)
+        } else {
+            params.setMaxVideoSize(Int.MAX_VALUE, height)
+            params.setMaxVideoBitrate(Int.MAX_VALUE)
+            binding.btnQuality.text = "${height}p"
+        }
+        exo.trackSelectionParameters = params.build()
     }
 
     // ---- favourites -------------------------------------------------------
@@ -217,6 +397,7 @@ class PlayerActivity : Activity() {
         val channel = queue.getOrNull(index) ?: return
         val saved = library.toggleFavourite(channel.key)
         showFavouriteState()
+        showControls()
         Toast.makeText(
             this,
             getString(if (saved) R.string.action_fav_saved else R.string.action_fav_removed, channel.name),
@@ -234,6 +415,7 @@ class PlayerActivity : Activity() {
         binding.errorPanel.visibility = View.GONE
         showChip(channel)
         prepareSource()
+        if (qualityHeight > 0) applyQuality(qualityHeight)
     }
 
     /** Prepares the address at [sourceIndex]; a mirror swap leaves the rest alone. */
@@ -314,6 +496,8 @@ class PlayerActivity : Activity() {
             .setMediaSourceFactory(sourceFactory)
             .build()
 
+        exo.volume = savedVolume
+
         exo.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 binding.buffering.visibility =
@@ -336,6 +520,7 @@ class PlayerActivity : Activity() {
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                showPlayState()
                 if (isPlaying) clearFailure()
             }
 
@@ -527,14 +712,14 @@ class PlayerActivity : Activity() {
         if (queue.isEmpty()) return
         index = ((index + delta) % queue.size + queue.size) % queue.size
         playCurrent()
-        binding.playerView.requestFocus()
+        showControls()
     }
 
     private fun showChip(channel: Channel) {
         binding.channelName.text = channel.name
         binding.channelMeta.text = getString(R.string.player_channel, index + 1, queue.size) +
             "  \u00b7  " + channel.category.uppercase()
-        Logos.apply(binding.channelLogo, binding.channelMonogram, channel.name, channel.logo)
+        Logos.apply(binding.channelLogo, channel.logo)
 
         binding.channelChip.animate().cancel()
         binding.channelChip.alpha = 1f
@@ -543,8 +728,8 @@ class PlayerActivity : Activity() {
         main.removeCallbacks(hideChip)
         main.postDelayed(hideChip, CHIP_MS)
 
-        wireControllerButtons()
         showFavouriteState()
+        showPlayState()
     }
 
     // ---- input ------------------------------------------------------------
@@ -562,16 +747,38 @@ class PlayerActivity : Activity() {
                 switchChannel(-1); true
             }
 
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+            KeyEvent.KEYCODE_HEADSETHOOK -> {
+                togglePlayback(); true
+            }
+
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER -> {
+                if (binding.controls.visibility != View.VISIBLE) {
+                    showControls(); true
+                } else {
+                    super.onKeyDown(keyCode, event)
+                }
+            }
+
             KeyEvent.KEYCODE_DPAD_UP -> {
-                if (inErrorPanel) super.onKeyDown(keyCode, event)
-                else { switchChannel(1); true }
+                if (inErrorPanel || binding.controls.visibility == View.VISIBLE) {
+                    super.onKeyDown(keyCode, event)
+                } else {
+                    switchChannel(1); true
+                }
             }
 
             KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (inErrorPanel) super.onKeyDown(keyCode, event)
-                else { switchChannel(-1); true }
+                if (inErrorPanel || binding.controls.visibility == View.VISIBLE) {
+                    super.onKeyDown(keyCode, event)
+                } else {
+                    switchChannel(-1); true
+                }
             }
 
+            // The close button says ESC, so the keyboard has to honour it.
+            KeyEvent.KEYCODE_ESCAPE,
             KeyEvent.KEYCODE_BACK -> {
                 finish(); true
             }

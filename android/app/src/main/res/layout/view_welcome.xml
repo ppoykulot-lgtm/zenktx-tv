@@ -142,6 +142,7 @@
             android:textStyle="bold" />
 
         <LinearLayout
+            android:id="@+id/welcomeLoading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="34dp"
@@ -163,5 +164,28 @@
                 android:textColor="@color/muted"
                 android:textSize="11sp" />
         </LinearLayout>
+
+        <!-- The kill switch writes here when the project has been stopped. -->
+        <TextView
+            android:id="@+id/welcomeNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginEnd="28dp"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/text"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:letterSpacing="0.08"
+            android:text="@string/welcome_credit"
+            android:textColor="@color/muted"
+            android:textSize="10sp" />
     </LinearLayout>
 </FrameLayout>
