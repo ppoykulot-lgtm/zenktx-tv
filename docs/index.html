@@ -670,7 +670,16 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.5 <span class="tagx">latest</span></h3>
+        <h3>1.5.6 <span class="tagx">latest</span></h3>
+        <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
+        <ul>
+          <li><b>The artwork fills the tile.</b> The logo sat in a fixed box with a wide strip of empty card either side of it, which is why it read as a stamp on a 65″ screen. It now takes every pixel above the name, edge to edge, so a channel is recognised by its mark from across the room.</li>
+          <li><b>The highlighted tile has light under it.</b> Focus draws a soft mint halo that fades out from the frame — six 1dp rings outside an inset card, because a gradient behind the card only ever shows its faintest rim. The card is inset 6dp so it does not change size when focus moves.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.5</h3>
         <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
         <ul>
           <li><b>Room above the first row.</b> The mint outline on a highlighted tile came within a hair of the search bar, because the grid sat 10dp under it and the tile lifts into that gap on focus. The gap is 18dp and the grid keeps 14dp of its own, so the ring now has air on every side; the cell is 120dp to keep two full rows on screen.</li>
@@ -710,16 +719,6 @@
         <li><b>Search sits under the categories.</b> The magnifier in the header opened a dialog, hid the results behind the keyboard and asked for a second tap before anything was found. On a phone the field is now a bar under the chips: type and the guide filters while you type, with the count, a clear button and the ✕ to empty it.</li>
         <li><b>The detail sheet is gone from the phone.</b> It took the bottom of the grid to repeat a name the tile already showed. A tap plays, and a long press on a tile adds or removes the favourite, so the star it held is still one gesture away.</li>
         <li><b>Smaller buttons over the picture.</b> The favourite star and the close ✕ in the phone player were 46dp, sized for a TV across the room. They are 38dp on a phone; the TV keeps its larger pair.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.1</h3>
-        <div class="meta">7 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-        <li><b>The highlight follows the mouse.</b> On Windows the guide only moved its outline after a click, so the strip at the bottom answered to the last tile you pressed instead of the one under the pointer. Resting the cursor on a tile selects it now, and a click still opens the channel straight away.</li>
-        <li><b>Tonight's NBA games appear.</b> A game row is named “8:00am Wizards vs Hawks”, so nothing in the name says NBA — only its tags do. The guide tested the name alone and threw away every game the publisher added, which is why the other players listed a full night of basketball and this one listed none. It reads the tags now, on all three builds, so a game stream shows up within a minute of being published and leaves again when it is pulled.</li>
-        <li><b>Playlists is dark.</b> The dialog had no background of its own and fell back to the browser's white sheet, which lit up the whole window. It uses the same surface, edge and radius as the rest of the app.</li>
         </ul>
       </article>
 
@@ -763,8 +762,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.5", mobile: "1.5.5", win: "1.5.1" };
-  const TAGS = { tv: "v1.5.5", mobile: "v1.5.5", win: "v1.5.1" };
+  const VERSIONS = { tv: "1.5.6", mobile: "1.5.6", win: "1.5.1" };
+  const TAGS = { tv: "v1.5.6", mobile: "v1.5.6", win: "v1.5.1" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

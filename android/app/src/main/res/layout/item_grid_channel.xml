@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One EPG cell on the TV. The logo is the thing the guide is scanned for, so
-     it takes most of the card: a 50dp mark inside a 100dp cell read as a
-     postage stamp from the sofa, so the cell is 120dp and the mark 82dp. The
-     phone has its own copy of this file. -->
+<!-- One EPG cell on the TV. The artwork is what the guide is scanned for, so it
+     takes every pixel above the name: the logo used to sit in a fixed 82dp box
+     with empty card around it, which read as a stamp on a 65" screen. The phone
+     has its own copy of this file. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="120dp"
@@ -10,10 +10,10 @@
     android:background="@drawable/bg_card"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:paddingStart="8dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="8dp"
-    android:paddingBottom="6dp">
+    android:paddingStart="12dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,8 +23,9 @@
 
         <ImageView
             android:id="@+id/tileLogo"
-            android:layout_width="82dp"
-            android:layout_height="82dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:contentDescription="@string/app_name"
             android:scaleType="fitCenter"
             android:visibility="gone" />
@@ -33,7 +34,7 @@
             android:id="@+id/tileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="5dp"
             android:ellipsize="end"
             android:gravity="center"
             android:includeFontPadding="false"
