@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Softens the right edge of the category row, so a chip that continues past
+     the screen fades out instead of being sliced in half. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="0"
+        android:centerColor="#B3060911"
+        android:endColor="#FF060911"
+        android:startColor="#00060911"
+        android:type="linear" />
+</shape>

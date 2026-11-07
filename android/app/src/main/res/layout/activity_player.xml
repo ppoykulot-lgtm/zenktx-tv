@@ -77,8 +77,8 @@
         android:indeterminateTint="@color/mint"
         android:visibility="gone" />
 
-    <!-- One bar, one row of controls and one row of key hints. OK on the picture
-         raises it; ▲ / ▼ on the picture changes channel without it. -->
+    <!-- One bar: a single row of controls and one row of key hints. OK on the
+         picture raises it; ▲ / ▼ on the picture changes channel without it. -->
     <LinearLayout
         android:id="@+id/controls"
         android:layout_width="match_parent"
@@ -94,17 +94,32 @@
         android:paddingEnd="20dp"
         android:paddingBottom="12dp">
 
-        <!-- Live position -->
+        <!-- One row, in the order a remote walks it: play first, then the
+             running time, the timeline and where the stream ends, then the
+             sound and the quality. The old bar stacked a time row above a
+             button row and the two collided over the picture. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_player_play"
+                android:contentDescription="@string/watch_now"
+                android:focusable="true"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_pause" />
+
             <TextView
                 android:id="@+id/pTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:fontFamily="monospace"
                 android:text="--:--"
                 android:textColor="@color/text"
@@ -130,25 +145,6 @@
                 android:text="LIVE"
                 android:textColor="@color/muted"
                 android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/btnPlay"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:background="@drawable/bg_player_play"
-                android:contentDescription="@string/watch_now"
-                android:focusable="true"
-                android:padding="12dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_pause" />
 
             <TextView
                 android:id="@+id/liveBadge"
@@ -166,15 +162,11 @@
                 android:textSize="8sp"
                 android:textStyle="bold" />
 
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
             <ImageButton
                 android:id="@+id/btnMute"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="18dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/player_volume"
                 android:focusable="true"
@@ -184,7 +176,7 @@
 
             <SeekBar
                 android:id="@+id/volBar"
-                android:layout_width="130dp"
+                android:layout_width="110dp"
                 android:layout_height="wrap_content"
                 android:max="100"
                 android:progress="100"

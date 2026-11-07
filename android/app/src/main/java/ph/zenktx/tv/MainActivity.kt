@@ -21,9 +21,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -141,23 +138,14 @@ class MainActivity : Activity() {
         github = GitHubStore(this)
         settings = AppSettings(this)
 
-        val chipsWrap = resources.getBoolean(R.bool.chips_wrap)
         chips = CategoryChipAdapter(
             onSelected = { onChipSelected(it) },
-            // The TV lays every category out on its own rows, so scrolling to a
-            // focused chip only shoved the band around under the D-pad.
-            onFocused = { pos ->
-                if (!chipsWrap) binding.chips.smoothScrollToPosition(pos)
-            },
+            // One row on every build. Wrapped, the band grew a second row that
+            // shoved the grid down and dragged the whole guide under the
+            // highlight; one row that slides keeps the guide still.
+            onFocused = { pos -> binding.chips.smoothScrollToPosition(pos) },
         )
-        // The TV guide wraps every category onto its own rows; a phone scrolls a
-        // single row instead, because five chip rows ate half the screen.
-        binding.chips.layoutManager =
-            if (chipsWrap) {
-                FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
-            } else {
-                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-            }
+        binding.chips.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.chips.adapter = chips
 
         grid = ChannelGridAdapter(
