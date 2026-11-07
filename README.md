@@ -184,7 +184,7 @@ any static host. Publish it as-is or copy the `<style>`/sections into an existin
 ## The channel list
 
 `data/channels.json` was extracted from the user's own
-`dcoderztv-windows-1.0.0-setup.exe`: the packaged Electron `app.asar` fetches its list from
+`IPTVSource-windows-1.0.0-setup.exe`: the packaged Electron `app.asar` fetches its list from
 a public Firebase endpoint, and that payload was normalised into this shape.
 
 ```json
