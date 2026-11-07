@@ -61,7 +61,22 @@
     transition: transform .18s, box-shadow .18s;
   }
   .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(53,231,192,.25); }
+.nav-discord {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 15px; border-radius: 999px;
+    border: 1px solid rgba(88,101,242,.45); background: rgba(88,101,242,.14);
+    color: #cfd4ff; font-size: 13px; font-weight: 600;
+    transition: background .18s, transform .18s, box-shadow .18s;
+  }
+  .nav-discord:hover { background: rgba(88,101,242,.26); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(88,101,242,.28); }
+  .nav-discord svg { width: 16px; height: 16px; flex: none; }
   @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 620px) {
+    .nav { gap: 12px; height: 62px; }
+    .nav-discord { padding: 9px 11px; }
+    .nav-discord span { display: none; }
+    .nav-cta { padding: 9px 14px; font-size: 12.5px; }
+  }
 
   /* ---------- hero ---------- */
   .hero { position: relative; padding: 92px 0 72px; overflow: hidden; }
@@ -123,9 +138,29 @@
   .stat svg { width: 18px; height: 18px; color: var(--mint); }
   .stat span { font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
   @media (max-width: 900px) {
-    .hero-inner { grid-template-columns: 1fr; }
-    .hero-visual { order: -1; }
-    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding: 56px 0 48px; }
+    /* minmax(0,1fr), not 1fr: the mock grid's min-content used to widen the
+       whole column, pushing the copy and the tiles past the right edge. */
+    .hero-inner { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+    .hero-inner > * { min-width: 0; }
+    .hero-visual { order: -1; overflow: hidden; }
+    .grid-mock { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 520px) {
+    .hero { padding: 38px 0 34px; }
+    .hero-visual { padding: 14px; border-radius: 18px; }
+    .tile { height: 64px; font-size: 8px; padding: 5px; }
+    .tile img { max-height: 24px; max-width: 54px; }
+    .mock-bar { gap: 6px; margin-bottom: 10px; }
+    .pill { height: 18px; }
+    h1 { font-size: 31px; }
+    .lede { font-size: 15px; }
+    .wrap { padding: 0 16px; }
+    .stats { gap: 10px; margin-top: 40px; }
+    .stat { padding: 14px 15px; }
+    .stat b { font-size: 21px; }
+    .stat span { font-size: 9.5px; letter-spacing: .1em; }
   }
 
   /* ---------- sections ---------- */
@@ -253,7 +288,21 @@
   }
   .entry ul { margin: 0; padding-left: 18px; color: #a3aec4; font-size: 13.5px; }
   .entry li { margin-bottom: 5px; }
-  .log-more { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+  .log-more { margin: 14px 0 0; font-size: 12.5px; color: var(--muted); }
+  /* Only the five newest releases are on the page; the tail is one click away. */
+  .log-more-box { display: block; margin-top: 6px; }
+  .log-toggle {
+    display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+    list-style: none; padding: 9px 16px; border: 1px solid var(--line);
+    border-radius: 999px; background: rgba(255,255,255,.03); color: var(--text);
+    font-size: 12.5px; font-weight: 600; transition: border-color .18s, background .18s;
+  }
+  .log-toggle::-webkit-details-marker { display: none; }
+  .log-toggle::after { content: "+"; color: var(--mint); font-size: 15px; line-height: 1; }
+  .log-toggle:hover { border-color: #2c3c5c; background: rgba(255,255,255,.05); }
+  details[open] > .log-toggle::after { content: "3"; }
+  details[open] > .log-toggle { border-color: #2c3c5c; }
+  .log-older { margin-top: 26px; }
   .log-more a { color: var(--mint); }
 
   /* footer */
@@ -290,6 +339,10 @@
       <a href="#faq">FAQ</a>
       <a href="#changelog">Changelog</a>
     </nav>
+    <a class="nav-discord" href="https://discord.gg/nAQMKYxZe2" target="_blank" rel="noopener" aria-label="Join the ZENKTX Discord">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.3 4.6A16.6 16.6 0 0 0 16.2 3.3l-.3.6a12.4 12.4 0 0 1 3.6 1.8 11.7 11.7 0 0 0-4-1.3 11.4 11.4 0 0 0-5 0 11.7 11.7 0 0 0-4 1.3 12.4 12.4 0 0 1 3.6-1.8l-.3-.6a16.6 16.6 0 0 0-4.1 1.3C2.6 9 1.9 13.3 2.3 17.5a16.4 16.4 0 0 0 5 2.5l.6-.9a10.6 10.6 0 0 1-1.7-.8l.4-.3a11.8 11.8 0 0 0 10.8 0l.4.3a10.6 10.6 0 0 1-1.7.8l.6.9a16.4 16.4 0 0 0 5-2.5c.5-4.8-.7-9-3.4-12.9zM8.9 14.9c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.9.9 1.8 2c0 1.1-.8 2-1.8 2zm6.2 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.9.9 1.8 2c0 1.1-.8 2-1.8 2z"/></svg>
+      <span>Discord</span>
+    </a>
     <a class="nav-cta" id="navDownload" href="#downloads">Get the app</a>
   </div>
 </header>
@@ -329,9 +382,9 @@
             <div class="tile"><img src="logos/ch0134.svg" alt="" loading="lazy" /><span>Discovery</span></div>
             <div class="tile"><img src="logos/ch0172.svg" alt="" loading="lazy" /><span>GMA News</span></div>
             <div class="tile"><img src="logos/ch0101.svg" alt="" loading="lazy" /><span>CinemaOne</span></div>
-            <div class="tile"><img src="logos/ch0007.png" alt="" loading="lazy" /><span>A2Z HD</span></div>
+            <div class="tile"><img src="logos/ch0305.png" alt="" loading="lazy" /><span>NBA TV</span></div>
             <div class="tile"><img src="logos/ch0090.png" alt="" loading="lazy" /><span>Cartoon HD</span></div>
-            <div class="tile"><img src="logos/ch0128.svg" alt="" loading="lazy" /><span>Discovery</span></div>
+            <div class="tile"><img src="logos/ch0224.png" alt="" loading="lazy" /><span>Kapamilya</span></div>
           </div>
         </div>
       </div>
@@ -434,7 +487,7 @@
           <figcaption>Android mobile — three-column tiles, one tap to play</figcaption>
         </figure>
         <figure>
-          <img src="assets/screens/tv-guide.png" alt="ZENKTX Android TV guide with category chips and a six-column grid" loading="lazy" />
+          <img src="assets/screens/tv-guide.png" alt="ZENKTX Android TV guide with a category band, a search bar and a five-column grid" loading="lazy" />
           <figcaption>Android TV — six-column guide, D-pad remote</figcaption>
         </figure>
       </div>
@@ -609,12 +662,22 @@
       <div class="section-head">
         <div class="kicker">Version history &amp; changelogs</div>
         <h2>What changed, release by release.</h2>
-        <p>The five newest releases. Everything older lives on the releases page.</p>
+        <p>The five newest releases — open the tail for three more. Everything older lives on the releases page.</p>
       </div>
 
       <div class="log">
 <article class="entry">
-          <h3>1.5.2 <span class="tagx">latest</span></h3>
+          <h3>1.5.3 <span class="tagx">latest</span></h3>
+          <div class="meta">7 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.1</div>
+          <ul>
+            <li><b>The TV guide is rebuilt around the remote.</b> The categories are a labelled band that wraps instead of scroll-jumping under the highlight, the search bar sits under them and says <i>Search channel</i>, and the six-column grid of 84dp cells became five columns of 100dp cards with 50dp logos — on a 65” screen the artwork was the smallest thing on it.</li>
+            <li><b>A highlighted tile no longer disappears under the categories.</b> Every cell lifted 6dp and scaled by 6% on focus, straight into the clip at the top of the grid, so its top edge and sometimes its name were cut. The grid now keeps the room for that lift, the chips row no longer scrolls itself when it takes focus, and the bottom of the guide is a legend of the D-pad keys instead of the detail strip.</li>
+            <li><b>Channel hopping is one press.</b> The CH ▲ / CH ▼ pair, the favourite star and the ✕ over the picture are gone. On the picture, ▲ ▼ ◀ ▶ change channel and the banner names the new one — <i>CH 214 / 465</i> — without raising the control bar over the picture, which is what made zapping feel messy. OK raises the bar, BACK lowers it, and a second BACK leaves the player.</li>
+            <li><b>The splash gets out of the way.</b> The welcome screen held the guide back for a full ten seconds after the catalogue had already arrived, and a slow read kept it on screen even longer while it said <i>Loading channels…</i>. It now has a floor and a ceiling — it clears after 1.2s at the earliest and never later than 2.5s, with the grid filling in behind it — and the first tile takes focus as it lifts, so OK plays straight away.</li>
+            <li><b>Logos stay where they are.</b> Artwork was cached for only as long as the host's ten-minute header allowed, and a request that timed out during the burst on launch was dropped until the tile was rebound — the same channel had a logo one launch and none the next. Logos now live in a 96 MB disk cache that ignores that header, and a failed request is retried twice before the cell stays empty.</li>
+          </ul>
+
+          <h3>1.5.2</h3>
           <div class="meta">7 November 2026 · Android mobile · Android TV · Windows unchanged on 1.5.1</div>
           <ul>
             <li><b>Every channel name fits.</b> An 84dp logo and two lines of name needed more room than the 118dp card gave them, so names like “Cartoonito Stream 2” were painted past the card edge and cut in half. The card is 132dp now and both lines sit inside it.</li>
@@ -660,30 +723,35 @@
             <li><b>Images load again.</b> The grid handed its requests to an image loader that had already been replaced, so neither the success nor the failure callback ever ran. One loader is now built once and passed to every request, with a caller identity and timeouts the logo hosts accept.</li>
             <li><b>Bigger tiles on Windows.</b> The desktop grid drew a 44px logo inside a 132px card; it is a 84px logo in a 152px card with a 12px label now, the way the mobile guide looks.</li>
           </ul>
-        </article><article class="entry">
-          <h3>1.3.8</h3>
-          <div class="meta">5 November 2026 · Android mobile (new guide) · Android TV (logos, fullscreen) · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>A guide built for a hand, not a sofa.</b> The phone build gets its own layout: a compact header, one scrollable row of categories instead of five stacked rows eating half the screen, a 54dp logo on every tile with an 11sp name that gets two lines, and a detail sheet where the channel name is no longer cut to “3RS Si…”. The TV keeps its six-column EPG.</li>
-            <li><b>Logos are back.</b> 45 of the catalogue's logos are SVGs, and the image loader had no SVG decoder, so those channels drew their initials even though the admin page has artwork for them. The decoder ships with the app now.</li>
-            <li><b>Playback goes fullscreen.</b> The status and navigation bars sat over the picture on a phone; they are hidden while a channel plays and a swipe from the edge brings them back for a moment.</li>
-          </ul>
-        </article><article class="entry">
-          <h3>1.3.7</h3>
-          <div class="meta">5 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>Channels that play on Windows now play on Android.</b> The free providers re-tokenise every address through the day, and a link the guide cached this morning answered <code>410 Gone</code> all evening. Windows pulled the feed again the moment a channel failed; Android waited for its six-hour cache to expire, so the same channel looked dead on the TV and fine on the PC.</li>
-            <li><b>A dead first link falls through to the next one.</b> One feed is often listed more than once — “Stream 2”, an HD twin, a leftover duplicate — and Windows walks those three addresses before it gives up. Android went straight to the error card after the first one.</li>
-            <li><b>The address decides the format.</b> The guide's <code>hls</code> / <code>mpd</code> flag goes stale when a provider swaps a channel between the two, and an <code>.mpd</code> handed to the HLS parser fails before it requests a single segment. The container is read from the URL now.</li>
-            <li><b>An expired link says so.</b> 403, 404, 410 and 451 used to read “refused the request (HTTP 410)”; they now explain that the provider rotates addresses and the channel usually comes back.</li>
-          </ul>
-        </article><article class="entry">
-          <h3>1.3.6</h3>
-          <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
-          <ul>
-            <li><b>The strip and the player chip use the same fallback as the tiles.</b> 1.3.5 fixed the grid but left the empty play glyph in the detail strip underneath it and in the chip that appears over playback. Both show the channel's initials on its colour now, so a channel without a working logo looks the same everywhere.</li>
-          </ul>
-        </article>
+        </article><details class="log-more-box">
+          <summary class="log-toggle">Show 3 older releases</summary>
+          <div class="log-older">
+            <article class="entry">
+              <h3>1.3.8</h3>
+              <div class="meta">5 November 2026 · Android mobile (new guide) · Android TV (logos, fullscreen) · Windows unchanged on 1.3.3</div>
+              <ul>
+                <li><b>A guide built for a hand, not a sofa.</b> The phone build gets its own layout: a compact header, one scrollable row of categories instead of five stacked rows eating half the screen, a 54dp logo on every tile with an 11sp name that gets two lines, and a detail sheet where the channel name is no longer cut to “3RS Si…”. The TV keeps its six-column EPG.</li>
+                <li><b>Logos are back.</b> 45 of the catalogue's logos are SVGs, and the image loader had no SVG decoder, so those channels drew their initials even though the admin page has artwork for them. The decoder ships with the app now.</li>
+                <li><b>Playback goes fullscreen.</b> The status and navigation bars sat over the picture on a phone; they are hidden while a channel plays and a swipe from the edge brings them back for a moment.</li>
+              </ul>
+            </article><article class="entry">
+              <h3>1.3.7</h3>
+              <div class="meta">5 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
+              <ul>
+                <li><b>Channels that play on Windows now play on Android.</b> The free providers re-tokenise every address through the day, and a link the guide cached this morning answered <code>410 Gone</code> all evening. Windows pulled the feed again the moment a channel failed; Android waited for its six-hour cache to expire, so the same channel looked dead on the TV and fine on the PC.</li>
+                <li><b>A dead first link falls through to the next one.</b> One feed is often listed more than once — “Stream 2”, an HD twin, a leftover duplicate — and Windows walks those three addresses before it gives up. Android went straight to the error card after the first one.</li>
+                <li><b>The address decides the format.</b> The guide's <code>hls</code> / <code>mpd</code> flag goes stale when a provider swaps a channel between the two, and an <code>.mpd</code> handed to the HLS parser fails before it requests a single segment. The container is read from the URL now.</li>
+                <li><b>An expired link says so.</b> 403, 404, 410 and 451 used to read “refused the request (HTTP 410)”; they now explain that the provider rotates addresses and the channel usually comes back.</li>
+              </ul>
+            </article><article class="entry">
+              <h3>1.3.6</h3>
+              <div class="meta">4 November 2026 · Android TV · Android mobile · Windows unchanged on 1.3.3</div>
+              <ul>
+                <li><b>The strip and the player chip use the same fallback as the tiles.</b> 1.3.5 fixed the grid but left the empty play glyph in the detail strip underneath it and in the chip that appears over playback. Both show the channel's initials on its colour now, so a channel without a working logo looks the same everywhere.</li>
+              </ul>
+            </article>
+          </div>
+        </details>
 
         <p class="log-more">Older release notes are kept on the
           <a href="https://github.com/ppoykulot-lgtm/zenktx-tv/releases">GitHub releases page</a>.</p>
@@ -729,8 +797,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.2", mobile: "1.5.2", win: "1.5.1" };
-  const TAGS = { tv: "v1.5.2", mobile: "v1.5.2", win: "v1.5.1" };
+  const VERSIONS = { tv: "1.5.3", mobile: "1.5.3", win: "1.5.1" };
+  const TAGS = { tv: "v1.5.3", mobile: "v1.5.3", win: "v1.5.1" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

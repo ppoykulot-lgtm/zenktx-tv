@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -100,6 +101,14 @@ class PlayerActivity : Activity() {
     private var draggingSeek = false
     private var savedVolume = 1f
 
+    /**
+     * The TV layout has no star, no ✕ and no CH buttons: a remote changes
+     * channel on the picture and leaves with BACK. The phone layout still
+     * carries all four, so they are found by name and may be missing.
+     */
+    private var favView: TextView? = null
+    private var tvDpad = false
+
     private val main = Handler(Looper.getMainLooper())
 
     private val hideChip = Runnable {
@@ -152,15 +161,18 @@ class PlayerActivity : Activity() {
             return
         }
 
-        binding.btnFav.setOnClickListener { toggleCurrentFavourite() }
-        binding.btnClose.setOnClickListener { finish() }
+        tvDpad = resources.getBoolean(R.bool.tv_dpad)
+        favView = optionalView("btnFav")
+
+        favView?.setOnClickListener { toggleCurrentFavourite() }
+        optionalView<View>("btnClose")?.setOnClickListener { finish() }
+        optionalView<View>("btnPrevChannel")?.setOnClickListener { switchChannel(-1) }
+        optionalView<View>("btnNextChannel")?.setOnClickListener { switchChannel(1) }
         binding.btnRetry.setOnClickListener { playCurrent() }
         binding.btnNext.setOnClickListener {
             if (queue.size < 2) finish() else switchChannel(1)
         }
         binding.btnBack.setOnClickListener { finish() }
-        binding.btnPrevChannel.setOnClickListener { switchChannel(-1) }
-        binding.btnNextChannel.setOnClickListener { switchChannel(1) }
         binding.btnPlay.setOnClickListener { togglePlayback() }
         binding.btnMute.setOnClickListener { toggleMute() }
         binding.btnQuality.setOnClickListener { showQuality() }
@@ -202,6 +214,13 @@ class PlayerActivity : Activity() {
         playCurrent()
         showControls()
         main.post(ticker)
+    }
+
+    /** A view only one flavour's layout carries, looked up without R.id. */
+    private fun <T : View> optionalView(name: String): T? {
+        val id = resources.getIdentifier(name, "id", packageName)
+        @Suppress("UNCHECKED_CAST")
+        return if (id == 0) null else findViewById(id) as T?
     }
 
     /**
@@ -256,6 +275,9 @@ class PlayerActivity : Activity() {
         setControlsVisible(true)
         main.removeCallbacks(hideControls)
         main.postDelayed(hideControls, CONTROLS_MS)
+        // A remote has to land on something: the play button is the leftmost
+        // stop, so OK on the picture then ◀▶ walks the bar from there.
+        if (tvDpad) binding.btnPlay.requestFocus()
     }
 
     private fun toggleControls() = setControlsVisible(binding.controls.visibility != View.VISIBLE)
@@ -387,10 +409,11 @@ class PlayerActivity : Activity() {
 
     /** The star follows the channel on screen, including after a channel hop. */
     private fun showFavouriteState() {
+        val star = favView ?: return
         val channel = queue.getOrNull(index) ?: return
         val saved = library.isFavourite(channel.key)
-        binding.btnFav.text = getString(if (saved) R.string.favourite_on else R.string.favourite_off)
-        binding.btnFav.alpha = if (saved) 1f else 0.72f
+        star.text = getString(if (saved) R.string.favourite_on else R.string.favourite_off)
+        star.alpha = if (saved) 1f else 0.72f
     }
 
     private fun toggleCurrentFavourite() {
@@ -708,11 +731,17 @@ class PlayerActivity : Activity() {
 
     // ---- channel hopping --------------------------------------------------
 
+    /**
+     * Channel hop. On a TV the banner is the whole feedback: raising the control
+     * bar over the picture after every ▲ press is what made zapping feel wrong.
+     */
     private fun switchChannel(delta: Int) {
         if (queue.isEmpty()) return
         index = ((index + delta) % queue.size + queue.size) % queue.size
+        setControlsVisible(false)
+        main.removeCallbacks(hideControls)
         playCurrent()
-        showControls()
+        if (!tvDpad) showControls()
     }
 
     private fun showChip(channel: Channel) {
@@ -736,6 +765,7 @@ class PlayerActivity : Activity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         val inErrorPanel = binding.errorPanel.visibility == View.VISIBLE
+        val controlsUp = binding.controls.visibility == View.VISIBLE
         return when (keyCode) {
             KeyEvent.KEYCODE_CHANNEL_UP,
             KeyEvent.KEYCODE_MEDIA_NEXT -> {
@@ -754,33 +784,39 @@ class PlayerActivity : Activity() {
 
             KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_ENTER -> {
-                if (binding.controls.visibility != View.VISIBLE) {
+                if (!controlsUp) {
                     showControls(); true
                 } else {
                     super.onKeyDown(keyCode, event)
                 }
             }
 
-            KeyEvent.KEYCODE_DPAD_UP -> {
-                if (inErrorPanel || binding.controls.visibility == View.VISIBLE) {
+            // On the picture, all four directions zap: a remote that has to be
+            // pointed at a pair of tiny CH buttons is not a TV remote.
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (inErrorPanel || controlsUp) {
                     super.onKeyDown(keyCode, event)
                 } else {
                     switchChannel(1); true
                 }
             }
 
-            KeyEvent.KEYCODE_DPAD_DOWN -> {
-                if (inErrorPanel || binding.controls.visibility == View.VISIBLE) {
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (inErrorPanel || controlsUp) {
                     super.onKeyDown(keyCode, event)
                 } else {
                     switchChannel(-1); true
                 }
             }
 
-            // The close button says ESC, so the keyboard has to honour it.
+            // BACK closes the bar first and the player second, so a mistaken
+            // press never drops the viewer back into the guide.
             KeyEvent.KEYCODE_ESCAPE,
             KeyEvent.KEYCODE_BACK -> {
-                finish(); true
+                if (controlsUp && !inErrorPanel) setControlsVisible(false) else finish()
+                true
             }
 
             else -> super.onKeyDown(keyCode, event)

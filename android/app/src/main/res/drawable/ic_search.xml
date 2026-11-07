@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Magnifier for the TV search bar. Mint, so it reads as an action against the
+     muted label next to it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:fillColor="@color/mint"
+        android:pathData="M10.5,3a7.5,7.5 0,1 0,4.55 13.46l4.24,4.25 1.42,-1.42 -4.25,-4.24A7.5,7.5 0,0 0,10.5 3zM10.5,5a5.5,5.5 0,1 1,0 11,5.5 5.5,0 0,1 0,-11z" />
+</vector>
