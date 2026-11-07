@@ -43,9 +43,13 @@
   .note code { color: var(--mint); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #141f33; vertical-align: middle; }
+  /* The header row sticks to the top of the table's own scroll pane. Pinned to
+     the page instead, it slid down over the first channel: a horizontal
+     overflow makes .tablewrap the scroll container, so top: 57px pushed the row
+     57px down from its own place. */
   th {
     color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .08em;
-    text-transform: uppercase; position: sticky; top: var(--head, 57px); background: var(--bg);
+    text-transform: uppercase; position: sticky; top: 0; background: #0a1120;
     z-index: 2; box-shadow: inset 0 -1px 0 #141f33;
   }
   tr.off td { opacity: .45; }
@@ -74,7 +78,13 @@
   .check label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--text); }
   .stopcard { border: 1px solid rgba(255,107,107,.35); background: rgba(255,107,107,.06); border-radius: 10px; padding: 10px 12px; margin-top: 12px; color: #ffc9c9; font-size: 12.5px; }
   .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-  .tablewrap { overflow-x: auto; }
+  /* One scroll pane for the whole table, so the header stays put while the
+     channel rows scroll under it. 36 rows visible at a time beats a page that
+     scrolls the header off the screen. */
+  .tablewrap {
+    overflow: auto; max-height: calc(100vh - 172px);
+    border: 1px solid var(--line); border-radius: 12px; background: #0a1120;
+  }
   /* The page is public, so the catalogue waits behind a passphrase. */
   body.locked { overflow: hidden; }
   body.locked header, body.locked main { filter: blur(3px); pointer-events: none; user-select: none; }
@@ -739,15 +749,6 @@ $('statusBtn').addEventListener('click', openStatus);
 $('msCancel').addEventListener('click', () => $('dlgStatus').close());
 $('msPublish').addEventListener('click', publishStatus);
 $('cancelSettings').addEventListener('click', () => $('dlgSettings').close());
-
-// The header wraps to two rows on a narrow window; the table headings used a
-// hard-coded 57px offset and slid over the first rows.
-function measureHeader() {
-  const header = document.querySelector('header');
-  if (header) document.documentElement.style.setProperty('--head', `${header.offsetHeight}px`);
-}
-window.addEventListener('resize', measureHeader);
-measureHeader();
 
 $('search').addEventListener('input', render);
 $('all').addEventListener('change', (event) => {
