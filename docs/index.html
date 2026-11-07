@@ -138,10 +138,10 @@
   .alt { background: linear-gradient(180deg, transparent, rgba(13,21,36,.6) 22%, rgba(13,21,36,.6) 78%, transparent); }
 
   /* screens */
-  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+  .screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .screens figure { margin: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); }
   .screens img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-  .screens figure.tall img { aspect-ratio: 9 / 16; object-fit: contain; background: var(--bg); }
+  .screens figure.phone img { object-position: top center; }
   .screens figcaption { font-size: 11.5px; color: var(--muted); padding: 11px 14px; border-top: 1px solid var(--line); }
   @media (max-width: 860px) { .screens { grid-template-columns: 1fr; } }
 
@@ -258,8 +258,9 @@
 
   /* footer */
   footer { border-top: 1px solid var(--line); padding: 40px 0 54px; color: var(--muted); font-size: 12.5px; }
-  .foot { display: flex; gap: 24px; justify-content: space-between; flex-wrap: wrap; }
-  .foot a { color: var(--muted); }
+  .foot { display: flex; gap: 18px 32px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .foot-links { display: flex; gap: 26px; flex-wrap: wrap; }
+  .foot a { color: var(--muted); text-decoration: none; }
   .foot a:hover { color: var(--text); }
   .legal { margin-top: 22px; max-width: 760px; line-height: 1.65; color: #66738f; font-size: 11.5px; }
 </style>
@@ -428,9 +429,9 @@
           <img src="assets/screens/win-player.png" alt="ZENKTX Windows player with the Glass control bar" loading="lazy" />
           <figcaption>Windows x86_64 — Glass player, volume, clock, quality</figcaption>
         </figure>
-        <figure class="tall">
-          <img src="assets/screens/mobile-guide.png" alt="ZENKTX Android mobile guide with two-column channel tiles" loading="lazy" />
-          <figcaption>Android mobile — two-column tiles, tap to pick, double tap to play</figcaption>
+        <figure class="phone">
+          <img src="assets/screens/mobile-guide.png" alt="ZENKTX Android mobile guide with three-column channel tiles" loading="lazy" />
+          <figcaption>Android mobile — three-column tiles, tap to pick, double tap to play</figcaption>
         </figure>
         <figure>
           <img src="assets/screens/tv-guide.png" alt="ZENKTX Android TV guide with category chips and a six-column grid" loading="lazy" />
@@ -616,7 +617,7 @@
           <h3>1.5.0 <span class="tagx">latest</span></h3>
           <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
-            <li><b>The phone guide behaves like the desktop one.</b> A tile is picked with one tap and played with a double tap, the thumbnails are the size of the Windows tiles instead of postage stamps, and the header has a search button that filters the whole catalogue.</li>
+            <li><b>The phone guide behaves like the desktop one.</b> A tile is picked with one tap and played with a double tap, the grid is three across with full-size logos instead of two rows of postage stamps, and the header has a search button that filters the whole catalogue.</li>
             <li><b>The player has a real control bar.</b> The star, the volume wheel, the running time, a quality switch with <i>Auto</i> and a close button — the same row the Windows build has — replacing the bare LIVE badge. Close is the ✕ in the corner, and Esc closes it from a keyboard.</li>
             <li><b>Channels are re-checked every ten minutes.</b> Every launch already pulled a fresh list; a session left open now re-reads the catalogue and the publisher's feed on a timer, so a link that dies while you are watching is replaced instead of failing for ever.</li>
             <li><b>Playlists can be fixed.</b> A source saved with the wrong stream URL or logo is edited in place, and the truncated “menu” rows are gone: no GitHub sync, no hidden-channel list, no logo edits, and no right-click sheet on the tiles.</li>
@@ -659,17 +660,23 @@
             <li><b>The address decides the format.</b> The guide's <code>hls</code> / <code>mpd</code> flag goes stale when a provider swaps a channel between the two, and an <code>.mpd</code> handed to the HLS parser fails before it requests a single segment. The container is read from the URL now.</li>
             <li><b>An expired link says so.</b> 403, 404, 410 and 451 used to read “refused the request (HTTP 410)”; they now explain that the provider rotates addresses and the channel usually comes back.</li>
           </ul>
-        </article><article class="entry">
-        </div>
-        <div>Remote-first live TV for Android TV, Android and Windows.</div>
-      </div>
-      <div style="display:flex; gap:28px; flex-wrap:wrap">
-        <div><a href="#downloads">Downloads</a></div>
-        <div><a href="#install">Install</a></div>
-        <div><a href="#changelog">Changelog</a></div>
-        <div><a data-repo-link href="#">GitHub</a></div>
+        </article>
       </div>
     </div>
+  </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot">
+        <div>Remote-first live TV for Android TV, Android and Windows.</div>
+        <nav class="foot-links">
+          <a href="#downloads">Downloads</a>
+          <a href="#install">Install</a>
+          <a href="#changelog">Changelog</a>
+          <a data-repo-link href="#">GitHub</a>
+        </nav>
+      </div>
     <p class="legal">
       ZENKTX does not host or broadcast any channel. The bundled list contains public
       stream URLs; playback depends on the availability of those sources and on your
