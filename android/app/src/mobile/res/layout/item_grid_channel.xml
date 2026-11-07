@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mobile tile: three across, a 66dp logo inside a 105dp card — the tight
-     thumbnail grid phone users expect, without shrinking the artwork to a dot. -->
+<!-- Mobile tile: three across, an 84dp logo inside a 118dp card — the tight
+     thumbnail grid phone users expect, with the logo big enough to read at a
+     glance instead of shrinking the artwork to a dot. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="105dp"
+    android:layout_height="118dp"
     android:layout_margin="4dp"
     android:background="@drawable/bg_card"
     android:focusable="true"
-    android:paddingStart="8dp"
-    android:paddingTop="9dp"
-    android:paddingEnd="8dp"
-    android:paddingBottom="7dp">
+    android:paddingStart="7dp"
+    android:paddingTop="7dp"
+    android:paddingEnd="7dp"
+    android:paddingBottom="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,8 +21,8 @@
 
         <ImageView
             android:id="@+id/tileLogo"
-            android:layout_width="66dp"
-            android:layout_height="66dp"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
             android:contentDescription="@string/app_name"
             android:visibility="gone" />
 
@@ -29,10 +30,10 @@
             android:id="@+id/tileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_marginTop="3dp"
             android:ellipsize="end"
             android:gravity="center"
-            android:lineSpacingExtra="1dp"
+            android:lineSpacingExtra="0dp"
             android:maxLines="2"
             android:textColor="#C7D2E6"
             android:textSize="10sp" />

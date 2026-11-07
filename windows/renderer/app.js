@@ -590,8 +590,9 @@ function renderGrid() {
       tile.appendChild(noLogo);
     }
 
-    tile.addEventListener('click', () => select(channel));
-    tile.addEventListener('dblclick', () => play(channel));
+    // One click plays. Selecting a channel first and then needing a second click
+    // on Watch is how a working guide came to look broken on the first launch.
+    tile.addEventListener('click', () => play(channel));
 
     $('grid').appendChild(tile);
   });
@@ -692,6 +693,9 @@ function cleanupPlayer() {
 }
 
 function play(channel) {
+  // The detail strip follows the click, so closing the player lands on the
+  // channel that was just watched.
+  select(channel);
   const inGuide = state.visible.some((c) => c.key === channel.key);
   state.queue = inGuide ? state.visible.slice() : [channel];
   state.index = Math.max(0, state.queue.findIndex((c) => c.key === channel.key));

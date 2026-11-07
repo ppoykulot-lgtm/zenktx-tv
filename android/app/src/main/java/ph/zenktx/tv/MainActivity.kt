@@ -140,7 +140,6 @@ class MainActivity : Activity() {
             onOpen = { openPlayer(it) },
             onFocused = { showDetail(it) },
             isFavourite = { library.isFavourite(it) },
-            doubleTapToPlay = resources.getBoolean(R.bool.double_tap_play),
         )
         val columns = resources.getInteger(R.integer.grid_columns)
         binding.grid.layoutManager = GridLayoutManager(this, columns)
@@ -168,9 +167,11 @@ class MainActivity : Activity() {
     // ---- full view --------------------------------------------------------
 
     /**
-     * Edge to edge: the guide runs behind the status and navigation bars and
-     * pads itself by their height instead of leaving two dead strips at the top
-     * and bottom of the screen.
+     * Full view: the guide owns the whole display. The clock strip at the top and
+     * the button strip at the bottom are hidden rather than merely drawn behind,
+     * so the phone shows nothing but the app. Only a display cutout still takes
+     * its notch out of the padding. A swipe from an edge brings the bars back for
+     * a moment, and [onWindowFocusChanged] hides them again.
      */
     private fun applyFullView() {
         if (!resources.getBoolean(R.bool.full_view)) return
@@ -180,21 +181,44 @@ class MainActivity : Activity() {
         window.statusBarColor = Color.TRANSPARENT
         @Suppress("DEPRECATION")
         window.navigationBarColor = Color.TRANSPARENT
-        WindowInsetsControllerCompat(window, binding.root).isAppearanceLightStatusBars = false
+
+        val hideBars = resources.getBoolean(R.bool.hide_system_bars)
+        WindowInsetsControllerCompat(window, binding.root).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+            if (hideBars) {
+                systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                hide(WindowInsetsCompat.Type.systemBars())
+            }
+        }
 
         val baseTop = binding.content.paddingTop
         val baseBottom = binding.content.paddingBottom
         ViewCompat.setOnApplyWindowInsetsListener(binding.content) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val cut = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            // While the bars are hidden their inset is zero, so the guide starts
+            // at the top of the screen instead of below an empty strip.
             view.setPadding(
                 view.paddingLeft,
-                bars.top + baseTop,
+                (if (hideBars) 0 else bars.top) + cut.top + baseTop,
                 view.paddingRight,
-                bars.bottom + baseBottom,
+                (if (hideBars) 0 else bars.bottom) + cut.bottom + baseBottom,
             )
             insets
         }
         binding.content.requestApplyInsets()
+    }
+
+    /** Bars come back after a swipe or a dialog; hide them again on focus. */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus || !::binding.isInitialized) return
+        if (!resources.getBoolean(R.bool.full_view)) return
+        if (!resources.getBoolean(R.bool.hide_system_bars)) return
+        WindowInsetsControllerCompat(window, binding.root)
+            .hide(WindowInsetsCompat.Type.systemBars())
     }
 
     // ---- welcome ----------------------------------------------------------

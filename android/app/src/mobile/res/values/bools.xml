@@ -3,9 +3,11 @@
     <!-- A phone cannot afford five chip rows above the guide. -->
     <bool name="chips_wrap">false</bool>
 
-    <!-- A phone taps to pick and double taps to play, like the desktop build. -->
-    <bool name="double_tap_play">true</bool>
-
     <!-- Draw behind the system bars so the guide uses the whole phone screen. -->
     <bool name="full_view">true</bool>
+
+    <!-- No clock strip at the top and no button strip at the bottom: the guide
+         owns the whole display, and a swipe from an edge brings the bars back
+         for a moment. -->
+    <bool name="hide_system_bars">true</bool>
 </resources>

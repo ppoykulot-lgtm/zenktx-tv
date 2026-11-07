@@ -3,9 +3,9 @@
     <!-- The TV guide has the height to show every category at once. -->
     <bool name="chips_wrap">true</bool>
 
-    <!-- A remote has no double tap: one click opens the channel. -->
-    <bool name="double_tap_play">false</bool>
-
-    <!-- A TV is always fullscreen already. -->
+    <!-- One click opens a channel on every build; nothing waits for a second tap. -->
     <bool name="full_view">false</bool>
+
+    <!-- A TV has no status or navigation bar to hide. -->
+    <bool name="hide_system_bars">false</bool>
 </resources>
