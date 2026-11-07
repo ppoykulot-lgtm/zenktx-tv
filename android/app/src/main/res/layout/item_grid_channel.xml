@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One EPG cell on the TV. The logo is the thing the guide is scanned for, so
      it takes most of the card: a 50dp mark inside a 100dp cell read as a
-     postage stamp from the sofa, so the cell is 128dp and the mark 84dp. The
+     postage stamp from the sofa, so the cell is 120dp and the mark 82dp. The
      phone has its own copy of this file. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="128dp"
+    android:layout_height="120dp"
     android:layout_margin="5dp"
     android:background="@drawable/bg_card"
     android:focusable="true"
@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/tileLogo"
-            android:layout_width="84dp"
-            android:layout_height="84dp"
+            android:layout_width="82dp"
+            android:layout_height="82dp"
             android:contentDescription="@string/app_name"
             android:scaleType="fitCenter"
             android:visibility="gone" />

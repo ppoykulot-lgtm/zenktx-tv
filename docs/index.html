@@ -70,7 +70,13 @@
   }
   .nav-discord:hover { background: rgba(88,101,242,.26); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(88,101,242,.28); }
   .nav-discord svg { width: 16px; height: 16px; flex: none; }
-  @media (max-width: 860px) { .nav-links { display: none; } }
+  @media (max-width: 860px) {
+    .nav-links { display: none; }
+    /* With the links hidden nothing pushed the pair to the right edge, so
+       Discord and Get the app sat against the brand with a gap down the
+       side of the page. */
+    .nav-discord { margin-left: auto; }
+  }
   @media (max-width: 620px) {
     .nav { gap: 12px; height: 62px; }
     .nav-discord { padding: 9px 11px; }
@@ -664,7 +670,16 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.4 <span class="tagx">latest</span></h3>
+        <h3>1.5.5 <span class="tagx">latest</span></h3>
+        <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
+        <ul>
+          <li><b>Room above the first row.</b> The mint outline on a highlighted tile came within a hair of the search bar, because the grid sat 10dp under it and the tile lifts into that gap on focus. The gap is 18dp and the grid keeps 14dp of its own, so the ring now has air on every side; the cell is 120dp to keep two full rows on screen.</li>
+          <li><b>Discord and the download button sit at the edge on a phone.</b> With the nav links hidden under 860px nothing was pushing them right, so they sat against the brand with a wide empty strip down the side of the page.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.4</h3>
         <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
         <ul>
           <li><b>The categories are one row again, without a label.</b> Wrapped, the band grew a second line that sat flush under the first with no gap and pushed the guide down the screen. It is a single line that slides sideways now, with the chip at the edge fading out instead of being sliced in half, and the <i>BROWSE</i> caption is gone.</li>
@@ -708,17 +723,6 @@
         </ul>
       </article>
 
-      <article class="entry">
-        <h3>1.5.0</h3>
-        <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-        <li><b>One click starts a channel on every build.</b> On Windows a tile used to select first and wait for a double click, which read as a guide that would not play; a single click now opens the player, and the phone follows the same rule. The phone grid is three across with larger logos instead of two rows of postage stamps, it runs without a status or navigation bar, and the header has a search button that filters the whole catalogue.</li>
-        <li><b>The player has a real control bar.</b> The star, the volume wheel, the running time, a quality switch with <i>Auto</i> and a close button — the same row the Windows build has — replacing the bare LIVE badge. Close is the ✕ in the corner, and Esc closes it from a keyboard.</li>
-        <li><b>Channels are re-checked every ten minutes.</b> Every launch already pulled a fresh list; a session left open now re-reads the catalogue and the publisher's feed on a timer, so a link that dies while you are watching is replaced instead of failing for ever.</li>
-        <li><b>Playlists can be fixed.</b> A source saved with the wrong stream URL or logo is edited in place, and the truncated “menu” rows are gone: no GitHub sync, no hidden-channel list, no logo edits, and no right-click sheet on the tiles.</li>
-        <li><b>Logos appear on their own.</b> The initials that stood in for every channel while its logo loaded are gone, so a guide of 450 tiles no longer paints and repaints itself.</li>
-        </ul>
-      </article>
       </section>
   </main>
 
@@ -759,8 +763,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.4", mobile: "1.5.4", win: "1.5.1" };
-  const TAGS = { tv: "v1.5.4", mobile: "v1.5.4", win: "v1.5.1" };
+  const VERSIONS = { tv: "1.5.5", mobile: "1.5.5", win: "1.5.1" };
+  const TAGS = { tv: "v1.5.5", mobile: "v1.5.5", win: "v1.5.1" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

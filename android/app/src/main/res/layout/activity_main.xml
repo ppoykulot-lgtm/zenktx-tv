@@ -160,19 +160,20 @@
             android:textSize="9sp"
             android:visibility="gone" />
 
-        <!-- EPG grid. The top padding is the room a focused tile needs to lift
-             into: clipToPadding keeps it inside the grid instead of letting it
-             draw over the categories. -->
+        <!-- EPG grid. The gap above and the top padding are the room a focused
+             tile needs to lift into: at 10dp the mint ring on the first row came
+             within a hair of the search bar. clipToPadding keeps the lift inside
+             the grid instead of letting it draw over the categories. -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/grid"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="18dp"
             android:layout_weight="1"
             android:clipChildren="true"
             android:clipToPadding="true"
             android:paddingStart="4dp"
-            android:paddingTop="10dp"
+            android:paddingTop="14dp"
             android:paddingEnd="4dp"
             android:paddingBottom="4dp"
             android:scrollbars="none" />
