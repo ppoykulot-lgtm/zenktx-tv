@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The TV guide has the height to show every category at once. -->
-    <bool name="chips_wrap">true</bool>
 
     <!-- The TV player is driven by a remote: the picture zaps on ▲▼◀▶ and
          BACK closes the bar before it closes the player. -->

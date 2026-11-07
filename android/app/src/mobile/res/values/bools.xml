@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- A phone cannot afford five chip rows above the guide. -->
-    <bool name="chips_wrap">false</bool>
 
     <!-- Draw behind the system bars so the guide uses the whole phone screen. -->
     <bool name="full_view">true</bool>

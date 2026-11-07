@@ -98,33 +98,43 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Categories: a labelled band, wrapped so no category hides off-screen -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:letterSpacing="0.22"
-            android:text="@string/browse_label"
-            android:textColor="@color/muted"
-            android:textSize="8sp"
-            android:textStyle="bold" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/chips"
+        <!-- Categories: one row, sliding sideways, so the band never wraps into
+             a second row that pushes the guide down. The strip on the right
+             fades the chip that runs past the edge instead of cutting it. -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:clipChildren="true"
-            android:clipToPadding="true"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:scrollbars="none" />
+            android:layout_marginTop="12dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:scrollbars="none" />
+
+            <!-- A fixed height, not match_parent: a fill-height child would
+                 stretch this wrap_content frame to the whole screen and push
+                 the search bar and the grid below it. -->
+            <View
+                android:layout_width="56dp"
+                android:layout_height="44dp"
+                android:layout_gravity="end|center_vertical"
+                android:background="@drawable/bg_chips_fade"
+                android:clickable="false"
+                android:focusable="false"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
 
         <!-- Search sits under the categories and says what it is -->
         <TextView
             android:id="@+id/searchButton"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="14dp"
             android:background="@drawable/bg_search_field"
             android:drawableStart="@drawable/ic_search"
