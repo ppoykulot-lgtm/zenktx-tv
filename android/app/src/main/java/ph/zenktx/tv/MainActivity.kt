@@ -12,8 +12,8 @@ import android.os.SystemClock
 import android.view.View
 import android.view.Window
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -60,8 +60,20 @@ class MainActivity : Activity() {
         private val PINOY = "Pinoy"
         private val ALL = "All"
 
-        /** Long enough to read the slogan and the credit under it. */
-        private const val WELCOME_MIN_MS = 10_000L
+        /**
+         * Just long enough that the mark does not flash and vanish. The guide
+         * used to be held back a full ten seconds after the catalogue had
+         * already arrived, which read as a hang rather than a splash.
+         */
+        private const val WELCOME_MIN_MS = 1_200L
+
+        /**
+         * Ceiling as well as a floor. The catalogue is a network read, and on a
+         * slow box it took ten seconds or more: the splash sat there saying
+         * "Loading channels…" long after the app looked broken. The guide comes
+         * up on this timer whatever the read is doing, then fills itself in.
+         */
+        private const val WELCOME_MAX_MS = 2_500L
 
         /** A channel that dies while the guide is open is replaced this often. */
         private const val REFRESH_EVERY_MS = 10 * 60 * 1000L
@@ -79,21 +91,15 @@ class MainActivity : Activity() {
     private var visible: List<Channel> = emptyList()
     private var categories: List<String> = listOf(ALL, FAVOURITES, PINOY)
     private var filter: String = ALL
-    private var detail: Channel? = null
     private var loadError: String? = null
     private var query: String = ""
 
     private lateinit var chips: CategoryChipAdapter
     private lateinit var grid: ChannelGridAdapter
 
-    // The detail strip and the header search icon belong to the TV guide. The
-    // phone dropped both — it searches in a field under the categories and a tap
-    // plays — so every view here is looked up and may be null.
-    private var detailNameView: TextView? = null
-    private var detailTagView: TextView? = null
-    private var detailMetaView: TextView? = null
-    private var detailLogoView: ImageView? = null
-    private var detailFavView: TextView? = null
+    // Neither build shows a detail strip: the TV replaced it with a D-pad
+    // legend, the phone with a search bar. The search field itself only exists
+    // on the phone, so every view here is looked up and may be null.
     private var searchField: EditText? = null
     private var searchClearView: View? = null
 
@@ -135,14 +141,19 @@ class MainActivity : Activity() {
         github = GitHubStore(this)
         settings = AppSettings(this)
 
+        val chipsWrap = resources.getBoolean(R.bool.chips_wrap)
         chips = CategoryChipAdapter(
             onSelected = { onChipSelected(it) },
-            onFocused = { pos -> binding.chips.smoothScrollToPosition(pos) },
+            // The TV lays every category out on its own rows, so scrolling to a
+            // focused chip only shoved the band around under the D-pad.
+            onFocused = { pos ->
+                if (!chipsWrap) binding.chips.smoothScrollToPosition(pos)
+            },
         )
         // The TV guide wraps every category onto its own rows; a phone scrolls a
         // single row instead, because five chip rows ate half the screen.
         binding.chips.layoutManager =
-            if (resources.getBoolean(R.bool.chips_wrap)) {
+            if (chipsWrap) {
                 FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
             } else {
                 LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -150,9 +161,9 @@ class MainActivity : Activity() {
         binding.chips.adapter = chips
 
         grid = ChannelGridAdapter(
-            onSelect = { showDetail(it) },
+            onSelect = { },
             onOpen = { openPlayer(it) },
-            onFocused = { showDetail(it) },
+            onFocused = { },
             onLongPress = { toggleFavourite(it) },
             isFavourite = { library.isFavourite(it) },
         )
@@ -223,6 +234,14 @@ class MainActivity : Activity() {
     /** Bars come back after a swipe or a dialog; hide them again on focus. */
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        // Android hands the first focus to whatever focusable it meets first,
+        // which is the MENU pill in the header. The guide is the screen, so the
+        // grid takes it back as soon as the window settles.
+        if (hasFocus && ::binding.isInitialized &&
+            binding.welcomePanel.root.visibility != View.VISIBLE
+        ) {
+            focusFirstTile()
+        }
         if (!hasFocus || !::binding.isInitialized) return
         if (!resources.getBoolean(R.bool.full_view)) return
         if (!resources.getBoolean(R.bool.hide_system_bars)) return
@@ -248,6 +267,9 @@ class MainActivity : Activity() {
                 repeatMode = ObjectAnimator.REVERSE
                 start()
             }
+        // A ceiling as well as a floor: a slow catalogue read used to keep this
+        // screen up for ten seconds or more, which read as a hang.
+        binding.root.postDelayed({ hideWelcome() }, WELCOME_MAX_MS)
     }
 
     private fun hideWelcome() {
@@ -262,6 +284,9 @@ class MainActivity : Activity() {
             panel.animate().alpha(0f).setDuration(280).withEndAction {
                 panel.visibility = View.GONE
                 panel.alpha = 1f
+                // The guide was filled behind the splash, so the D-pad had no
+                // tile to sit on: the first press of OK did nothing at all.
+                focusFirstTile()
             }.start()
         }, remaining.coerceAtLeast(0L))
     }
@@ -290,6 +315,23 @@ class MainActivity : Activity() {
         }
 
         scope.launch {
+            // Paint the list that ships inside the APK before touching the
+            // network. The read below takes seconds on a slow box, and a guide
+            // that says "0 channels" for that long looks broken.
+            if (all.isEmpty()) {
+                val quick = withContext(Dispatchers.IO) {
+                    runCatching { ChannelRepository.bundled(this@MainActivity) }
+                        .getOrDefault(emptyList())
+                }
+                if (isFinishing) return@launch
+                if (quick.isNotEmpty()) {
+                    all = quick
+                    categories = buildCategories(all)
+                    applyFilter(if (filter in categories) filter else ALL)
+                    if (!silent) focusFirstTile()
+                }
+            }
+
             val stopped = withContext(Dispatchers.IO) {
                 runCatching { ProjectStatus.current(this@MainActivity) }.getOrNull()
             }
@@ -368,7 +410,6 @@ class MainActivity : Activity() {
         } else {
             "\u201c$text\u201d  \u00b7  ${visible.size}"
         }
-        showDetail(visible.firstOrNull())
     }
 
     // ---- filtering --------------------------------------------------------
@@ -408,40 +449,33 @@ class MainActivity : Activity() {
         } else {
             binding.status.visibility = View.GONE
         }
-        showDetail(visible.firstOrNull())
     }
-
-    /** Explicitly focus the first tile -- requestFocus() on a RecyclerView is not reliable. */
-    private fun focusFirstTile() {
-        binding.grid.post {
-            val manager = binding.grid.layoutManager as? LinearLayoutManager
-            val tile = manager?.findViewByPosition(0)
-            if (tile != null) tile.requestFocus() else binding.grid.requestFocus()
-        }
-    }
-
-    // ---- detail strip -----------------------------------------------------
 
     /**
-     * Binds whatever this build's guide actually has. The TV keeps the detail
-     * strip under the grid and the search icon in the header; the phone has
-     * neither, so every lookup is optional instead of assumed.
+     * Explicitly focus the first tile -- requestFocus() on a RecyclerView is not
+     * reliable. A tile that has not been laid out yet refuses focus and the
+     * header's MENU pill picks it up instead, so this retries a few frames
+     * before it settles for the grid itself.
+     */
+    private fun focusFirstTile(attempt: Int = 0) {
+        binding.grid.postDelayed({
+            if (isFinishing) return@postDelayed
+            val manager = binding.grid.layoutManager as? LinearLayoutManager
+            val tile = manager?.findViewByPosition(0)
+                ?: binding.grid.findViewHolderForAdapterPosition(0)?.itemView
+            if (tile != null && tile.requestFocus()) return@postDelayed
+            if (attempt < 5) focusFirstTile(attempt + 1) else binding.grid.requestFocus()
+        }, if (attempt == 0) 0L else 60L)
+    }
+
+    // ---- search & guide bar ------------------------------------------------
+
+    /**
+     * Binds whatever this build's guide actually has. The TV has a search bar
+     * under the categories; the phone has a field that filters as it types. The
+     * other is absent, so every lookup is optional instead of assumed.
      */
     private fun bindGuideViews() {
-        detailNameView = optionalView("detailName")
-        detailTagView = optionalView("detailTag")
-        detailMetaView = optionalView("detailMeta")
-        detailLogoView = optionalView("detailLogo")
-        detailFavView = optionalView("detailFav")
-
-        optionalView<View>("detailWatch")?.let { view ->
-            Ui.attachFocusEffect(view)
-            view.setOnClickListener { detail?.let { openPlayer(it) } }
-        }
-        detailFavView?.let { view ->
-            Ui.attachFocusEffect(view, scale = 1.04f)
-            view.setOnClickListener { detail?.let { toggleFavourite(it) } }
-        }
         optionalView<View>("searchButton")?.let { view ->
             Ui.attachFocusEffect(view, scale = 1.04f)
             view.setOnClickListener { showSearch() }
@@ -472,36 +506,18 @@ class MainActivity : Activity() {
         return if (id == 0) null else findViewById(id) as T?
     }
 
-    private fun showDetail(channel: Channel?) {
-        if (channel == null) {
-            detail = null
-            detailNameView?.text = ""
-            detailTagView?.text = ""
-            detailMetaView?.text = ""
-            detailLogoView?.setImageDrawable(null)
-            detailLogoView?.visibility = View.GONE
-            detailFavView?.text = getString(R.string.favourite_off)
-            return
-        }
-        detail = channel
-        detailNameView?.text = channel.name
-        detailTagView?.text = channel.category.uppercase()
-        detailMetaView?.text = listOf(
-            channel.quality,
-            channel.streamType.uppercase(),
-            if (channel.isFilipino) "PH" else "",
-        ).filter { it.isNotBlank() }.joinToString("  \u00b7  ")
-        detailFavView?.text = getString(
-            if (library.isFavourite(channel.key)) R.string.favourite_on else R.string.favourite_off
-        )
-        detailLogoView?.let { Logos.apply(it, channel.logo) }
-    }
-
     private fun toggleFavourite(channel: Channel) {
-        library.toggleFavourite(channel.key)
-        if (detail?.key == channel.key) showDetail(channel)
+        val saved = library.toggleFavourite(channel.key)
         grid.refreshBadges()
         if (filter == FAVOURITES && query.isBlank()) applyFilter(FAVOURITES)
+        Toast.makeText(
+            this,
+            getString(
+                if (saved) R.string.action_fav_saved else R.string.action_fav_removed,
+                channel.name,
+            ),
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     // ---- player -----------------------------------------------------------
@@ -541,7 +557,6 @@ class MainActivity : Activity() {
         super.onResume()
         if (!::binding.isInitialized) return
         clockHandler.post(clockTick)
-        showDetail(detail)
         grid.refreshBadges()
 
         // Playlist sources or GitHub pushes changed: reload in the background.

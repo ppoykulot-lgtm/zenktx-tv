@@ -1,0 +1,373 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- The picture. Media3's own controller stays off: the bar below is ours,
+         so it can hold the favourite star, the volume wheel, the clock and the
+         quality switch the desktop build has. -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:resize_mode="fit"
+        app:show_buffering="never"
+        app:use_controller="false" />
+
+    <!-- Channel chip, top-left -->
+    <LinearLayout
+        android:id="@+id/channelChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_player_chip"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingTop="7dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="7dp">
+
+        <ImageView
+            android:id="@+id/channelLogo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:contentDescription="@string/app_name"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/channelName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/channelMeta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:letterSpacing="0.1"
+                android:textColor="@color/mint"
+                android:textSize="7sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Favourite and close, top-right -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="18dp"
+        android:orientation="horizontal">
+
+        <!-- Sized from values/dimens.xml, which the phone flavour shrinks: a
+             46dp star over the picture is a button built for a TV, not a thumb. -->
+        <TextView
+            android:id="@+id/btnFav"
+            android:layout_width="@dimen/player_corner_size"
+            android:layout_height="@dimen/player_corner_size"
+            android:background="@drawable/bg_player_chip"
+            android:contentDescription="@string/favourites"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="@string/favourite_off"
+            android:textColor="@color/text"
+            android:textSize="@dimen/player_corner_glyph" />
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="@dimen/player_corner_size"
+            android:layout_height="@dimen/player_corner_size"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_player_chip"
+            android:contentDescription="@string/player_close"
+            android:focusable="true"
+            android:padding="@dimen/player_corner_pad"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_close" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/buffering"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/mint"
+        android:visibility="gone" />
+
+    <!-- Control bar. Tapping the picture hides and shows it. -->
+    <LinearLayout
+        android:id="@+id/controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_player_bar"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="--:--"
+                android:textColor="@color/text"
+                android:textSize="11sp" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:max="1000"
+                android:progressBackgroundTint="#33FFFFFF"
+                android:progressTint="@color/mint"
+                android:thumbTint="@color/mint" />
+
+            <TextView
+                android:id="@+id/pTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:text="LIVE"
+                android:textColor="@color/muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_player_play"
+                android:contentDescription="@string/watch_now"
+                android:focusable="true"
+                android:padding="11dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_pause" />
+
+            <TextView
+                android:id="@+id/btnPrevChannel"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_player_chip"
+                android:contentDescription="Previous channel"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="&#9650;"
+                android:textColor="@color/text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/btnNextChannel"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_player_chip"
+                android:contentDescription="Next channel"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="&#9660;"
+                android:textColor="@color/text"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/liveBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_player_chip"
+                android:letterSpacing="0.18"
+                android:paddingStart="10dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="4dp"
+                android:text="LIVE"
+                android:textColor="@color/mint"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btnMute"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/player_volume"
+                android:focusable="true"
+                android:padding="7dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_volume" />
+
+            <SeekBar
+                android:id="@+id/volBar"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="100"
+                android:progressBackgroundTint="#33FFFFFF"
+                android:progressTint="@color/mint"
+                android:thumbTint="@color/mint" />
+
+            <TextView
+                android:id="@+id/btnQuality"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_player_chip"
+                android:focusable="true"
+                android:gravity="center"
+                android:letterSpacing="0.08"
+                android:minWidth="62dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/player_quality_auto"
+                android:textColor="@color/mint"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Failure panel: always explains what happened and what to do next -->
+    <LinearLayout
+        android:id="@+id/errorPanel"
+        android:layout_width="520dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_dialog"
+        android:orientation="vertical"
+        android:paddingStart="28dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="28dp"
+        android:paddingBottom="22dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.18"
+            android:text="@string/player_error_label"
+            android:textColor="@color/mint"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/errorTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/errorBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="3dp"
+            android:textColor="@color/muted"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/errorCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_tag"
+            android:letterSpacing="0.06"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:textColor="#8FE7D6"
+            android:textSize="8sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnRetry"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_btn_primary"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="@string/player_retry"
+                android:textColor="@color/btn_primary_text"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnNext"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_btn_ghost"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="@string/player_next"
+                android:textColor="@color/text"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_btn_ghost"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="@string/player_back"
+                android:textColor="@color/text"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

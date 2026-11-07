@@ -1,12 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The TV player. The picture owns the screen; the two corner buttons (star and
+     ✕) and the CH ▲ / CH ▼ pair are gone, because on a remote the channel is
+     changed with ▲ / ▼ on the picture itself and the way out is BACK. What is
+     left is one bar that only appears when asked for, plus a legend that says
+     which key does what. The phone keeps its own copy of this file. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- The picture. Media3's own controller stays off: the bar below is ours,
-         so it can hold the favourite star, the volume wheel, the clock and the
-         quality switch the desktop build has. -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
@@ -15,33 +18,35 @@
         app:show_buffering="never"
         app:use_controller="false" />
 
-    <!-- Channel chip, top-left -->
+    <!-- Channel banner, top-left: what is on, and where it sits in the list.
+         Every channel hop raises it for a few seconds. -->
     <LinearLayout
         android:id="@+id/channelChip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|top"
-        android:layout_marginStart="18dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="22dp"
         android:background="@drawable/bg_player_chip"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="10dp"
-        android:paddingTop="7dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="7dp">
+        android:paddingStart="12dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="9dp">
 
         <ImageView
             android:id="@+id/channelLogo"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:contentDescription="@string/app_name"
+            android:scaleType="fitCenter"
             android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
             <TextView
@@ -49,55 +54,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text"
-                android:textSize="14sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/channelMeta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="4dp"
                 android:letterSpacing="0.1"
                 android:textColor="@color/mint"
-                android:textSize="7sp"
+                android:textSize="8sp"
                 android:textStyle="bold" />
         </LinearLayout>
-    </LinearLayout>
-
-    <!-- Favourite and close, top-right -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="18dp"
-        android:orientation="horizontal">
-
-        <!-- Sized from values/dimens.xml, which the phone flavour shrinks: a
-             46dp star over the picture is a button built for a TV, not a thumb. -->
-        <TextView
-            android:id="@+id/btnFav"
-            android:layout_width="@dimen/player_corner_size"
-            android:layout_height="@dimen/player_corner_size"
-            android:background="@drawable/bg_player_chip"
-            android:contentDescription="@string/favourites"
-            android:focusable="true"
-            android:gravity="center"
-            android:text="@string/favourite_off"
-            android:textColor="@color/text"
-            android:textSize="@dimen/player_corner_glyph" />
-
-        <ImageButton
-            android:id="@+id/btnClose"
-            android:layout_width="@dimen/player_corner_size"
-            android:layout_height="@dimen/player_corner_size"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_player_chip"
-            android:contentDescription="@string/player_close"
-            android:focusable="true"
-            android:padding="@dimen/player_corner_pad"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_close" />
     </LinearLayout>
 
     <ProgressBar
@@ -108,22 +77,24 @@
         android:indeterminateTint="@color/mint"
         android:visibility="gone" />
 
-    <!-- Control bar. Tapping the picture hides and shows it. -->
+    <!-- One bar, one row of controls and one row of key hints. OK on the picture
+         raises it; ▲ / ▼ on the picture changes channel without it. -->
     <LinearLayout
         android:id="@+id/controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/bg_player_bar"
         android:orientation="vertical"
-        android:paddingStart="14dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="14dp"
-        android:paddingBottom="10dp">
+        android:paddingStart="20dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="12dp">
 
+        <!-- Live position -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -137,14 +108,14 @@
                 android:fontFamily="monospace"
                 android:text="--:--"
                 android:textColor="@color/text"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
 
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
                 android:layout_weight="1"
                 android:max="1000"
                 android:progressBackgroundTint="#33FFFFFF"
@@ -158,52 +129,26 @@
                 android:fontFamily="monospace"
                 android:text="LIVE"
                 android:textColor="@color/muted"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/btnPlay"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
                 android:background="@drawable/bg_player_play"
                 android:contentDescription="@string/watch_now"
                 android:focusable="true"
-                android:padding="11dp"
+                android:padding="12dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_pause" />
-
-            <TextView
-                android:id="@+id/btnPrevChannel"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_player_chip"
-                android:contentDescription="Previous channel"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="&#9650;"
-                android:textColor="@color/text"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/btnNextChannel"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_player_chip"
-                android:contentDescription="Next channel"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="&#9660;"
-                android:textColor="@color/text"
-                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/liveBadge"
@@ -228,18 +173,18 @@
 
             <ImageButton
                 android:id="@+id/btnMute"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/player_volume"
                 android:focusable="true"
-                android:padding="7dp"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_volume" />
 
             <SeekBar
                 android:id="@+id/volBar"
-                android:layout_width="110dp"
+                android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:max="100"
                 android:progress="100"
@@ -250,26 +195,100 @@
             <TextView
                 android:id="@+id/btnQuality"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginStart="12dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="14dp"
                 android:background="@drawable/bg_player_chip"
                 android:focusable="true"
                 android:gravity="center"
                 android:letterSpacing="0.08"
-                android:minWidth="62dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
+                android:minWidth="70dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:text="@string/player_quality_auto"
                 android:textColor="@color/mint"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Key legend, so the remote never needs a manual -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_keycap"
+                android:gravity="center"
+                android:minWidth="26dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:text="@string/key_arrows_updown"
+                android:textColor="@color/text"
                 android:textSize="9sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="@string/player_hint_zap_label"
+                android:textColor="@color/muted"
+                android:textSize="9sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:layout_marginStart="18dp"
+                android:background="@drawable/bg_keycap"
+                android:gravity="center"
+                android:minWidth="26dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:text="@string/key_ok"
+                android:textColor="@color/text"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="@string/player_hint_ok_label"
+                android:textColor="@color/muted"
+                android:textSize="9sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:layout_marginStart="18dp"
+                android:background="@drawable/bg_keycap"
+                android:gravity="center"
+                android:minWidth="26dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:text="@string/key_back"
+                android:textColor="@color/text"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="@string/player_hint_exit_label"
+                android:textColor="@color/muted"
+                android:textSize="9sp" />
         </LinearLayout>
     </LinearLayout>
 
     <!-- Failure panel: always explains what happened and what to do next -->
     <LinearLayout
         android:id="@+id/errorPanel"
-        android:layout_width="520dp"
+        android:layout_width="560dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/bg_dialog"
@@ -332,7 +351,7 @@
             <TextView
                 android:id="@+id/btnRetry"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_btn_primary"
                 android:focusable="true"
@@ -345,7 +364,7 @@
             <TextView
                 android:id="@+id/btnNext"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_btn_ghost"
@@ -358,13 +377,13 @@
             <TextView
                 android:id="@+id/btnBack"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:layout_marginStart="10dp"
                 android:background="@drawable/bg_btn_ghost"
                 android:focusable="true"
                 android:gravity="center"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:text="@string/player_back"
                 android:textColor="@color/text"
                 android:textSize="11sp" />

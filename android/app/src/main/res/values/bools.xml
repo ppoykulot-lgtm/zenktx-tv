@@ -3,6 +3,10 @@
     <!-- The TV guide has the height to show every category at once. -->
     <bool name="chips_wrap">true</bool>
 
+    <!-- The TV player is driven by a remote: the picture zaps on ▲▼◀▶ and
+         BACK closes the bar before it closes the player. -->
+    <bool name="tv_dpad">true</bool>
+
     <!-- One click opens a channel on every build; nothing waits for a second tap. -->
     <bool name="full_view">false</bool>
 

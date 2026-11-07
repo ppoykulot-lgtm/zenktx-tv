@@ -137,4 +137,22 @@
     <string name="playlist_enable">Enable</string>
     <string name="playlist_disable">Disable</string>
     <string name="playlist_remove">Remove</string>
+    <string name="browse_label">BROWSE</string>
+    <string name="search_channel">Search channel</string>
+    <string name="key_arrows">◀ ▶</string>
+    <string name="key_move">Move</string>
+    <string name="key_ok">OK</string>
+    <string name="key_watch">Watch</string>
+    <string name="key_hold">HOLD</string>
+    <string name="key_favourite">Favourite</string>
+    <string name="key_menu">MENU</string>
+    <string name="key_settings">Settings</string>
+    <string name="player_hint_zap">▲ ▼ Channel</string>
+    <string name="player_hint_ok">OK Controls</string>
+    <string name="player_hint_exit">BACK Exit</string>
+    <string name="key_arrows_updown">▲ ▼</string>
+    <string name="key_back">BACK</string>
+    <string name="player_hint_zap_label">Channel</string>
+    <string name="player_hint_ok_label">Controls</string>
+    <string name="player_hint_exit_label">Exit</string>
 </resources>

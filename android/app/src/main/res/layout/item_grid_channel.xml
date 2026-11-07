@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- One EPG cell on the TV. The logo is the thing the guide is scanned for, so
+     it takes most of the card: 84dp tiles drew a 42dp mark on a 65" screen.
+     The phone has its own copy of this file with a taller card. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="84dp"
+    android:layout_height="100dp"
     android:layout_margin="5dp"
     android:background="@drawable/bg_card"
     android:focusable="true"
+    android:focusableInTouchMode="true"
     android:paddingStart="8dp"
-    android:paddingTop="8dp"
+    android:paddingTop="10dp"
     android:paddingEnd="8dp"
-    android:paddingBottom="7dp">
+    android:paddingBottom="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,21 +22,23 @@
 
         <ImageView
             android:id="@+id/tileLogo"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:contentDescription="@string/app_name"
+            android:scaleType="fitCenter"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/tileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:gravity="center"
+            android:includeFontPadding="false"
             android:maxLines="2"
             android:textColor="#C7D2E6"
-            android:textSize="8sp" />
+            android:textSize="10sp" />
     </LinearLayout>
 
     <TextView
@@ -41,6 +47,6 @@
         android:layout_height="wrap_content"
         android:text="★"
         android:textColor="@color/mint"
-        android:textSize="9sp"
+        android:textSize="11sp"
         android:visibility="gone" />
 </FrameLayout>

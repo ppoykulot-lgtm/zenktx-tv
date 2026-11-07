@@ -5,7 +5,9 @@ import android.view.View
 import android.widget.ImageView
 import coil.ImageLoader
 import coil.decode.SvgDecoder
+import coil.disk.DiskCache
 import coil.load
+import coil.memory.MemoryCache
 import okhttp3.OkHttpClient
 import ph.zenktx.tv.net.Http
 import java.util.concurrent.TimeUnit
@@ -15,31 +17,34 @@ import java.util.concurrent.TimeUnit
  * drawing a monogram meant every tile painted initials first and then swapped in
  * the real logo when it arrived, which is what made the guide feel slow. A tile
  * without a working logo simply stays empty, like an EPG cell with no artwork.
+ *
+ * The artwork used to come and go between launches. Two things caused it: the
+ * images were only cached for as long as the host's headers said (GitHub Pages
+ * says ten minutes, so every launch fetched 400 files again), and a request that
+ * timed out during that burst was dropped for good until the tile was rebound.
+ * The cache now keeps a logo for good and a failure is retried twice.
  */
 object Logos {
 
     @Volatile
     private var loader: ImageLoader? = null
 
-    /**
-     * One loader for the whole app, handed to every request explicitly. Going
-     * through the global singleton left the tiles stuck: the requests were
-     * enqueued on a loader that had already been replaced, so neither the
-     * success nor the error callback ever ran.
-     *
-     * The decoder handles the catalogue's SVG logos, and the client sends the
-     * same caller the catalogue fetch uses -- a couple of these hosts sit
-     * behind Cloudflare and answer a bare OkHttp request with nothing at all.
-     */
+    /** 96 MB holds the whole catalogue's artwork, twice over. */
+    private const val CACHE_BYTES = 96L * 1024 * 1024
+
+    /** One unchanged logo should never cost three requests. */
+    private const val MAX_ATTEMPTS = 3
+
     private fun loader(context: Context): ImageLoader =
         loader ?: synchronized(this) {
             loader ?: ImageLoader.Builder(context.applicationContext)
                 .components { add(SvgDecoder.Factory()) }
                 .okHttpClient {
                     OkHttpClient.Builder()
-                        .connectTimeout(10, TimeUnit.SECONDS)
-                        .readTimeout(10, TimeUnit.SECONDS)
-                        .callTimeout(20, TimeUnit.SECONDS)
+                        .connectTimeout(12, TimeUnit.SECONDS)
+                        .readTimeout(15, TimeUnit.SECONDS)
+                        .callTimeout(30, TimeUnit.SECONDS)
+                        .retryOnConnectionFailure(true)
                         .addInterceptor { chain ->
                             chain.proceed(
                                 chain.request().newBuilder()
@@ -51,6 +56,20 @@ object Logos {
                         }
                         .build()
                 }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(context.applicationContext.cacheDir.resolve("logos"))
+                        .maxSizeBytes(CACHE_BYTES)
+                        .build()
+                }
+                .memoryCache {
+                    MemoryCache.Builder(context.applicationContext)
+                        .maxSizePercent(0.25)
+                        .build()
+                }
+                // The host's ten-minute Cache-Control is what emptied the guide
+                // between launches; the files themselves never change.
+                .respectCacheHeaders(false)
                 .crossfade(true)
                 .build()
                 .also { loader = it }
@@ -60,18 +79,36 @@ object Logos {
     fun apply(logo: ImageView, url: String) {
         val address = url.trim()
         if (!address.startsWith("http")) {
+            logo.tag = null
             logo.setImageDrawable(null)
             logo.visibility = View.GONE
             return
         }
 
+        logo.tag = address
         logo.visibility = View.VISIBLE
+        load(logo, address, 1)
+    }
+
+    private fun load(logo: ImageView, address: String, attempt: Int) {
         logo.load(address, loader(logo.context)) {
             listener(
-                onSuccess = { _, _ -> logo.visibility = View.VISIBLE },
+                onSuccess = { _, _ ->
+                    if (logo.tag == address) logo.visibility = View.VISIBLE
+                },
                 onError = { _, _ ->
-                    logo.setImageDrawable(null)
-                    logo.visibility = View.GONE
+                    // A tile scrolled away owns a different address by now, and
+                    // retrying for it would land the wrong artwork on it.
+                    if (logo.tag != address) return@listener
+                    if (attempt < MAX_ATTEMPTS) {
+                        logo.postDelayed(
+                            { if (logo.tag == address) load(logo, address, attempt + 1) },
+                            350L * attempt,
+                        )
+                    } else {
+                        logo.setImageDrawable(null)
+                        logo.visibility = View.GONE
+                    }
                 },
             )
         }

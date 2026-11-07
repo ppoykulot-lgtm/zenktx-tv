@@ -10,4 +10,6 @@
          owns the whole display, and a swipe from an edge brings the bars back
          for a moment. -->
     <bool name="hide_system_bars">true</bool>
+    <!-- A phone taps its player controls; nothing there reacts to arrow keys. -->
+    <bool name="tv_dpad">false</bool>
 </resources>
