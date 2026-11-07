@@ -1,7 +1,7 @@
 {
   "name": "zenktx-tv",
   "productName": "ZENKTX TV Stream",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Remote-first live TV player for Android TV, Android and Windows",
   "main": "main.js",
   "author": {
