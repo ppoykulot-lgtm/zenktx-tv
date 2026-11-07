@@ -20,7 +20,10 @@ object ChannelRepository {
     // so the bundled copy alone goes stale within hours of a release.
     private const val LIVE_FEED =
         "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json"
-    private const val LIVE_PREFS = "zenktx_live"
+    // v2: the cached map now carries tags, which is how a game row named
+    // "8:00am Wizards vs Hawks" is recognised as NBA. A map cached by an older
+    // build has no tags and would keep hiding every game until it expired.
+    private const val LIVE_PREFS = "zenktx_live_v2"
     private const val KEY_LIVE_MAP = "map"
     private const val KEY_LIVE_AT = "at"
     // Zero: every launch asks the feed for its current addresses. These links
@@ -299,12 +302,16 @@ object ChannelRepository {
      * next morning, so the catalogue can never list today's game. Anything the
      * feed calls NBA and the guide does not already hold is added here, in its
      * own category, on every refresh.
+     *
+     * A game row is named "8:00am Wizards vs Hawks", so the name alone never says
+     * NBA — only its tags do. Reading the name was why a whole night's games were
+     * dropped while every other player listed them.
      */
     private fun liveExtras(channels: List<Channel>, map: Map<String, LiveEntry>): List<Channel> {
         val urls = channels.mapTo(HashSet()) { it.url }
         val extras = ArrayList<Channel>()
         for (entry in map.values) {
-            if (!entry.name.contains("nba", ignoreCase = true)) continue
+            if (!isNbaRow(entry)) continue
             if (entry.url.isBlank() || !urls.add(entry.url)) continue
             extras += Channel(
                 key = "live:${hash(entry.url)}",
@@ -325,6 +332,11 @@ object ChannelRepository {
         return extras
     }
 
+    private fun isNbaRow(entry: LiveEntry): Boolean =
+        entry.name.contains("nba", ignoreCase = true) ||
+            entry.group.contains("nba", ignoreCase = true) ||
+            entry.tags.any { it.contains("nba", ignoreCase = true) }
+
     private fun parseLive(text: String): Map<String, LiveEntry> {
         val arr = JSONArray(text)
         val map = HashMap<String, LiveEntry>(arr.length())
@@ -335,6 +347,10 @@ object ChannelRepository {
             if (name.isBlank() || url.isBlank() || !o.optBoolean("enabled", true)) continue
             val key = liveKey(name)
             if (map.containsKey(key)) continue
+            val tags = ArrayList<String>()
+            o.optJSONArray("tags")?.let { arr ->
+                for (t in 0 until arr.length()) tags += arr.optString(t)
+            }
             map[key] = LiveEntry(
                 name = name,
                 url = url,
@@ -344,6 +360,8 @@ object ChannelRepository {
                 drmType = o.optString("drmType"),
                 keyId = o.optString("keyId"),
                 drmKey = o.optString("key"),
+                tags = tags,
+                group = o.optString("group"),
             )
         }
         return map
@@ -361,6 +379,8 @@ object ChannelRepository {
         val drmType: String = "",
         val keyId: String = "",
         val drmKey: String = "",
+        val tags: List<String> = emptyList(),
+        val group: String = "",
     ) {
         fun toJson(): JSONObject = JSONObject()
             .put("name", name)
@@ -371,6 +391,8 @@ object ChannelRepository {
             .put("drmType", drmType)
             .put("keyId", keyId)
             .put("key", drmKey)
+            .put("tags", JSONArray(tags))
+            .put("group", group)
 
         companion object {
             fun from(o: JSONObject) = LiveEntry(
@@ -382,6 +404,10 @@ object ChannelRepository {
                 drmType = o.optString("drmType"),
                 keyId = o.optString("keyId"),
                 drmKey = o.optString("key"),
+                tags = o.optJSONArray("tags")?.let { arr ->
+                    (0 until arr.length()).map { arr.optString(it) }
+                } ?: emptyList(),
+                group = o.optString("group"),
             )
         }
     }

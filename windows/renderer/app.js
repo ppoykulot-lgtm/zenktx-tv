@@ -153,7 +153,7 @@ function hash(value) {
 // every other app looks broken here. This is the feed those lists are built
 // from: pull it, cache it, and move every channel onto its current address.
 const LIVE_FEED = 'https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json';
-const LIVE_KEY = 'zenktx.live.v1';
+const LIVE_KEY = 'zenktx.live.v2';
 const LIVE_TTL = 6 * 60 * 60 * 1000;
 
 let liveMap = {};
@@ -176,6 +176,8 @@ function buildLiveMap(list) {
       drmType: item.drmType || '',
       keyId: item.keyId || '',
       drmKey: item.key || '',
+      tags: Array.isArray(item.tags) ? item.tags.map((tag) => String(tag)) : [],
+      group: item.group || '',
     };
   }
   return map;
@@ -226,10 +228,19 @@ function applyLive() {
 // the next morning, so the catalogue can never list today's game. Whatever the
 // feed calls NBA and the guide does not already hold is added here, in its own
 // category, every time the feed refreshes.
+//
+// A game row is named "8:00am Wizards vs Hawks", so the name alone never says
+// NBA — only its tags do. Reading the name was why a whole night's games were
+// dropped while every other player listed them.
+function isNbaRow(live) {
+  if (/nba/i.test(live.name || '') || /nba/i.test(live.group || '')) return true;
+  return (live.tags || []).some((tag) => /nba/i.test(tag));
+}
+
 function appendLiveExtras() {
   let added = 0;
   for (const live of Object.values(liveMap)) {
-    if (!/nba/i.test(live.name || '')) continue;
+    if (!isNbaRow(live)) continue;
     const key = `auto:${hash(live.url)}`;
     if (state.base.some((c) => c.key === key || c.url === live.url)) continue;
     state.base.push({
@@ -589,6 +600,13 @@ function renderGrid() {
       noLogo.textContent = 'NO LOGO';
       tile.appendChild(noLogo);
     }
+
+    // The highlight follows the pointer: moving the mouse onto a tile selects it,
+    // so the detail strip and the Watch button answer to the cursor without a
+    // click. A click still plays straight away.
+    tile.addEventListener('mouseenter', () => {
+      if (state.selected?.key !== channel.key) select(channel);
+    });
 
     // One click plays. Selecting a channel first and then needing a second click
     // on Watch is how a working guide came to look broken on the first launch.

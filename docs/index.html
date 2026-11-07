@@ -614,7 +614,15 @@
 
       <div class="log">
 <article class="entry">
-          <h3>1.5.0 <span class="tagx">latest</span></h3>
+          <h3>1.5.1 <span class="tagx">latest</span></h3>
+          <div class="meta">7 November 2026 · Android TV · Android mobile · Windows</div>
+          <ul>
+            <li><b>The highlight follows the mouse.</b> On Windows the guide only moved its outline after a click, so the strip at the bottom answered to the last tile you pressed instead of the one under the pointer. Resting the cursor on a tile selects it now, and a click still opens the channel straight away.</li>
+            <li><b>Tonight's NBA games appear.</b> A game row is named “8:00am Wizards vs Hawks”, so nothing in the name says NBA — only its tags do. The guide tested the name alone and threw away every game the publisher added, which is why the other players listed a full night of basketball and this one listed none. It reads the tags now, on all three builds, so a game stream shows up within a minute of being published and leaves again when it is pulled.</li>
+            <li><b>Playlists is dark.</b> The dialog had no background of its own and fell back to the browser's white sheet, which lit up the whole window. It uses the same surface, edge and radius as the rest of the app.</li>
+          </ul>
+
+          <h3>1.5.0</h3>
           <div class="meta">6 November 2026 · Android TV · Android mobile · Windows</div>
           <ul>
             <li><b>One click starts a channel on every build.</b> On Windows a tile used to select first and wait for a double click, which read as a guide that would not play; a single click now opens the player, and the phone follows the same rule. The phone grid is three across with larger logos instead of two rows of postage stamps, it runs without a status or navigation bar, and the header has a search button that filters the whole catalogue.</li>
@@ -712,8 +720,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.0", mobile: "1.5.0", win: "1.5.0" };
-  const TAGS = { tv: "v1.5.0", mobile: "v1.5.0", win: "v1.5.0" };
+  const VERSIONS = { tv: "1.5.1", mobile: "1.5.1", win: "1.5.1" };
+  const TAGS = { tv: "v1.5.1", mobile: "v1.5.1", win: "v1.5.1" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
