@@ -90,6 +90,24 @@ object ChannelRepository {
         return cache
     }
 
+    /**
+     * The catalogue the app downloaded last time, if there is one. The first
+     * paint of the guide uses this instead of the copy baked into the APK: the
+     * bundle is frozen at build time, so a channel removed or renamed in the
+     * admin page showed up for a second or two and then vanished when the
+     * network answer landed.
+     */
+    fun cached(context: Context): List<Channel> {
+        val prefs = context.applicationContext
+            .getSharedPreferences(CATALOG_PREFS, Context.MODE_PRIVATE)
+        val text = prefs.getString(KEY_CATALOG, null) ?: return emptyList()
+        return runCatching { fromJson(text, "b") }.getOrDefault(emptyList())
+    }
+
+    /** The cached catalogue, or the bundled one on a first launch. */
+    fun cachedOrBundled(context: Context): List<Channel> =
+        cached(context).ifEmpty { bundled(context) }
+
     fun bundled(context: Context): List<Channel> =
         fromJson(
             context.assets.open(ASSET).bufferedReader().use { it.readText() },

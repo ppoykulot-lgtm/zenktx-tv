@@ -164,19 +164,32 @@
              tile needs to lift into: at 10dp the mint ring on the first row came
              within a hair of the search bar. clipToPadding keeps the lift inside
              the grid instead of letting it draw over the categories. -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/grid"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="18dp"
-            android:layout_weight="1"
-            android:clipChildren="true"
-            android:clipToPadding="true"
-            android:paddingStart="4dp"
-            android:paddingTop="14dp"
-            android:paddingEnd="4dp"
-            android:paddingBottom="4dp"
-            android:scrollbars="none" />
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                android:paddingStart="4dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="18dp"
+                android:paddingBottom="4dp"
+                android:scrollbars="none" />
+
+            <!-- Up/down readiness on the right edge: a D-pad has no scrollbar. -->
+            <ph.zenktx.tv.ui.ScrollHint
+                android:id="@+id/scrollHint"
+                android:layout_width="12dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
 
         <!-- D-pad legend, where the detail strip used to be -->
         <LinearLayout

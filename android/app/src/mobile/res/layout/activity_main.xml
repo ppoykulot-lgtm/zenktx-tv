@@ -175,17 +175,32 @@
             android:textSize="8.5sp"
             android:visibility="gone" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/grid"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="4dp"
-            android:layout_weight="1"
-            android:clipChildren="true"
-            android:clipToPadding="true"
-            android:paddingTop="2dp"
-            android:paddingBottom="8dp"
-            android:scrollbars="none" />
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="true"
+                android:clipToPadding="true"
+                android:paddingTop="2dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="8dp"
+                android:scrollbars="none" />
+
+            <!-- The same up/down readiness the TV guide has, so a thumb and a
+                 D-pad both see how much list is left. -->
+            <ph.zenktx.tv.ui.ScrollHint
+                android:id="@+id/scrollHint"
+                android:layout_width="10dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Sits on top until the current catalogue has been pulled. -->

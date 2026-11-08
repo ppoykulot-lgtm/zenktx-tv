@@ -748,7 +748,7 @@ class PlayerActivity : Activity() {
         binding.channelName.text = channel.name
         binding.channelMeta.text = getString(R.string.player_channel, index + 1, queue.size) +
             "  \u00b7  " + channel.category.uppercase()
-        Logos.apply(binding.channelLogo, channel.logo)
+        Logos.apply(binding.channelLogo, channel.logo, channel.name)
 
         binding.channelChip.animate().cancel()
         binding.channelChip.alpha = 1f

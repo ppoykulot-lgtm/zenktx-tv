@@ -75,22 +75,35 @@ object Logos {
                 .also { loader = it }
         }
 
-    /** Shows [url] when it loads, and an empty cell when it does not. */
-    fun apply(logo: ImageView, url: String) {
+    /**
+     * Shows [url] when it loads. A channel with no URL at all gets its initials
+     * immediately -- fourteen channels in the published catalogue have no logo
+     * that any host will still serve, and an empty cell in a full grid looks
+     * like a bug. The monogram is only drawn once the real artwork is known to
+     * be absent, never while it is still on its way, so nothing repaints over
+     * it.
+     */
+    fun apply(logo: ImageView, url: String, name: String = "") {
         val address = url.trim()
         if (!address.startsWith("http")) {
             logo.tag = null
-            logo.setImageDrawable(null)
-            logo.visibility = View.GONE
+            val fallback = MonogramDrawable.of(name)
+            if (fallback == null) {
+                logo.setImageDrawable(null)
+                logo.visibility = View.GONE
+            } else {
+                logo.setImageDrawable(fallback)
+                logo.visibility = View.VISIBLE
+            }
             return
         }
 
         logo.tag = address
         logo.visibility = View.VISIBLE
-        load(logo, address, 1)
+        load(logo, address, name, 1)
     }
 
-    private fun load(logo: ImageView, address: String, attempt: Int) {
+    private fun load(logo: ImageView, address: String, name: String, attempt: Int) {
         logo.load(address, loader(logo.context)) {
             listener(
                 onSuccess = { _, _ ->
@@ -102,12 +115,12 @@ object Logos {
                     if (logo.tag != address) return@listener
                     if (attempt < MAX_ATTEMPTS) {
                         logo.postDelayed(
-                            { if (logo.tag == address) load(logo, address, attempt + 1) },
+                            { if (logo.tag == address) load(logo, address, name, attempt + 1) },
                             350L * attempt,
                         )
                     } else {
-                        logo.setImageDrawable(null)
-                        logo.visibility = View.GONE
+                        logo.setImageDrawable(MonogramDrawable.of(name))
+                        logo.visibility = if (logo.drawable == null) View.GONE else View.VISIBLE
                     }
                 },
             )

@@ -159,6 +159,7 @@ class MainActivity : Activity() {
         binding.grid.layoutManager = GridLayoutManager(this, columns)
         binding.grid.adapter = grid
         binding.grid.itemAnimator = null
+        binding.scrollHint.attach(binding.grid)
 
         Ui.attachFocusEffect(binding.menuButton, scale = 1.04f)
         binding.menuButton.setOnClickListener {
@@ -307,8 +308,12 @@ class MainActivity : Activity() {
             // network. The read below takes seconds on a slow box, and a guide
             // that says "0 channels" for that long looks broken.
             if (all.isEmpty()) {
+                // The published catalogue first, not the copy inside the APK:
+                // the bundle is from build time, and painting it here made the
+                // guide show channels that admin.html had already removed for
+                // the second or two the network read took.
                 val quick = withContext(Dispatchers.IO) {
-                    runCatching { ChannelRepository.bundled(this@MainActivity) }
+                    runCatching { ChannelRepository.cachedOrBundled(this@MainActivity) }
                         .getOrDefault(emptyList())
                 }
                 if (isFinishing) return@launch
@@ -426,8 +431,9 @@ class MainActivity : Activity() {
         }
 
         grid.submit(visible)
-        chips.submit(categories, filter)
+        chips.submit(categories, filter, chipCounts())
         binding.grid.scrollToPosition(0)
+        binding.scrollHint.sync()
         binding.channelCount.text = getString(R.string.channel_count, visible.size)
 
         val message = if (visible.isEmpty()) getString(R.string.no_channels) else loadError
@@ -437,6 +443,25 @@ class MainActivity : Activity() {
         } else {
             binding.status.visibility = View.GONE
         }
+    }
+
+    /**
+     * The number behind every chip. Counted from the loaded list rather than
+     * from the catalogue, so a chip never promises rows the guide is not
+     * showing: Favourites follows the star, Pinoy follows the tag, and a
+     * category follows its own shelf.
+     */
+    private fun chipCounts(): Map<String, Int> {
+        val out = LinkedHashMap<String, Int>(categories.size)
+        for (chip in categories) {
+            out[chip] = when (chip) {
+                ALL -> all.size
+                FAVOURITES -> all.count { library.isFavourite(it.key) }
+                PINOY -> all.count { it.isFilipino }
+                else -> all.count { it.category == chip }
+            }
+        }
+        return out
     }
 
     /**
@@ -497,6 +522,7 @@ class MainActivity : Activity() {
     private fun toggleFavourite(channel: Channel) {
         val saved = library.toggleFavourite(channel.key)
         grid.refreshBadges()
+        chips.recount(chipCounts())
         if (filter == FAVOURITES && query.isBlank()) applyFilter(FAVOURITES)
         Toast.makeText(
             this,

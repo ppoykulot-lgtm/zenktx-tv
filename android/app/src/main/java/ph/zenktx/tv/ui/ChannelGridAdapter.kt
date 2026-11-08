@@ -49,7 +49,7 @@ class ChannelGridAdapter(
     inner class TileVH(val binding: ItemGridChannelBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(channel: Channel) {
             binding.tileName.text = channel.name
-            Logos.apply(binding.tileLogo, channel.logo)
+            Logos.apply(binding.tileLogo, channel.logo, channel.name)
             binding.tileStar.visibility =
                 if (isFavourite(channel.key)) View.VISIBLE else View.GONE
 
