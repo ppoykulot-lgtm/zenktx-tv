@@ -36,3 +36,8 @@ channels/keycheck.json
 build.log
 .chk/
 android/build*.log
+
+# Screenshots dropped here are personal payment codes; only the cropped
+# copies made by tools/import-donation-qr.py are committed.
+inbox/*
+!inbox/README.md
