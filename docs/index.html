@@ -670,7 +670,19 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.6 <span class="tagx">latest</span></h3>
+        <h3>1.5.7 <span class="tagx">latest</span></h3>
+        <div class="meta">8 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.1</div>
+        <ul>
+          <li><b>Every category says how many channels it holds.</b> The count sits after the name in a lighter weight — <i>Pinoy 129</i>, <i>News 80</i> — so the row answers whether Kids is worth opening before the D-pad walks into an empty grid. Favourites counts itself as you star a tile.</li>
+          <li><b>Every category has its own mark.</b> A newspaper for News, a ball for Sports, a clapperboard for Movies, a flag for Pinoy. The glyphs follow the category name, so a new shelf the catalogue grows later still gets one without a new APK.</li>
+          <li><b>The guide says which way there is more.</b> A thin strip on the right edge carries a mint thumb and a chevron at each end, and a chevron only lights up when there is something that way. A D-pad has no scrollbar; this is the one question it cannot answer on its own.</li>
+          <li><b>Logos belong to the right channel again.</b> Artwork was stored under the channel id and skipped whenever that file already existed, so when the feed reused an id the tile kept the old picture: 4k Travel wore the TV Maria logo, Adventure Earth wore A2Z. Each logo is now named after the address it came from and rebuilt from it, AVIF and WebP are converted to PNG for the boxes that cannot decode them, and a channel with no artwork left draws its initials instead of an empty cell.</li>
+          <li><b>The guide opens on your list, not on last build's.</b> The first paint used the catalogue baked into the APK, so a channel removed in admin.html still appeared for a second or two and then vanished when the network answer landed. It paints the catalogue downloaded on the previous launch first, so what you see is what you published.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.6</h3>
         <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
         <ul>
           <li><b>The artwork fills the tile.</b> The logo sat in a fixed box with a wide strip of empty card either side of it, which is why it read as a stamp on a 65″ screen. It now takes every pixel above the name, edge to edge, so a channel is recognised by its mark from across the room.</li>
@@ -708,17 +720,6 @@
         <li><b>Channel hopping is one press.</b> The CH ▲ / CH ▼ pair, the favourite star and the ✕ over the picture are gone. On the picture, ▲ ▼ ◀ ▶ change channel and the banner names the new one — <i>CH 214 / 465</i> — without raising the control bar over the picture, which is what made zapping feel messy. OK raises the bar, BACK lowers it, and a second BACK leaves the player.</li>
         <li><b>The splash gets out of the way.</b> The welcome screen held the guide back for a full ten seconds after the catalogue had already arrived, and a slow read kept it on screen even longer while it said <i>Loading channels…</i>. It now has a floor and a ceiling — it clears after 1.2s at the earliest and never later than 2.5s, with the grid filling in behind it — and the first tile takes focus as it lifts, so OK plays straight away.</li>
         <li><b>Logos stay where they are.</b> Artwork was cached for only as long as the host's ten-minute header allowed, and a request that timed out during the burst on launch was dropped until the tile was rebound — the same channel had a logo one launch and none the next. Logos now live in a 96 MB disk cache that ignores that header, and a failed request is retried twice before the cell stays empty.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.2</h3>
-        <div class="meta">7 November 2026 · Android mobile · Android TV · Windows unchanged on 1.5.1</div>
-        <ul>
-        <li><b>Every channel name fits.</b> An 84dp logo and two lines of name needed more room than the 118dp card gave them, so names like “Cartoonito Stream 2” were painted past the card edge and cut in half. The card is 132dp now and both lines sit inside it.</li>
-        <li><b>Search sits under the categories.</b> The magnifier in the header opened a dialog, hid the results behind the keyboard and asked for a second tap before anything was found. On a phone the field is now a bar under the chips: type and the guide filters while you type, with the count, a clear button and the ✕ to empty it.</li>
-        <li><b>The detail sheet is gone from the phone.</b> It took the bottom of the grid to repeat a name the tile already showed. A tap plays, and a long press on a tile adds or removes the favourite, so the star it held is still one gesture away.</li>
-        <li><b>Smaller buttons over the picture.</b> The favourite star and the close ✕ in the phone player were 46dp, sized for a TV across the room. They are 38dp on a phone; the TV keeps its larger pair.</li>
         </ul>
       </article>
 
@@ -762,8 +763,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.6", mobile: "1.5.6", win: "1.5.1" };
-  const TAGS = { tv: "v1.5.6", mobile: "v1.5.6", win: "v1.5.1" };
+  const VERSIONS = { tv: "1.5.7", mobile: "1.5.7", win: "1.5.1" };
+  const TAGS = { tv: "v1.5.7", mobile: "v1.5.7", win: "v1.5.1" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
