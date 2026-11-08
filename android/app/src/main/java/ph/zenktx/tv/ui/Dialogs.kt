@@ -2,8 +2,11 @@ package ph.zenktx.tv.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.text.InputType
+import android.view.LayoutInflater
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -32,6 +35,28 @@ object Dialogs {
                 onPick(which)
             }
             .show()
+    }
+
+    /**
+     * The donation sheet: the note, then the GCash and Maya codes side by side.
+     * The images live in `assets/donation/` so the same two files ship inside
+     * both APKs without a drawable per density, and a build that somehow
+     * arrives without them shows the empty QR frame instead of a broken card.
+     */
+    fun donate(context: Context) {
+        val view = LayoutInflater.from(context).inflate(R.layout.dialog_donate, null)
+        view.findViewById<ImageView>(R.id.gcashQr)?.let { loadQr(context, it, "donation/gcash.png") }
+        view.findViewById<ImageView>(R.id.mayaQr)?.let { loadQr(context, it, "donation/maya.png") }
+        AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun loadQr(context: Context, target: ImageView, asset: String) {
+        runCatching { context.assets.open(asset).use { BitmapFactory.decodeStream(it) } }
+            .getOrNull()
+            ?.let { target.setImageBitmap(it) }
     }
 
     fun info(context: Context, title: String, message: String) {

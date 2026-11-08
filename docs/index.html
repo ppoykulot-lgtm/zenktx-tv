@@ -315,6 +315,41 @@
   .foot a { color: var(--muted); text-decoration: none; }
   .foot a:hover { color: var(--text); }
   .legal { margin-top: 22px; max-width: 760px; line-height: 1.65; color: #66738f; font-size: 11.5px; }
+
+  /* --------------------------------------------------------------- support */
+  .qr-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 26px;
+  }
+  @media (max-width: 720px) { .qr-row { grid-template-columns: 1fr; } }
+  .qr-card {
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--card);
+    text-align: center;
+  }
+  .qr-card img {
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 1;
+    object-fit: contain;
+    padding: 10px;
+    border-radius: 12px;
+    background: #fff;
+  }
+  .qr-card img[data-missing] { display: none; }
+  .qr-card .qr-name {
+    margin-top: 14px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mint);
+  }
+  .donation-note { max-width: 720px; color: var(--muted); font-size: 15px; line-height: 1.7; }
+  .donation-note p + p { margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -341,6 +376,7 @@
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
       <a href="#changelog">Changelog</a>
+      <a href="#support">Support</a>
     </nav>
     <a class="nav-discord" href="https://discord.gg/nAQMKYxZe2" target="_blank" rel="noopener" aria-label="Join the ZENKTX Discord">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.3 4.6A16.6 16.6 0 0 0 16.2 3.3l-.3.6a12.4 12.4 0 0 1 3.6 1.8 11.7 11.7 0 0 0-4-1.3 11.4 11.4 0 0 0-5 0 11.7 11.7 0 0 0-4 1.3 12.4 12.4 0 0 1 3.6-1.8l-.3-.6a16.6 16.6 0 0 0-4.1 1.3C2.6 9 1.9 13.3 2.3 17.5a16.4 16.4 0 0 0 5 2.5l.6-.9a10.6 10.6 0 0 1-1.7-.8l.4-.3a11.8 11.8 0 0 0 10.8 0l.4.3a10.6 10.6 0 0 1-1.7.8l.6.9a16.4 16.4 0 0 0 5-2.5c.5-4.8-.7-9-3.4-12.9zM8.9 14.9c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.9.9 1.8 2c0 1.1-.8 2-1.8 2zm6.2 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.9.9 1.8 2c0 1.1-.8 2-1.8 2z"/></svg>
@@ -726,6 +762,32 @@
       </section>
   </main>
 
+  <section id="support">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">Support the project</div>
+        <h2>Help Us Keep This Project Growing! ❤️</h2>
+      </div>
+
+      <div class="donation-note">
+        <p>Your donations will help cover maintenance, updates, official domain and hosting expenses, system upgrades, and the development of future features.</p>
+        <p>No amount is too small. Every donation, no matter how big or small, makes a difference in keeping this project active and improving it for everyone.</p>
+        <p>Thank you for supporting the project!</p>
+      </div>
+
+      <div class="qr-row">
+        <div class="qr-card">
+          <img src="assets/donation/gcash.png" alt="GCash QR code" onerror="this.dataset.missing='1'" />
+          <div class="qr-name">GCash</div>
+        </div>
+        <div class="qr-card">
+          <img src="assets/donation/maya.png" alt="Maya QR code" onerror="this.dataset.missing='1'" />
+          <div class="qr-name">Maya</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <div class="wrap">
       <div class="foot">
@@ -739,6 +801,7 @@
           <a href="#downloads">Downloads</a>
           <a href="#install">Install</a>
           <a href="#changelog">Changelog</a>
+      <a href="#support">Support</a>
           <a data-repo-link href="#">GitHub</a>
         </nav>
       </div>

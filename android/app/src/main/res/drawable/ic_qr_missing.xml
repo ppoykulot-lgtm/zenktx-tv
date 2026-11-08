@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shown until a QR image is dropped into assets/donation: a dashed frame with
+     three finder squares, so the card still reads as a QR slot. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#2A3550"
+        android:strokeWidth="0.8"
+        android:strokeLineJoin="round"
+        android:pathData="M3,3h6v6h-6z M15,3h6v6h-6z M3,15h6v6h-6z M12,12h3v3h-3z M18,12h3v3h-3z M12,18h3v3h-3z M18,18h3v3h-3z" />
+</vector>

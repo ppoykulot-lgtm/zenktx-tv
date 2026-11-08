@@ -38,6 +38,7 @@ class SettingsActivity : Activity() {
             binding.rowPlaylists to 1.02f,
             binding.rowUpdates to 1.02f,
             binding.rowAbout to 1.02f,
+            binding.rowDonate to 1.02f,
         ).forEach { (view, scale) -> Ui.attachFocusEffect(view, lift = false, scale = scale) }
 
         binding.rowPlaylists.setOnClickListener {
@@ -45,6 +46,7 @@ class SettingsActivity : Activity() {
         }
         binding.rowUpdates.setOnClickListener { Updater.check(this, silent = false) }
         binding.rowAbout.setOnClickListener { showAbout() }
+        binding.rowDonate.setOnClickListener { Dialogs.donate(this) }
 
         binding.backButton.requestFocus()
     }

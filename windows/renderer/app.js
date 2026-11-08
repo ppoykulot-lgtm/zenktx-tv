@@ -57,7 +57,14 @@ const state = {
   failed: false,
   sources: [],
   sourceIndex: 0,
+  // How many times this playback has already asked the feeds for a newer
+  // address. Transient, per channel pick.
+  liveRetries: 0,
 };
+
+// Three asks is enough for a token that rolled over while the channel was
+// open; more than that and the feed itself is down.
+const FRESH_LINK_LIMIT = 3;
 
 /* ------------------------------------------------------------------ loading */
 
@@ -714,6 +721,7 @@ function play(channel) {
   // The detail strip follows the click, so closing the player lands on the
   // channel that was just watched.
   select(channel);
+  state.liveRetries = 0;
   const inGuide = state.visible.some((c) => c.key === channel.key);
   state.queue = inGuide ? state.visible.slice() : [channel];
   state.index = Math.max(0, state.queue.findIndex((c) => c.key === channel.key));
@@ -723,6 +731,7 @@ function play(channel) {
 function switchChannel(delta) {
   if (!state.queue.length) return;
   state.index = (state.index + delta + state.queue.length) % state.queue.length;
+  state.liveRetries = 0;
   beginPlayback();
 }
 
@@ -732,7 +741,6 @@ function beginPlayback() {
 
   cleanupPlayer();
   wantPlaying = true;
-  state.liveRetried = false;
   state.failed = false;
   state.sources = channelSources(channel);
   state.sourceIndex = 0;
@@ -846,7 +854,11 @@ function playSource(channel) {
       if (!data.fatal) return;
       const code = data.response?.code;
       window.__zenkLastStreamError = `${data.details}: ${data.error?.message || data.response?.text || ''}`;
-      fail(describeHlsError(data, code), data.details || 'HLS_ERROR');
+      // The old code handed the detail name over as the failure code, so an
+      // expired token arrived here as "manifestLoadError" and never reached the
+      // fresh-link retry below: the error card stayed up until the app was
+      // closed and opened again, which is exactly what the second window did.
+      fail(describeHlsError(data, code), hlsFailureCode(data, code));
     });
   } else {
     video.src = sourceUrl;
@@ -989,19 +1001,68 @@ function startWatchdog(channel) {
   }, 1000);
 }
 
-// The provider re-tokenises its addresses through the day, so a link the guide
-// cached an hour ago can answer 410 while the channel itself is alive — which is
-// why opening a second copy of the app used to "fix" it. Pull the feed again and
-// retry once when it hands back a different address for this channel.
+// Codes that mean "this address is no good any more", not "this build cannot
+// play it". Anything here is worth re-reading the published list for.
+function isExpiredCode(code) {
+  return code === 'LINK_EXPIRED' || code === 'STALLED' || code === 'NO_VIDEO';
+}
+
+// The streams these channels point at are re-tokenised through the day, so an
+// address that worked this morning answers 403 or 410 tonight while the channel
+// itself is fine. Opening a second copy of the app "fixed" that only because a
+// new process re-read the list.
+//
+// Two things were wrong with the old one-shot retry: the published catalogue was
+// never re-read (only the feed was, and the catalogue is where most addresses
+// live), and the flag that guarded it was set for the whole session, so the
+// second expiry in a viewing session always ended at the error card.
+function hlsFailureCode(data, status) {
+  const details = String(data.details || '');
+  if (details === 'manifestLoadError' || details === 'manifestLoadTimeOut') return 'LINK_EXPIRED';
+  if (details === 'levelLoadError' || details === 'levelLoadTimeOut') return 'LINK_EXPIRED';
+  if (details === 'manifestParsingError') return 'FORMAT';
+  if (details === 'fragLoadError' || details === 'fragLoadTimeOut') {
+    // A segment refused with 403/410 while the channel was playing is the token
+    // rolling over mid-stream, not a broken tile.
+    if (!status) return 'STALLED';
+    return status >= 400 && status < 500 ? 'LINK_EXPIRED' : 'STALLED';
+  }
+  if (details === 'bufferStalledError' || details === 'bufferAppendError') return 'STALLED';
+  if (details === 'mediaError') return 'MEDIA_ERROR';
+  return details || 'HLS_ERROR';
+}
+
 async function retryWithFreshLink(code) {
-  if (code !== 'LINK_EXPIRED' || state.liveRetried) return false;
+  if (!isExpiredCode(code)) return false;
+  if (state.liveRetries >= FRESH_LINK_LIMIT) return false;
   const channel = state.queue[state.index];
   if (!channel) return false;
-  state.liveRetried = true;
+
+  state.liveRetries += 1;
+  $('pchipMeta').textContent = `REFRESHING LINK \u00b7 ${state.liveRetries}/${FRESH_LINK_LIMIT}`;
+
+  // The catalogue first: it is the list the admin page writes, and almost every
+  // address change arrives there. The live feed is the second chance for the
+  // rows it rewrites on the fly.
+  await refreshCatalog();
   await refreshLive();
-  const fresh = state.base.find((c) => c.key === channel.key);
-  if (!fresh || fresh.url === channel.url) return false;
-  play(fresh);
+
+  const normalise = (name) =>
+    String(name || '').toLowerCase().replace(/\b(hd|fhd|sd|uhd)\b/g, ' ')
+      .replace(/\bstream\s*\d+\b/g, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+  const fresh = state.base.find((c) => c.key === channel.key) ||
+    state.base.find((c) => normalise(c.name) === normalise(channel.name));
+
+  // Even without a new address, reopen: the failed request carried the stale
+  // token, and the retry is a new connection to the provider.
+  const next = Object.assign({}, channel, fresh
+    ? { url: fresh.url || channel.url, drmType: fresh.drmType || channel.drmType, keyId: fresh.keyId || channel.keyId, drmKey: fresh.drmKey || channel.drmKey }
+    : {});
+
+  // Reopen in place, without touching the counter this loop guards.
+  state.queue[state.index] = next;
+  if (state.selected && state.selected.key === next.key) state.selected = next;
+  beginPlayback();
   return true;
 }
 
@@ -1467,7 +1528,25 @@ if (window.zenk.onUpdateProgress) {
     if (total) $('updInstall').textContent = `Downloading ${pct}%`;
   });
 }
-$('retryBtn').addEventListener('click', () => { state.failed = false; beginPlayback(); });
+// A manual retry earns a fresh budget of link refreshes: the automatic ones may
+// all have been spent while the provider was still handing out the old token.
+// The donation sheet: opened from the header, closed by its button, Escape or a
+// click on the dimmed guide behind it.
+const donateSheet = $('donate');
+function setDonate(open) {
+  donateSheet.hidden = !open;
+  if (open) $('donateClose').focus();
+}
+$('donateBtn').addEventListener('click', () => setDonate(true));
+$('donateClose').addEventListener('click', () => setDonate(false));
+donateSheet.addEventListener('click', (event) => {
+  if (event.target === donateSheet) setDonate(false);
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !donateSheet.hidden) setDonate(false);
+});
+
+$('retryBtn').addEventListener('click', () => { state.failed = false; state.liveRetries = 0; beginPlayback(); });
 $('nextBtn').addEventListener('click', () => switchChannel(1));
 $('closeBtn').addEventListener('click', closePlayer);
 $('exitBtn').addEventListener('click', closePlayer);
