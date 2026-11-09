@@ -350,6 +350,9 @@
   }
   .donation-note { max-width: 720px; color: var(--muted); font-size: 15px; line-height: 1.7; }
   .donation-note p + p { margin-top: 12px; }
+  /* the title is 12 words and a heart: it needs the same room as the note
+     below it, or the heart drops onto a line of its own */
+  #support .section-head { max-width: 720px; }
 </style>
 </head>
 <body>
@@ -766,7 +769,7 @@
     <div class="wrap">
       <div class="section-head">
         <div class="kicker">Support the project</div>
-        <h2>Help Us Keep This Project Growing! ❤️</h2>
+        <h2>Help Us Keep This Project Growing!&nbsp;❤️</h2>
       </div>
 
       <div class="donation-note">
