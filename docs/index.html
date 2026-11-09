@@ -343,6 +343,10 @@
      an advert. */
   .pay-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 720px; margin-top: 16px; }
   @media (max-width: 560px) { .pay-btns { grid-template-columns: 1fr; } }
+  /* One button left after admin.html switches a method off: let it fill the row
+     instead of sitting in half of it. */
+  .pay-btns.single { grid-template-columns: minmax(0, 1fr); }
+  .pay-paused { margin: 16px 0 0; font-size: 13px; color: var(--muted); }
   .pay-btn {
     display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
     padding: 15px 18px; border-radius: 14px; cursor: pointer; font: inherit; color: var(--text);
@@ -840,6 +844,7 @@
           <span class="pay-arrow" aria-hidden="true">→</span>
         </button>
       </div>
+      <p class="pay-paused" id="payPaused" hidden>Donations are paused right now — please check back soon. Salamat! ❤️</p>
     </div>
   </section>
 
@@ -1013,6 +1018,29 @@
       // A click that lands on the dialog element itself is a click on the backdrop.
       if (event.target === payDialog) payDialog.close();
     });
+  }
+
+  // Donation switches: admin.html publishes donation.json, where a method set to
+  // false is taken off the page. Read once on load; if the file cannot be read,
+  // both buttons stay, so a hiccup never hides the only way to give.
+  const payBtns = document.querySelector(".pay-btns");
+  if (payBtns) {
+    fetch("donation.json", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((flags) => {
+        if (!flags) return;
+        ["gcash", "maya"].forEach((key) => {
+          if (flags[key] !== false) return;
+          const button = payBtns.querySelector('[data-pay="' + key + '"]');
+          if (button) button.remove();
+        });
+        const left = payBtns.querySelectorAll(".pay-btn").length;
+        payBtns.classList.toggle("single", left === 1);
+        payBtns.style.display = left ? "" : "none";
+        const paused = document.getElementById("payPaused");
+        if (paused) paused.hidden = left > 0;
+      })
+      .catch(() => {});
   }
 
   // Donation goal: data-goal and data-raised on .goal are the only numbers to edit.

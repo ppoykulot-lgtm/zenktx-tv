@@ -107,6 +107,10 @@
   td.drm select { width: 104px; }
   td.key input { width: 106px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; }
   td.num input { width: 48px; text-align: right; padding: 4px 6px; }
+  .infocard {
+    border: 1px solid var(--line); border-left: 3px solid var(--mint); background: #0c1728;
+    border-radius: 10px; padding: 10px 12px; margin-top: 14px; color: #b9c6dc; font-size: 12.5px;
+  }
 </style>
 </head>
 <body class="locked">
@@ -128,6 +132,7 @@
   <button id="add">Add channel</button>
   <button id="publish">Publish</button>
   <button id="statusBtn" class="ghost" title="Stop, or restart, every build">Project status</button>
+  <button id="donateBtn" class="ghost" title="Switch the donation QR buttons on or off">Donations</button>
   <button id="settings" class="ghost" title="Repository and token">⚙</button>
   <button id="lock" class="ghost" title="Lock this page">🔒</button>
 </header>
@@ -199,6 +204,29 @@
   </div>
 </dialog>
 
+<dialog id="dlgDonate">
+  <h3 style="margin:0 0 4px">Donation buttons</h3>
+  <p style="font-size:12.5px;color:#8496b5;margin:0">
+    Publishing this writes <code>donation.json</code>, which the support section of the site reads on
+    load. A method switched off loses its button and its code; with both off the buttons give way to a
+    short “donations are paused” line. The QR images stay in the repository, so switching a method back
+    on needs no upload — and Pages picks the change up in about 20s.
+  </p>
+  <div class="check">
+    <input id="dnGcash" type="checkbox" />
+    <label for="dnGcash">GCash — show the QR button</label>
+  </div>
+  <div class="check">
+    <input id="dnMaya" type="checkbox" />
+    <label for="dnMaya">Maya — show the QR button</label>
+  </div>
+  <div class="infocard" id="dnCurrent">Loading current switches…</div>
+  <div class="row">
+    <button id="dnCancel" class="ghost">Cancel</button>
+    <button id="dnPublish" class="primary">Publish</button>
+  </div>
+</dialog>
+
 <dialog id="dlgStatus">
   <h3 style="margin:0 0 4px">Project status</h3>
   <p style="font-size:12.5px;color:#8496b5;margin:0">
@@ -224,6 +252,7 @@
 
 const SETTINGS_KEY = 'zenktx.admin.v1';
 const statusPath = () => settings.path.replace(/[^/]*$/, 'status.json');
+const donationPath = () => settings.path.replace(/[^/]*$/, 'donation.json');
 const RAW = (cfg) =>
   `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.path}`;
 
@@ -717,6 +746,65 @@ async function publishStatus() {
   }
 }
 
+/* ------------------------------------------------------- donation switch */
+
+async function openDonations() {
+  $('dnGcash').checked = true;
+  $('dnMaya').checked = true;
+  $('dnCurrent').textContent = 'Loading current switches…';
+  $('dlgDonate').showModal();
+
+  try {
+    const response = await fetch(
+      `${RAW(settings).replace(/[^/]*$/, 'donation.json')}?t=${Date.now()}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    $('dnGcash').checked = data.gcash !== false;
+    $('dnMaya').checked = data.maya !== false;
+    const live = [
+      $('dnGcash').checked ? 'GCash' : '',
+      $('dnMaya').checked ? 'Maya' : '',
+    ].filter(Boolean);
+    $('dnCurrent').textContent = live.length
+      ? `Showing on the site now: ${live.join(' and ')}.`
+      : 'Both methods are off — the site shows the paused line instead of the buttons.';
+  } catch (error) {
+    $('dnCurrent').textContent =
+      'Could not read donation.json — publishing will create it with the boxes above.';
+  }
+}
+
+async function publishDonations() {
+  if (!settings.token) {
+    $('dlgDonate').close();
+    openSettings();
+    return setStatus('A token is needed to publish the donation switches.', 'bad');
+  }
+  const payload = {
+    gcash: $('dnGcash').checked,
+    maya: $('dnMaya').checked,
+    updatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'),
+  };
+  const state = (on) => (on ? 'on' : 'off');
+  setStatus('Publishing the donation switches…');
+  try {
+    await commitFile(
+      donationPath(),
+      JSON.stringify(payload, null, 1) + '\n',
+      `Turn the donation switches: GCash ${state(payload.gcash)}, Maya ${state(payload.maya)}`
+    );
+    $('dlgDonate').close();
+    setStatus(
+      `Published: GCash ${state(payload.gcash)}, Maya ${state(payload.maya)} (Pages takes ~20s).`,
+      'ok'
+    );
+  } catch (error) {
+    setStatus(`Donation switch failed: ${error.message}`, 'bad');
+  }
+}
+
 $('load').addEventListener('click', load);
 $('add').addEventListener('click', addChannel);
 $('publish').addEventListener('click', publish);
@@ -746,6 +834,9 @@ $('lock').addEventListener('click', () => {
   document.body.classList.add('locked');
 });
 $('statusBtn').addEventListener('click', openStatus);
+$('donateBtn').addEventListener('click', openDonations);
+$('dnCancel').addEventListener('click', () => $('dlgDonate').close());
+$('dnPublish').addEventListener('click', publishDonations);
 $('msCancel').addEventListener('click', () => $('dlgStatus').close());
 $('msPublish').addEventListener('click', publishStatus);
 $('cancelSettings').addEventListener('click', () => $('dlgSettings').close());
