@@ -317,37 +317,73 @@
   .legal { margin-top: 22px; max-width: 760px; line-height: 1.65; color: #66738f; font-size: 11.5px; }
 
   /* --------------------------------------------------------------- support */
-  .qr-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    margin-top: 26px;
+  /* The goal reads as a caption, not a dashboard: one line of numbers over a
+     thin track, so it sits beside the note instead of competing with it. */
+  .goal {
+    max-width: 720px; margin-top: 26px; padding: 20px 22px;
+    border: 1px solid var(--line); border-radius: 16px; background: var(--card);
   }
-  @media (max-width: 720px) { .qr-row { grid-template-columns: 1fr; } }
-  .qr-card {
-    padding: 22px;
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    background: var(--card);
-    text-align: center;
+  .goal-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .goal-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .goal-fig { font-size: 14px; color: var(--muted); }
+  .goal-fig b { color: var(--text); font-size: 20px; letter-spacing: -.01em; }
+  .goal-fig b + b, .goal-fig b:last-child { font-size: 15px; color: #cfd8ea; }
+  .goal-track {
+    margin-top: 12px; height: 8px; border-radius: 999px; overflow: hidden;
+    background: #0a1220; border: 1px solid var(--line);
   }
-  .qr-card img {
-    width: 100%;
-    max-width: 260px;
-    aspect-ratio: 1;
-    object-fit: contain;
-    padding: 10px;
-    border-radius: 12px;
-    background: #fff;
+  .goal-track i {
+    display: block; height: 100%; width: 0; border-radius: 999px;
+    background: linear-gradient(90deg, var(--mint), var(--blue)); transition: width .6s ease;
   }
-  .qr-card img[data-missing] { display: none; }
-  .qr-card .qr-name {
-    margin-top: 14px;
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--mint);
+  .goal-note { margin-top: 10px; font-size: 12px; color: #6e7c99; }
+
+  /* The codes themselves live in a popup: two full-size QR cards pushed the
+     note off the screen on a phone, and a code you did not ask for reads like
+     an advert. */
+  .pay-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 720px; margin-top: 16px; }
+  @media (max-width: 560px) { .pay-btns { grid-template-columns: 1fr; } }
+  .pay-btn {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    padding: 15px 18px; border-radius: 14px; cursor: pointer; font: inherit; color: var(--text);
+    background: var(--card); border: 1px solid var(--line);
+    transition: transform .18s, border-color .18s, background .18s;
   }
+  .pay-btn:hover, .pay-btn:focus-visible {
+    transform: translateY(-2px); border-color: rgba(53,231,192,.45); background: #13203a; outline: none;
+  }
+  .pay-ico {
+    flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+    color: var(--mint); background: rgba(53,231,192,.1); border: 1px solid rgba(53,231,192,.22);
+  }
+  .pay-ico svg { width: 19px; height: 19px; }
+  .pay-txt { display: grid; gap: 2px; min-width: 0; }
+  .pay-txt b { font-size: 15px; }
+  .pay-txt small { font-size: 12px; color: var(--muted); }
+  .pay-arrow { margin-left: auto; color: var(--mint); font-size: 16px; }
+
+  .pay-dialog {
+    width: min(340px, calc(100vw - 32px)); padding: 24px 22px 20px; text-align: center;
+    border: 1px solid #2c3c5c; border-radius: 20px; background: #0d1524; color: var(--text);
+    box-shadow: 0 40px 90px -30px #000;
+  }
+  .pay-dialog::backdrop { background: rgba(4,7,14,.78); }
+  .pay-kicker2 { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--mint); font-weight: 700; }
+  .pay-dialog h3 { margin: 8px 0 16px; font-size: 22px; letter-spacing: -.01em; }
+  .pay-qr { padding: 10px; border-radius: 14px; background: #fff; }
+  .pay-qr img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .pay-hint { margin: 16px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .pay-hint b { color: var(--text); }
+  .pay-thanks { margin: 6px 0 0; font-size: 12.5px; color: #6e7c99; }
+  .pay-close {
+    position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer; font: inherit; font-size: 13px;
+    color: var(--muted); background: rgba(255,255,255,.05); border: 1px solid var(--line);
+  }
+  .pay-close:hover { color: var(--text); border-color: #2c3c5c; }
+  /* The dialog focuses this button on open, so the browser's own ring would be
+     the first thing seen on the card. */
+  .pay-close:focus-visible { outline: none; color: var(--text); border-color: rgba(53,231,192,.5); box-shadow: 0 0 0 2px rgba(53,231,192,.22); }
   .donation-note { max-width: 720px; color: var(--muted); font-size: 15px; line-height: 1.7; }
   .donation-note p + p { margin-top: 12px; }
   /* the title is 12 words and a heart: it needs the same room as the note
@@ -778,18 +814,43 @@
         <p>Thank you for supporting the project!</p>
       </div>
 
-      <div class="qr-row">
-        <div class="qr-card">
-          <img src="assets/donation/gcash.png" alt="GCash QR code" onerror="this.dataset.missing='1'" />
-          <div class="qr-name">GCash</div>
+      <!-- Update the two numbers here when a donation lands; nothing else on
+           the page needs touching. -->
+      <div class="goal" data-goal="100" data-raised="0">
+        <div class="goal-top">
+          <span class="goal-label" id="goalLabel">This month's goal</span>
+          <span class="goal-fig"><b id="goalRaised">$0</b> of <b id="goalTarget">$100</b></span>
         </div>
-        <div class="qr-card">
-          <img src="assets/donation/maya.png" alt="Maya QR code" onerror="this.dataset.missing='1'" />
-          <div class="qr-name">Maya</div>
+        <div class="goal-track" role="progressbar" aria-labelledby="goalLabel"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <i id="goalFill"></i>
         </div>
+        <div class="goal-note">Hosting, the domain and the next round of updates. Counted by hand after each donation.</div>
+      </div>
+
+      <div class="pay-btns">
+        <button type="button" class="pay-btn" data-pay="gcash" data-pay-name="GCash" data-pay-qr="assets/donation/gcash.png">
+          <span class="pay-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14.5 14.5h2v2h-2zM18 14.5h2v2h-2zM14.5 18h2v2h-2zM18 18h2v2h-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          <span class="pay-txt"><b>GCash</b><small>Show the QR code</small></span>
+          <span class="pay-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="pay-btn" data-pay="maya" data-pay-name="Maya" data-pay-qr="assets/donation/maya.png">
+          <span class="pay-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14.5 14.5h2v2h-2zM18 14.5h2v2h-2zM14.5 18h2v2h-2zM18 18h2v2h-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          <span class="pay-txt"><b>Maya</b><small>Show the QR code</small></span>
+          <span class="pay-arrow" aria-hidden="true">→</span>
+        </button>
       </div>
     </div>
   </section>
+
+  <dialog class="pay-dialog" id="payDialog" aria-labelledby="payTitle">
+    <button type="button" class="pay-close" id="payClose" aria-label="Close">✕</button>
+    <div class="pay-kicker2">Scan to send</div>
+    <h3 id="payTitle">GCash</h3>
+    <div class="pay-qr"><img id="payQr" src="assets/donation/gcash.png" alt="GCash QR code" /></div>
+    <p class="pay-hint">Open <b id="payApp">GCash</b>, tap <b>Scan QR</b>, and enter any amount you like.</p>
+    <p class="pay-thanks">Salamat! ❤️</p>
+  </dialog>
 
   <footer>
     <div class="wrap">
@@ -929,6 +990,45 @@
       });
     });
   });
+
+  // Donation: both buttons open the same popup, filled from the button's data.
+  const payDialog = document.getElementById("payDialog");
+  if (payDialog) {
+    const payQr = document.getElementById("payQr");
+    const payTitle = document.getElementById("payTitle");
+    const payApp = document.getElementById("payApp");
+    document.querySelectorAll("[data-pay]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const name = btn.dataset.payName;
+        payQr.src = btn.dataset.payQr;
+        payQr.alt = name + " QR code";
+        payTitle.textContent = name;
+        payApp.textContent = name;
+        if (typeof payDialog.showModal === "function") payDialog.showModal();
+        else payDialog.setAttribute("open", "");
+      });
+    });
+    document.getElementById("payClose").addEventListener("click", () => payDialog.close());
+    payDialog.addEventListener("click", (event) => {
+      // A click that lands on the dialog element itself is a click on the backdrop.
+      if (event.target === payDialog) payDialog.close();
+    });
+  }
+
+  // Donation goal: data-goal and data-raised on .goal are the only numbers to edit.
+  const goal = document.querySelector(".goal");
+  if (goal) {
+    const target = Number(goal.dataset.goal) || 0;
+    const raised = Math.max(0, Math.min(Number(goal.dataset.raised) || 0, target));
+    const money = (n) => "$" + n.toLocaleString("en-US");
+    document.getElementById("goalRaised").textContent = money(raised);
+    document.getElementById("goalTarget").textContent = money(target);
+    document.getElementById("goalFill").style.width = (target ? (raised / target) * 100 : 0) + "%";
+    const track = goal.querySelector(".goal-track");
+    track.setAttribute("aria-valuemax", String(target));
+    track.setAttribute("aria-valuenow", String(raised));
+    track.setAttribute("aria-valuetext", money(raised) + " raised of " + money(target));
+  }
 
   // Highlight the nav link for the section in view
   const links = [...document.querySelectorAll(".nav-links a")];
