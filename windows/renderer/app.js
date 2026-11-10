@@ -1575,9 +1575,51 @@ if (window.zenk.onUpdateProgress) {
 // The donation sheet: opened from the header, closed by its button, Escape or a
 // click on the dimmed guide behind it.
 const donateSheet = $('donate');
+
+// admin.html publishes which donation methods are on, and the site hides a
+// method that is switched off. Both codes ship inside the app, so it has to
+// read the same file; only an explicit false hides one, so a dead network
+// leaves the only way to give on screen.
+const DONATE_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/donation.json';
+const DONATE_KEY = 'zenktx.donate.v1';
+
+async function donationFlags() {
+  try {
+    const text = await window.zenk.fetchText(`${DONATE_URL}?t=${Date.now()}`);
+    const data = JSON.parse(text);
+    const flags = { gcash: data.gcash !== false, maya: data.maya !== false };
+    localStorage.setItem(DONATE_KEY, JSON.stringify(flags));
+    return flags;
+  } catch (error) {
+    try {
+      return JSON.parse(localStorage.getItem(DONATE_KEY) || 'null') || { gcash: true, maya: true };
+    } catch (inner) {
+      return { gcash: true, maya: true };
+    }
+  }
+}
+
+function applyDonation(flags) {
+  const any = flags.gcash || flags.maya;
+  $('donateGcash').hidden = !flags.gcash;
+  $('donateMaya').hidden = !flags.maya;
+  $('donateCodes').hidden = !any;
+  $('donateHint').hidden = !any;
+  $('donatePaused').hidden = any;
+  // Name the method that is actually on: with one behind, the old line sent
+  // people looking for a code the owner had switched off.
+  if (any) {
+    const names = [flags.gcash && 'GCash', flags.maya && 'Maya'].filter(Boolean).join(' or ');
+    $('donateHint').textContent = `Scan the code inside your ${names} app. Salamat! ❤️`;
+  }
+}
+
 function setDonate(open) {
   donateSheet.hidden = !open;
-  if (open) $('donateClose').focus();
+  if (open) {
+    $('donateClose').focus();
+    donationFlags().then(applyDonation).catch(() => {});
+  }
 }
 $('donateBtn').addEventListener('click', () => setDonate(true));
 $('donateClose').addEventListener('click', () => setDonate(false));

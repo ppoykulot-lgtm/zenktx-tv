@@ -65,17 +65,18 @@
       <p>Your donations will help cover maintenance, updates, official domain and hosting expenses, system upgrades, and the development of future features.</p>
       <p>No amount is too small. Every donation, no matter how big or small, makes a difference in keeping this project active and improving it for everyone.</p>
       <p>Thank you for supporting the project!</p>
-      <div class="donate-codes">
-        <figure>
+      <div class="donate-codes" id="donateCodes">
+        <figure id="donateGcash">
           <img src="../assets/donation/gcash.png" alt="GCash QR code" onerror="this.closest('figure').classList.add('missing')" />
           <figcaption>GCash</figcaption>
         </figure>
-        <figure>
+        <figure id="donateMaya">
           <img src="../assets/donation/maya.png" alt="Maya QR code" onerror="this.closest('figure').classList.add('missing')" />
           <figcaption>Maya</figcaption>
         </figure>
       </div>
-      <p class="donate-hint">Scan the code inside your GCash or Maya app. Salamat! ❤️</p>
+      <p class="donate-hint" id="donateHint">Scan the code inside your GCash or Maya app. Salamat! ❤️</p>
+      <p class="donate-hint" id="donatePaused" hidden>Donations are paused right now — please check back soon. Salamat! ❤️</p>
       <button class="btn mint" id="donateClose">Close</button>
     </div>
   </div>

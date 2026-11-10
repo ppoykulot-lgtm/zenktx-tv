@@ -35,12 +35,14 @@
             android:textSize="11sp" />
 
         <LinearLayout
+            android:id="@+id/donateCodes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:orientation="horizontal">
 
             <LinearLayout
+                android:id="@+id/gcashCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -72,10 +74,12 @@
             </LinearLayout>
 
             <Space
+                android:id="@+id/donateGap"
                 android:layout_width="14dp"
                 android:layout_height="1dp" />
 
             <LinearLayout
+                android:id="@+id/mayaCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -108,6 +112,18 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/donatePaused"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:gravity="center"
+            android:text="@string/donate_paused"
+            android:textColor="@color/muted"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/donateHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"

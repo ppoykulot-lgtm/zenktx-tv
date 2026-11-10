@@ -61,6 +61,8 @@ Thank you for supporting the project!</string>
     <string name="donate_gcash">GCash</string>
     <string name="donate_maya">Maya</string>
     <string name="donate_hint">Scan the code inside your GCash or Maya app. Salamat! ❤️</string>
+    <string name="donate_hint_one">Scan the code inside your %1$s app. Salamat! ❤️</string>
+    <string name="donate_paused">Donations are paused right now — please check back soon. Salamat! ❤️</string>
     <string name="row_about">About</string>
     <string name="row_about_sub">ZENKTX TV Stream %1$s</string>
     <string name="on">on</string>
