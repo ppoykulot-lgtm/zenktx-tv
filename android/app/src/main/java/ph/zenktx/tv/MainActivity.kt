@@ -576,10 +576,9 @@ class MainActivity : Activity() {
     // ---- updates & integrity ---------------------------------------------
 
     private fun scheduleUpdateCheck() {
-        if (!settings.autoCheckUpdates()) return
         binding.root.postDelayed({
-            if (!isFinishing && !isDestroyed && !stopped) Updater.check(this, silent = true)
-        }, 2_500)
+            if (!isFinishing && !isDestroyed && !stopped) Updater.enforce(this)
+        }, 1_200)
     }
 
     private fun showTamperDialog(message: String) {
@@ -594,6 +593,8 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         if (!::binding.isInitialized) return
+        // Back from the installer without updating: gate again.
+        if (!stopped) Updater.onResume(this)
         clockHandler.post(clockTick)
         grid.refreshBadges()
 

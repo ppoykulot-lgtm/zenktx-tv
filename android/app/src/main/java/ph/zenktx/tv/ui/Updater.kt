@@ -19,13 +19,22 @@ import ph.zenktx.tv.data.Integrity
 import ph.zenktx.tv.data.UpdateChecker
 
 /**
- * Shared GitHub-release update flow: silent check on launch, or an explicit
- * check from Settings. The user always has to confirm the download.
+ * Shared GitHub-release update flow. On launch the build is gated: an outdated
+ * copy cannot reach the guide until it installs the release attached to the
+ * newest tag. A check that fails (no network, GitHub down) never locks anyone
+ * out, because a build that cannot see the feed would be bricked on a plane.
+ * The Settings check stays a plain, cancellable prompt.
  */
 object Updater {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var working = false
+
+    /** The blocking dialog, kept so a second resume cannot stack another one. */
+    private var gate: AlertDialog? = null
+
+    /** Set while the installer is in front; the app re-gates when it returns. */
+    private var awaitingInstall = false
 
     fun check(activity: Activity, silent: Boolean) {
         if (working) return
@@ -63,6 +72,79 @@ object Updater {
                 )
             }
         }
+    }
+
+    /**
+     * Launch gate. Runs regardless of the automatic-check preference: a build
+     * that the owner has replaced must not stay usable, and the feed is the
+     * only place that knows which number is current.
+     */
+    fun enforce(activity: Activity) {
+        if (working) return
+        val repo = AppSettings(activity).updateRepo()
+        if (repo.isBlank()) return
+
+        working = true
+        scope.launch {
+            val release = withContext(Dispatchers.IO) {
+                runCatching { UpdateChecker.latest(repo) }.getOrNull()
+            }
+            working = false
+            if (activity.isFinishing || activity.isDestroyed) return@launch
+            // No answer from the feed is not a verdict on the installed build.
+            if (release == null) return@launch
+            if (!UpdateChecker.isNewer(BuildConfig.VERSION_NAME, release.version)) {
+                gate?.takeIf { it.isShowing }?.dismiss()
+                gate = null
+                return@launch
+            }
+            showRequired(activity, release, null)
+        }
+    }
+
+    /** Re-gate once the installer closes, unless the copy on disk changed. */
+    fun onResume(activity: Activity) {
+        if (!awaitingInstall) return
+        awaitingInstall = false
+        enforce(activity)
+    }
+
+    fun close(activity: Activity) {
+        gate = null
+        activity.finishAffinity()
+    }
+
+    /**
+     * The one dialog an outdated build can show. Home still works, but there is
+     * no way back into the app: download it, or close the app.
+     */
+    private fun showRequired(activity: Activity, release: UpdateChecker.Release, problem: String?) {
+        if (activity.isFinishing || activity.isDestroyed) return
+        gate?.takeIf { it.isShowing }?.dismiss()
+
+        // No release notes on the gate: it is one sentence, and the workflow's
+        // body is a platform table whose stray lines only confuse.
+        val body = buildString {
+            if (problem != null) append(activity.getString(R.string.update_required_problem, problem)).append("\n\n")
+            append(
+                activity.getString(
+                    R.string.update_required_body,
+                    release.version,
+                    BuildConfig.VERSION_NAME,
+                )
+            )
+        }
+
+        val dialog = AlertDialog.Builder(activity, R.style.Theme_Zenktx_Dialog)
+            .setTitle(R.string.update_required_title)
+            .setMessage(body)
+            .setPositiveButton(R.string.update_download) { _, _ -> download(activity, release, forced = true) }
+            .setNegativeButton(R.string.update_close) { _, _ -> close(activity) }
+            .setCancelable(false)
+            .create()
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.show()
+        gate = dialog
     }
 
     /**
@@ -104,7 +186,7 @@ object Updater {
             .show()
     }
 
-    private fun download(activity: Activity, release: UpdateChecker.Release) {
+    private fun download(activity: Activity, release: UpdateChecker.Release, forced: Boolean = false) {
         val context = activity
         val progress = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
@@ -127,11 +209,13 @@ object Updater {
             addView(progress)
         }
 
-        val dialog = AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
+        val builder = AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
             .setTitle(R.string.update_title)
             .setView(container)
-            .setNegativeButton(android.R.string.cancel, null)
-            .create()
+        // A forced download cannot be abandoned into the guide, so its only
+        // way out is the failure dialog, which offers the retry.
+        if (!forced) builder.setNegativeButton(android.R.string.cancel, null)
+        val dialog = builder.setCancelable(!forced).create()
         dialog.show()
 
         scope.launch {
@@ -157,31 +241,50 @@ object Updater {
                 val installed = Integrity.signingSha256(context)
                 val incoming = UpdateChecker.apkSigningSha256(context, apk)
                 if (installed != null && incoming != null && installed != incoming) {
+                    val why = "This download is signed with a different key than the copy on " +
+                        "this device, so Android will not replace it. Uninstall ZENKTX, then " +
+                        "install this APK."
+                    // A forced copy cannot fall back into the guide on this path
+                    // either; the gate carries the instruction instead.
+                    if (forced) {
+                        showRequired(activity, release, why)
+                    } else {
+                        Dialogs.info(context, context.getString(R.string.update_title), why)
+                    }
+                    return@onSuccess
+                }
+                val ready = AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
+                    .setTitle(R.string.update_ready)
+                    .apply { if (!forced) setNegativeButton(R.string.update_later, null) }
+                    .setCancelable(!forced)
+                    .create()
+                ready.setButton(AlertDialog.BUTTON_POSITIVE, context.getString(R.string.update_install)) { _, _ ->
+                    awaitingInstall = true
+                    runCatching { UpdateChecker.install(context, apk) }
+                        .onFailure {
+                            awaitingInstall = false
+                            val why = it.message ?: "Install failed"
+                            if (forced) {
+                                // The install sheet is replaced, not stacked.
+                                ready.dismiss()
+                                showRequired(activity, release, why)
+                            } else {
+                                Dialogs.info(context, context.getString(R.string.update_title), why)
+                            }
+                        }
+                }
+                ready.show()
+            }.onFailure {
+                val why = it.message ?: "unknown error"
+                if (forced) {
+                    showRequired(activity, release, why)
+                } else {
                     Dialogs.info(
                         context,
                         context.getString(R.string.update_title),
-                        "This download is signed with a different key than the copy on this " +
-                            "device, so Android will not replace it. Uninstall ZENKTX, then " +
-                            "install this APK.",
+                        context.getString(R.string.update_failed, why),
                     )
-                    return@onSuccess
                 }
-                AlertDialog.Builder(context, R.style.Theme_Zenktx_Dialog)
-                    .setTitle(R.string.update_ready)
-                    .setPositiveButton(R.string.update_install) { _, _ ->
-                        runCatching { UpdateChecker.install(context, apk) }
-                            .onFailure {
-                                Dialogs.info(context, context.getString(R.string.update_title), it.message ?: "Install failed")
-                            }
-                    }
-                    .setNegativeButton(R.string.update_later, null)
-                    .show()
-            }.onFailure {
-                Dialogs.info(
-                    context,
-                    context.getString(R.string.update_title),
-                    context.getString(R.string.update_failed, it.message ?: "unknown error"),
-                )
             }
         }
     }

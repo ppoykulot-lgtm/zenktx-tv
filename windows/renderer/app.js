@@ -1435,20 +1435,30 @@ function noteLines(body) {
     .slice(0, 6);
 }
 
-function showUpdate(release) {
+// A launched copy is gated: the sheet cannot be dismissed and only updates.
+// A manual check keeps the friendly card with its Later button.
+let forcedUpdate = false;
+
+function showUpdate(release, { forced = false, problem = '' } = {}) {
   const asset = updateAsset(release);
   if (!asset) {
     toast('That release has no Windows download yet.');
     return;
   }
   pendingUpdate = release;
+  forcedUpdate = forced;
   const size = asset.size ? `${Math.round(asset.size / 1048576)} MB` : 'the new build';
 
   $('updBadge').textContent = `v${release.version}`;
-  $('updTitle').textContent = 'A new ZENKTX is ready';
-  $('updBody').textContent =
-    `You are on v${currentVersion || '—'}. Updating downloads ${size}, closes this copy ` +
-    'and opens the new version by itself.';
+  $('updTitle').textContent = forced ? 'Update required' : 'A new ZENKTX is ready';
+  $('updBody').textContent = forced
+    ? `${problem ? `${problem} ` : ''}v${release.version} has replaced this copy ` +
+      `(${currentVersion || '—'}), so ZENKTX stays closed until you install it. ` +
+      `The download is ${size}; it closes this window and opens the new version.`
+    : `You are on v${currentVersion || '—'}. Updating downloads ${size}, closes this copy ` +
+      'and opens the new version by itself.';
+  // There is no "later" on a copy the owner has already retired.
+  $('updLater').hidden = forced;
 
   const notes = noteLines(release.notes);
   const list = $('updNotes');
@@ -1472,7 +1482,9 @@ async function checkUpdates() {
   if (release) showUpdate(release);
 }
 
-// Nobody presses "check for updates": look once at launch and flag the button.
+// Nobody presses "check for updates": look once at launch, flag the button and
+// block the app until the installed copy is replaced. A check that cannot
+// reach GitHub leaves the app usable, so an offline machine still opens.
 function scheduleUpdateCheck() {
   setTimeout(async () => {
     const release = await fetchUpdate(true);
@@ -1480,7 +1492,7 @@ function scheduleUpdateCheck() {
     pendingUpdate = release;
     $('updateBtn').classList.add('alert');
     $('updateBtn').textContent = `Update ${release.version}`;
-    showUpdate(release);
+    showUpdate(release, { forced: true });
   }, 4000);
 }
 
@@ -1546,6 +1558,10 @@ $('promptCancel').addEventListener('click', () => $('dlgPrompt').close());
 
 $('updateBtn').addEventListener('click', checkUpdates);
 $('updLater').addEventListener('click', () => $('dlgUpdate').close());
+// Escape is not an exit from a required update.
+$('dlgUpdate').addEventListener('cancel', (event) => {
+  if (forcedUpdate) event.preventDefault();
+});
 $('updInstall').addEventListener('click', async () => {
   const asset = pendingUpdate && updateAsset(pendingUpdate);
   if (!asset) return;
@@ -1557,9 +1573,14 @@ $('updInstall').addEventListener('click', async () => {
     $('updInstall').textContent = 'Installing…';
   } catch (error) {
     $('updInstall').disabled = false;
-    $('updInstall').textContent = 'Install update';
     $('updProgress').hidden = true;
-    toast(`Update download failed: ${error.message}`);
+    if (forcedUpdate && pendingUpdate) {
+      // Stay on the sheet: retry is the only way forward.
+      showUpdate(pendingUpdate, { forced: true, problem: `The update download failed: ${error.message}` });
+    } else {
+      $('updInstall').textContent = 'Install update';
+      toast(`Update download failed: ${error.message}`);
+    }
   }
 });
 

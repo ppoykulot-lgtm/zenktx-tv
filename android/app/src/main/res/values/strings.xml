@@ -109,6 +109,10 @@ Thank you for supporting the project!</string>
     <string name="update_failed">Could not check for updates: %1$s</string>
     <string name="update_latest">You are on the latest version (%1$s).</string>
     <string name="update_install">Install</string>
+    <string name="update_required_title">Update required</string>
+    <string name="update_required_body">ZENKTX %1$s has replaced this copy (%2$s). The app stays closed until you install it.</string>
+    <string name="update_required_problem">The update did not finish: %1$s</string>
+    <string name="update_close">Close app</string>
 
     <!-- Player -->
     <string name="playback_error">Cannot play this channel (%1$s).\nTry another one.</string>

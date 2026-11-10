@@ -345,6 +345,8 @@ dialog.upd { width: min(470px, 92vw); }
 }
 .upd-notes li { margin: 0 0 4px; }
 .upd-notes li::marker { color: var(--mint); }
+/* A required update shows no Later button; :hidden alone loses to .btn. */
+.upd .row .btn[hidden] { display: none; }
 
 .progress { height: 6px; border-radius: 999px; background: #1d2843; overflow: hidden; margin: 12px 0 8px; }
 .progress div { height: 100%; width: 0; background: var(--mint); transition: width .2s; }
