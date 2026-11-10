@@ -1,5 +1,5 @@
 {
- "maintenance": false,
- "message": "Maintenance mode.",
- "updatedAt": "2026-11-10T06:56:03Z"
+ "maintenance": true,
+ "message": "Maintenance Mode.",
+ "updatedAt": "2026-11-10T06:56:26Z"
 }
