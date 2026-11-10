@@ -171,4 +171,6 @@ Thank you for supporting the project!</string>
     <string name="player_hint_zap_label">Channel</string>
     <string name="player_hint_ok_label">Controls</string>
     <string name="player_hint_exit_label">Exit</string>
+    <string name="player_hint_guide_label">Guide</string>
+    <string name="player_hint_bar">OK then ▶ to the Guide</string>
 </resources>

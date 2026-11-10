@@ -138,6 +138,9 @@
                 android:textColor="@color/text"
                 android:textSize="12sp" />
 
+            <!-- Not a D-pad stop. A focused SeekBar eats ◀ ▶ to scrub, so the
+                 remote could never walk past it to the quality chip or the
+                 Guide: live TV has nothing to scrub anyway. -->
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="0dp"
@@ -145,6 +148,7 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:layout_weight="1"
+                android:focusable="false"
                 android:max="1000"
                 android:progressBackgroundTint="#33FFFFFF"
                 android:progressTint="@color/mint"
@@ -183,6 +187,7 @@
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/player_volume"
                 android:focusable="true"
+                android:nextFocusRight="@+id/btnQuality"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_volume" />
@@ -191,6 +196,7 @@
                 android:id="@+id/volBar"
                 android:layout_width="110dp"
                 android:layout_height="wrap_content"
+                android:focusable="false"
                 android:max="100"
                 android:progress="100"
                 android:progressBackgroundTint="#33FFFFFF"
@@ -207,6 +213,8 @@
                 android:gravity="center"
                 android:letterSpacing="0.08"
                 android:minWidth="70dp"
+                android:nextFocusLeft="@+id/btnMute"
+                android:nextFocusRight="@+id/btnGuide"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:text="@string/player_quality_auto"
@@ -224,6 +232,8 @@
                 android:gravity="center"
                 android:letterSpacing="0.08"
                 android:minWidth="70dp"
+                android:nextFocusLeft="@+id/btnQuality"
+                android:nextFocusRight="@+id/btnPlay"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:text="@string/player_guide"
@@ -302,6 +312,30 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="7dp"
                 android:text="@string/player_hint_exit_label"
+                android:textColor="@color/muted"
+                android:textSize="9sp" />
+
+            <!-- Second way in: some remotes have no MENU key, so the bar is
+                 walked with ◀ ▶ and the Guide chip is the last stop. -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:layout_marginStart="18dp"
+                android:background="@drawable/bg_keycap"
+                android:gravity="center"
+                android:minWidth="26dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:text="@string/key_menu"
+                android:textColor="@color/text"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:text="@string/player_hint_guide_label"
                 android:textColor="@color/muted"
                 android:textSize="9sp" />
         </LinearLayout>

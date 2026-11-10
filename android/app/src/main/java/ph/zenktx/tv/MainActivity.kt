@@ -102,6 +102,9 @@ class MainActivity : Activity() {
 
     private var welcomeAt = 0L
     private var welcomeAnim: ObjectAnimator? = null
+    /** True once the admin kill switch has been read: nothing un-stops it here. */
+    private var stopped = false
+    private val hideWelcomeNow = Runnable { hideWelcome() }
 
     private val clockHandler = Handler(Looper.getMainLooper())
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -226,7 +229,7 @@ class MainActivity : Activity() {
         // Android hands the first focus to whatever focusable it meets first,
         // which is the MENU pill in the header. The guide is the screen, so the
         // grid takes it back as soon as the window settles.
-        if (hasFocus && ::binding.isInitialized &&
+        if (hasFocus && ::binding.isInitialized && !stopped &&
             binding.welcomePanel.root.visibility != View.VISIBLE
         ) {
             focusFirstTile()
@@ -258,11 +261,13 @@ class MainActivity : Activity() {
             }
         // A ceiling as well as a floor: a slow catalogue read used to keep this
         // screen up for ten seconds or more, which read as a hang.
-        binding.root.postDelayed({ hideWelcome() }, WELCOME_MAX_MS)
+        binding.root.postDelayed(hideWelcomeNow, WELCOME_MAX_MS)
     }
 
     private fun hideWelcome() {
         if (!::binding.isInitialized) return
+        // The kill switch owns the screen from here on.
+        if (stopped) return
         val panel = binding.welcomePanel.root
         if (panel.visibility != View.VISIBLE) return
         val remaining = WELCOME_MIN_MS - (SystemClock.elapsedRealtime() - welcomeAt)
@@ -284,15 +289,32 @@ class MainActivity : Activity() {
      * The kill switch: the welcome screen becomes the notice and nothing else
      * loads. There is no "continue" button, and the state survives a restart
      * without a network, because the last published answer is cached.
+     *
+     * The answer arrives after the splash has already faded, so the panel is
+     * brought back here -- hiding only the guide used to leave a black screen
+     * with the message inside a view that was no longer on screen.
      */
     private fun showStopped(message: String) {
+        stopped = true
         clockHandler.removeCallbacks(refreshTick)
+        binding.root.removeCallbacks(hideWelcomeNow)
+
+        welcomeAnim?.cancel()
+        welcomeAnim = null
+
+        val panel = binding.welcomePanel.root
+        panel.animate().cancel()
+        panel.alpha = 1f
+        panel.visibility = View.VISIBLE
+        panel.requestFocus()
+
         binding.welcomePanel.welcomeLoading.visibility = View.GONE
         binding.welcomePanel.welcomeNotice.visibility = View.VISIBLE
         binding.welcomePanel.welcomeNotice.text =
             message.ifBlank { getString(R.string.maintenance_body) }
 
         binding.content.visibility = View.GONE
+        binding.status.visibility = View.GONE
     }
 
     // ---- loading ----------------------------------------------------------
@@ -304,6 +326,8 @@ class MainActivity : Activity() {
         }
 
         scope.launch {
+            // Already stopped: do not paint a catalogue behind the notice.
+            if (stopped) return@launch
             // Paint the list that ships inside the APK before touching the
             // network. The read below takes seconds on a slow box, and a guide
             // that says "0 channels" for that long looks broken.
@@ -554,7 +578,7 @@ class MainActivity : Activity() {
     private fun scheduleUpdateCheck() {
         if (!settings.autoCheckUpdates()) return
         binding.root.postDelayed({
-            if (!isFinishing && !isDestroyed) Updater.check(this, silent = true)
+            if (!isFinishing && !isDestroyed && !stopped) Updater.check(this, silent = true)
         }, 2_500)
     }
 

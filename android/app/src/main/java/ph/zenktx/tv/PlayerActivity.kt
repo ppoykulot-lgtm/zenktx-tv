@@ -131,7 +131,18 @@ class PlayerActivity : Activity() {
         }.start()
     }
 
-    private val hideControls = Runnable { setControlsVisible(false) }
+    // Never pull the bar out from under the D-pad: while one of its views holds
+    // focus the remote is still walking it, so the timer starts again instead of
+    // hiding the very thing the viewer is aiming at.
+    private val hideControls = Runnable { hideControlsWhenIdle() }
+
+    private fun hideControlsWhenIdle() {
+        if (tvDpad && ::binding.isInitialized && binding.controls.hasFocus()) {
+            main.postDelayed(hideControls, CONTROLS_MS)
+        } else {
+            setControlsVisible(false)
+        }
+    }
 
     /** Keeps the clock and the seek bar honest without touching the video. */
     private val ticker = object : Runnable {
@@ -292,8 +303,9 @@ class PlayerActivity : Activity() {
         main.removeCallbacks(hideControls)
         main.postDelayed(hideControls, CONTROLS_MS)
         // A remote has to land on something: the play button is the leftmost
-        // stop, so OK on the picture then ◀▶ walks the bar from there.
-        if (tvDpad) binding.btnPlay.requestFocus()
+        // stop, so OK on the picture then ◀▶ walks the bar from there. If the
+        // viewer is already somewhere on the bar, leave the focus there.
+        if (tvDpad && !binding.controls.hasFocus()) binding.btnPlay.requestFocus()
     }
 
     private fun toggleControls() = setControlsVisible(binding.controls.visibility != View.VISIBLE)
@@ -303,7 +315,18 @@ class PlayerActivity : Activity() {
         if (visible) {
             main.removeCallbacks(hideControls)
             main.postDelayed(hideControls, CONTROLS_MS)
+        } else if (binding.controls.hasFocus()) {
+            // Give the remote back to the picture, or the next press lands on a
+            // view that is no longer on screen.
+            binding.playerView.requestFocus()
         }
+    }
+
+    /** A press while the bar is up means it is in use, so the timer restarts. */
+    private fun keepControls() {
+        if (binding.controls.visibility != View.VISIBLE) return
+        main.removeCallbacks(hideControls)
+        main.postDelayed(hideControls, CONTROLS_MS)
     }
 
     private fun togglePlayback() {
@@ -871,6 +894,7 @@ class PlayerActivity : Activity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         val inErrorPanel = binding.errorPanel.visibility == View.VISIBLE
         val controlsUp = binding.controls.visibility == View.VISIBLE
+        if (controlsUp) keepControls()
         return when (keyCode) {
             KeyEvent.KEYCODE_CHANNEL_UP,
             KeyEvent.KEYCODE_MEDIA_NEXT -> {
