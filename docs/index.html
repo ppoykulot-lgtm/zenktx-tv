@@ -749,7 +749,15 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.10 <span class="tagx">latest</span></h3>
+        <h3>1.5.11 <span class="tagx">latest</span></h3>
+        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
+        <ul>
+          <li><b>An old copy cannot open the guide any more.</b> Every build asks the release feed on launch which number is current, and if a newer one is there it blocks itself until that build is installed: Android TV and mobile show one dialog carrying <i>Download update</i> and <i>Close app</i>, Windows shows its update sheet with the <i>Later</i> button gone. Back, Escape and swiping the dialog away no longer lead anywhere, a download that fails returns to the same block with the reason printed above it, and coming back from the installer without updating blocks again. The check runs whatever the update preference says; the manual check in Settings keeps its ordinary prompt. A device that cannot reach GitHub is left alone instead of being locked out.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.10</h3>
         <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
         <ul>
           <li><b>The donation sheet shows what you left switched on.</b> Both codes shipped inside every build and stayed there whatever admin.html said, so a viewer could scan a method you had already turned off. All three builds now read the same <i>donation.json</i> the site reads before they paint the sheet: a method set to off loses its card, the hint names the one that is left, and with both off the codes give way to the paused line. Only an explicit <i>false</i> hides a code, so a dead network never hides the only way to give.</li>
@@ -787,16 +795,6 @@
           <li><b>The guide opens on your list, not on last build's.</b> The first paint used the catalogue baked into the APK, so a channel removed in admin.html still appeared for a second or two and then vanished when the network answer landed. It paints the catalogue downloaded on the previous launch first, so what you see is what you published.</li>
         </ul>
       </article>
-
-      <article class="entry">
-        <h3>1.5.6</h3>
-        <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
-        <ul>
-          <li><b>The artwork fills the tile.</b> The logo sat in a fixed box with a wide strip of empty card either side of it, which is why it read as a stamp on a 65″ screen. It now takes every pixel above the name, edge to edge, so a channel is recognised by its mark from across the room.</li>
-          <li><b>The highlighted tile has light under it.</b> Focus draws a soft mint halo that fades out from the frame — six 1dp rings outside an inset card, because a gradient behind the card only ever shows its faintest rim. The card is inset 6dp so it does not change size when focus moves.</li>
-        </ul>
-      </article>
-
 
       </div>
     </div>
@@ -893,8 +891,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.10", mobile: "1.5.10", win: "1.5.10" };
-  const TAGS = { tv: "v1.5.10", mobile: "v1.5.10", win: "v1.5.10" };
+  const VERSIONS = { tv: "1.5.11", mobile: "1.5.11", win: "1.5.11" };
+  const TAGS = { tv: "v1.5.11", mobile: "v1.5.11", win: "v1.5.11" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
