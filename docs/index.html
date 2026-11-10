@@ -749,7 +749,27 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.7 <span class="tagx">latest</span></h3>
+        <h3>1.5.9 <span class="tagx">latest</span></h3>
+        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.8</div>
+        <ul>
+          <li><b>The remote can reach the Guide.</b> The bar could not be walked past the running-time slider: a focused slider eats left and right to scrub, so the quality chip and the Guide were unreachable from the sofa. The sliders are no longer D-pad stops on the TV layout, and the bar chains Play → Mute → Auto → Guide with the same path back.</li>
+          <li><b>The bar waits while you walk it.</b> The hide timer kept counting while the D-pad was still moving, so the bar could vanish mid-step and leave the picture with no way to ask for the schedule. Every press restarts it, and it stays up while one of its buttons has focus.</li>
+          <li><b>Maintenance shows your message, not a black screen.</b> Published while the app was already open, the notice was written into the welcome panel that had faded out long before, and the guide was hidden as well — a black screen with nothing to read. The panel now comes back with the text you wrote in admin.html, and the app stops loading channels and update checks behind it.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.8</h3>
+        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
+        <ul>
+          <li><b>A channel that expires heals itself.</b> The provider hands out a link that stops working after a while and then answers HTTP 410, and every build kept the session it opened on the first launch, so a channel that expired sat on an error until the app was restarted. Each playback opens its own session now, and a 410 under the picture is retried once in the background.</li>
+          <li><b>The player has a guide.</b> A chip on the bar says what is on now and next from the published <i>epg.json</i>, and Guide — MENU on a remote, <i>G</i> on Windows — opens the channel's schedule without leaving the picture.</li>
+          <li><b>Nothing arrives stale.</b> The guide and the channel list were fetched through the normal cache, so a change published in admin.html could sit behind an old copy. Those requests ask for a fresh answer every time, on all three builds.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.7</h3>
         <div class="meta">8 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.1</div>
         <ul>
           <li><b>Every category says how many channels it holds.</b> The count sits after the name in a lighter weight — <i>Pinoy 129</i>, <i>News 80</i> — so the row answers whether Kids is worth opening before the D-pad walks into an empty grid. Favourites counts itself as you star a tile.</li>
@@ -778,31 +798,9 @@
         </ul>
       </article>
 
-      <article class="entry">
-        <h3>1.5.4</h3>
-        <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
-        <ul>
-          <li><b>The categories are one row again, without a label.</b> Wrapped, the band grew a second line that sat flush under the first with no gap and pushed the guide down the screen. It is a single line that slides sideways now, with the chip at the edge fading out instead of being sliced in half, and the <i>BROWSE</i> caption is gone.</li>
-          <li><b>The logos take the card.</b> A 50dp mark inside a 100dp cell still read as a stamp from the sofa. The cell is 128dp and the artwork 84dp — the tile is now mostly logo, with the name under it.</li>
-          <li><b>The search bar is centred</b> under the categories instead of hanging off the left edge.</li>
-          <li><b>The player bar is one row.</b> It stacked a time row above a button row, so the running time and the duration were painted over the volume and the pause button. Play first, then the elapsed time, the timeline, where the stream ends, the sound and the quality — one line, in the order a remote walks it.</li>
-          <li><b>Each release has its own card on this page.</b> The five entries were nested inside the newest one's article, so every version inherited its padding and ran into the block above it. They are separate cards now, and the older releases are off the page entirely — the releases page still has them.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.3</h3>
-        <div class="meta">7 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.1</div>
-        <ul>
-        <li><b>The TV guide is rebuilt around the remote.</b> The categories are a labelled band that wraps instead of scroll-jumping under the highlight, the search bar sits under them and says <i>Search channel</i>, and the six-column grid of 84dp cells became five columns of 100dp cards with 50dp logos — on a 65” screen the artwork was the smallest thing on it.</li>
-        <li><b>A highlighted tile no longer disappears under the categories.</b> Every cell lifted 6dp and scaled by 6% on focus, straight into the clip at the top of the grid, so its top edge and sometimes its name were cut. The grid now keeps the room for that lift, the chips row no longer scrolls itself when it takes focus, and the bottom of the guide is a legend of the D-pad keys instead of the detail strip.</li>
-        <li><b>Channel hopping is one press.</b> The CH ▲ / CH ▼ pair, the favourite star and the ✕ over the picture are gone. On the picture, ▲ ▼ ◀ ▶ change channel and the banner names the new one — <i>CH 214 / 465</i> — without raising the control bar over the picture, which is what made zapping feel messy. OK raises the bar, BACK lowers it, and a second BACK leaves the player.</li>
-        <li><b>The splash gets out of the way.</b> The welcome screen held the guide back for a full ten seconds after the catalogue had already arrived, and a slow read kept it on screen even longer while it said <i>Loading channels…</i>. It now has a floor and a ceiling — it clears after 1.2s at the earliest and never later than 2.5s, with the grid filling in behind it — and the first tile takes focus as it lifts, so OK plays straight away.</li>
-        <li><b>Logos stay where they are.</b> Artwork was cached for only as long as the host's ten-minute header allowed, and a request that timed out during the burst on launch was dropped until the tile was rebound — the same channel had a logo one launch and none the next. Logos now live in a 96 MB disk cache that ignores that header, and a failed request is retried twice before the cell stays empty.</li>
-        </ul>
-      </article>
-
-      </section>
+      </div>
+    </div>
+  </section>
   </main>
 
   <section id="support">
@@ -895,8 +893,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.7", mobile: "1.5.7", win: "1.5.1" };
-  const TAGS = { tv: "v1.5.7", mobile: "v1.5.7", win: "v1.5.1" };
+  const VERSIONS = { tv: "1.5.9", mobile: "1.5.9", win: "1.5.8" };
+  const TAGS = { tv: "v1.5.9", mobile: "v1.5.9", win: "v1.5.8" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
