@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
@@ -70,13 +71,63 @@ async function fetchText(url, token) {
     throw new Error(`Could not reach the server (${cause})`);
   }
 
-  const body = await response.text();
+  const body = await response.arrayBuffer();
   if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-  return body;
+
+  // The guide is published as a plain .gz file, not with a Content-Encoding, so
+  // fetch() hands back the compressed bytes instead of unpacking them.
+  const buffer = Buffer.from(body);
+  if (buffer.length > 2 && buffer[0] === 0x1f && buffer[1] === 0x8b) {
+    return zlib.gunzipSync(buffer).toString('utf8');
+  }
+  return buffer.toString('utf8');
 }
 
 function base64(text) {
   return Buffer.from(text, 'utf8').toString('base64');
+}
+
+// ---------------------------------------------------------------------------
+// Media sessions. Chromium keeps one cookie jar and one socket pool per
+// session, so a player that reuses them walks into the provider's HTTP 410
+// with the previous channel's cookies still attached -- the reason a second
+// copy of the app played a link the first copy kept refusing. Every playback
+// now starts from an empty pool with the stream host's cookies dropped.
+// ---------------------------------------------------------------------------
+const MEDIA_URL =
+  /\.(m3u8|mpd|mp4|m4s|m4f|m4a|m4v|ts|aac|mp3|key|cmfv|cmfa|vtt|webvtt)(\?|#|$)/i;
+
+let mediaSession = { id: '', origin: '', startedAt: 0 };
+
+function originOf(url) {
+  try {
+    const parsed = new URL(url);
+    return /^https?:$/.test(parsed.protocol) ? `${parsed.protocol}//${parsed.host}` : '';
+  } catch {
+    return '';
+  }
+}
+
+async function beginMediaSession(ses, url) {
+  const origin = originOf(url);
+
+  // Sockets: a pooled connection carries the TLS session and HTTP/2 stream the
+  // provider already answered 410 on.
+  try { await ses.closeAllConnections(); } catch { /* older Electron */ }
+  // Disk and memory cache: a cached playlist is yesterday's token.
+  try { await ses.clearCache(); } catch { /* nothing cached */ }
+  if (origin) {
+    try { await ses.clearStorageData({ storages: ['cookies'], origin }); } catch { /* no cookies */ }
+  }
+
+  mediaSession = { id: crypto.randomUUID(), origin, startedAt: Date.now() };
+  return mediaSession.id;
+}
+
+async function endMediaSession(ses) {
+  try { await ses.closeAllConnections(); } catch { /* already closed */ }
+  mediaSession = { id: '', origin: '', startedAt: 0 };
+  return true;
 }
 
 // electron-builder's portable target unpacks itself to a temp folder and
@@ -117,10 +168,19 @@ function createWindow() {
     win.webContents.on('did-finish-load', async () => {
       try {
         const report = await win.webContents.executeJavaScript(`(async () => {
-          const deadline = Date.now() + 8000;
+          const deadline = Date.now() + ${Number(process.env.SMOKE_WAIT || 8000)};
           while (Date.now() < deadline) {
             if (document.querySelectorAll('.tile').length > 0) break;
             await new Promise((r) => setTimeout(r, 100));
+          }
+          let epg = null;
+          if (window.ZenkEpg) {
+            await window.ZenkEpg.load((url) => window.zenk.fetchText(url));
+            epg = {
+              size: window.ZenkEpg.size(),
+              gma: window.ZenkEpg.schedule('GMA').slice(0, 2).map((p) => p.title),
+              now: (window.ZenkEpg.now('GMA') || {}).title || ''
+            };
           }
           return {
             tiles: document.querySelectorAll('.tile').length,
@@ -130,7 +190,8 @@ function createWindow() {
             hls: typeof window.Hls !== 'undefined',
             dash: typeof window.dashjs !== 'undefined',
             csp: window.__zenkCsp || [],
-            error: window.__zenkError || ''
+            error: window.__zenkError || '',
+            epg
           };
         })()`);
         console.log('SMOKE ' + JSON.stringify(report));
@@ -143,7 +204,7 @@ function createWindow() {
           const results = await win.webContents.executeJavaScript(`(async () => {
             const out = [];
             const candidates = '${type}'.startsWith('http')
-              ? [{ name: 'direct', url: '${type}', streamType: /\.mpd$/i.test('${type}') ? 'mpd' : 'hls' }]
+              ? [{ name: 'direct', category: 'Playlist', url: '${type}', streamType: /\.mpd$/i.test('${type}') ? 'mpd' : 'hls' }]
               : state.visible.filter((c) => c.streamType === '${type}').slice(0, 3);
             for (const channel of candidates) {
               play(channel);
@@ -201,9 +262,15 @@ app.whenReady().then(() => {
   const netSession = session.defaultSession;
   netSession.webRequest.onBeforeSendHeaders((details, callback) => {
     if (!/^https?:/i.test(details.url)) return callback({ requestHeaders: details.requestHeaders });
-    callback({
-      requestHeaders: Object.assign({}, details.requestHeaders, { 'User-Agent': USER_AGENT }),
-    });
+    const headers = Object.assign({}, details.requestHeaders, { 'User-Agent': USER_AGENT });
+    if (MEDIA_URL.test(details.url)) {
+      // Every request for a playlist or a segment asks for the live copy. The
+      // tokens these providers hand out roll over, and a revalidated 200 from
+      // the cache is the one answer that keeps a dead channel dead.
+      headers['Cache-Control'] = 'no-cache';
+      headers.Pragma = 'no-cache';
+    }
+    callback({ requestHeaders: headers });
   });
   netSession.webRequest.onHeadersReceived((details, callback) => {
     if (!/^https?:/i.test(details.url)) return callback({ responseHeaders: details.responseHeaders });
@@ -212,8 +279,22 @@ app.whenReady().then(() => {
       if (key.toLowerCase() === 'access-control-allow-origin') delete headers[key];
     }
     headers['Access-Control-Allow-Origin'] = ['*'];
+    if (MEDIA_URL.test(details.url)) {
+      // Nor does the answer stay on disk: the next playback asks again.
+      for (const key of Object.keys(headers)) {
+        const name = key.toLowerCase();
+        if (name === 'cache-control' || name === 'expires' || name === 'etag' ||
+            name === 'last-modified' || name === 'age') delete headers[key];
+      }
+      headers['Cache-Control'] = ['no-store, no-cache, must-revalidate'];
+    }
     callback({ responseHeaders: headers });
   });
+
+  // The renderer calls these around a playback so each one owns its own HTTP
+  // identity instead of inheriting the last channel's.
+  ipcMain.handle('media:begin', (_event, url) => beginMediaSession(session.defaultSession, url));
+  ipcMain.handle('media:end', () => endMediaSession(session.defaultSession));
 
   ipcMain.handle('app:bundled-channels', () => {
     const file = path.join(ROOT, 'assets', 'channels.json');

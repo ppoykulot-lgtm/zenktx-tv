@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('zenk', {
   githubPush: (cfg, content, message) => ipcRenderer.invoke('net:github-push', cfg, content, message),
   openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
   setFullscreen: (on) => ipcRenderer.invoke('app:set-fullscreen', on),
+  mediaBegin: (url) => ipcRenderer.invoke('media:begin', url),
+  mediaEnd: () => ipcRenderer.invoke('media:end'),
   checkUpdate: () => ipcRenderer.invoke('app:check-update'),
   installUpdate: (url, name) => ipcRenderer.invoke('app:install-update', url, name),
   onUpdateProgress: (callback) =>

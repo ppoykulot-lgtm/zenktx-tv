@@ -141,6 +141,7 @@
         </div>
         <div class="pbar-right">
           <button class="skin-chip" id="skinBtn" title="Switch the player design">Glass</button>
+          <button class="skin-chip" id="guideBtn" title="Programme guide (G)">Guide</button>
           <span class="quality" id="pQuality">AUTO</span>
           <button class="icon-btn" id="fsBtn" title="Fullscreen (F11)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 9.2V4.6h4.6M19.4 9.2V4.6h-4.6M4.6 14.8v4.6h4.6M19.4 14.8v4.6h-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
@@ -151,6 +152,7 @@
         <div class="pinfo-text">
           <b id="pInfoName">—</b>
           <small id="pInfoMeta">—</small>
+          <small class="epg" id="pEpg" hidden><b>NOW</b> <span id="pEpgNow">—</span><em>·</em><b>NEXT</b> <span id="pEpgNext">—</span></small>
         </div>
         <button class="btn pinfo-fav" id="pFav" title="Toggle favourite">☆</button>
         <div class="pclock" title="Local time">
@@ -161,6 +163,16 @@
       </div>
     </section>
   </div>
+
+  <!-- programme guide -->
+  <dialog id="dlgGuide">
+    <h3 id="guideTitle">Guide</h3>
+    <p>What is on until the guide runs out. Times are your local time.</p>
+    <div class="list" id="guideList"></div>
+    <div class="row">
+      <button class="btn mint" id="guideClose">Close</button>
+    </div>
+  </dialog>
 
   <!-- playlists dialog -->
   <dialog id="dlgPlaylists">
@@ -216,6 +228,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <script src="epg.js"></script>
   <script src="vendor/hls.min.js"></script>
   <script src="vendor/dash.all.min.js"></script>
   <script src="vendor/shaka-player.compiled.js"></script>

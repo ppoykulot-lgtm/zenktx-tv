@@ -21,7 +21,6 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.drm.DefaultDrmSessionManager
@@ -30,18 +29,22 @@ import androidx.media3.exoplayer.drm.ExoMediaDrm
 import androidx.media3.exoplayer.drm.FrameworkMediaDrm
 import androidx.media3.exoplayer.drm.LocalMediaDrmCallback
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import ph.zenktx.tv.data.Channel
 import ph.zenktx.tv.data.ChannelRepository
+import ph.zenktx.tv.data.Epg
 import ph.zenktx.tv.data.LibraryStore
 import ph.zenktx.tv.databinding.ActivityPlayerBinding
-import ph.zenktx.tv.net.Http
+import ph.zenktx.tv.net.StreamSession
 import ph.zenktx.tv.ui.Logos
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -77,6 +80,13 @@ class PlayerActivity : Activity() {
     /** Set per channel, before the media source is built. */
     private var clearKey: DrmSessionManager? = null
 
+    /**
+     * This playback's own HTTP identity: fresh cookies, fresh sockets. A player
+     * that reuses the connection it was just refused on reads 410 forever, which
+     * is why opening the app a second time used to be the only cure.
+     */
+    private var session: StreamSession? = null
+
     private var queue: List<Channel> = emptyList()
     private var index = 0
 
@@ -98,6 +108,10 @@ class PlayerActivity : Activity() {
 
     /** Height chosen in the quality menu; 0 means Auto. */
     private var qualityHeight = 0
+
+    /** The guide is read once per visit, off the main thread. */
+    private var guideLoading = false
+    private var guideReady = false
     private var draggingSeek = false
     private var savedVolume = 1f
 
@@ -176,6 +190,7 @@ class PlayerActivity : Activity() {
         binding.btnPlay.setOnClickListener { togglePlayback() }
         binding.btnMute.setOnClickListener { toggleMute() }
         binding.btnQuality.setOnClickListener { showQuality() }
+        binding.btnGuide.setOnClickListener { showGuide() }
 
         binding.volBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) {
@@ -214,6 +229,7 @@ class PlayerActivity : Activity() {
         playCurrent()
         showControls()
         main.post(ticker)
+        loadGuide()
     }
 
     /** A view only one flavour's layout carries, looked up without R.id. */
@@ -405,6 +421,71 @@ class PlayerActivity : Activity() {
         exo.trackSelectionParameters = params.build()
     }
 
+    // ---- guide ------------------------------------------------------------
+
+    /**
+     * The schedule comes from the published XMLTV guide, not from the stream,
+     * so it is fetched once and cached on disk. A player that waited for it
+     * would hold a black screen for a download the viewer never asked for.
+     */
+    private fun loadGuide() {
+        if (guideLoading) return
+        guideLoading = true
+        Thread {
+            val context = applicationContext
+            runCatching {
+                if (Epg.cached(context).isEmpty() || Epg.stale(context)) Epg.refresh(context)
+            }
+            main.post {
+                if (isFinishing) return@post
+                guideLoading = false
+                guideReady = true
+                queue.getOrNull(index)?.let { showEpg(it) }
+            }
+        }.start()
+    }
+
+    /** One line under the channel name: what is on, then what follows. */
+    private fun showEpg(channel: Channel) {
+        val now = Epg.now(channel.name)
+        val next = Epg.next(channel.name)
+        val text = when {
+            now != null && next != null ->
+                getString(R.string.epg_now, clockOf(now.start), now.title) + "   " +
+                    getString(R.string.epg_next, clockOf(next.start), next.title)
+
+            now != null -> getString(R.string.epg_now, clockOf(now.start), now.title)
+            next != null -> getString(R.string.epg_next, clockOf(next.start), next.title)
+            else -> ""
+        }
+
+        binding.epgNow.text = text
+        binding.epgNow.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+    }
+
+    /** The rest of today for this channel, in the same dialog style as Quality. */
+    private fun showGuide() {
+        val channel = queue.getOrNull(index) ?: return
+        showControls()
+
+        val rows = Epg.schedule(channel.name)
+        if (rows.isEmpty()) {
+            Toast.makeText(this, getString(R.string.epg_none), Toast.LENGTH_SHORT).show()
+            if (!guideLoading) loadGuide()
+            return
+        }
+
+        val labels = rows.map { "${clockOf(it.start)}\u2013${clockOf(it.stop)}   ${it.title}" }
+        AlertDialog.Builder(this, R.style.Theme_Zenktx_Dialog)
+            .setTitle(getString(R.string.epg_title, channel.name))
+            .setItems(labels.toTypedArray(), null)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun clockOf(epochMs: Long): String =
+        SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(epochMs))
+
     // ---- favourites -------------------------------------------------------
 
     /** The star follows the channel on screen, including after a channel hop. */
@@ -431,7 +512,14 @@ class PlayerActivity : Activity() {
     // ---- playback ---------------------------------------------------------
 
     private fun playCurrent() {
-        val channel = queue.getOrNull(index) ?: return
+        val queued = queue.getOrNull(index) ?: return
+        // Re-read the row before every start. The queue holds whatever address
+        // the channel had when it was picked, and these providers re-tokenise
+        // their links through the day.
+        val channel = ChannelRepository.byKey(queued.key) ?: queued
+        if (channel !== queued) {
+            queue = queue.toMutableList().also { it[index] = channel }
+        }
         sources = ChannelRepository.sourcesFor(channel)
         sourceIndex = 0
         liveRetried = false
@@ -461,8 +549,10 @@ class PlayerActivity : Activity() {
         clearKey = clearKeyManager(channel)
 
         binding.playerView.player = exo
-        exo.clearMediaItems()
-        exo.setMediaItem(mediaItemFor(channel, url))
+        // A new session per start, and the previous one is torn down first: its
+        // cookies and sockets must never leak into this attempt.
+        replaceSession()
+        exo.setMediaSource(sourceFor(channel, url))
         exo.prepare()
         exo.playWhenReady = true
 
@@ -495,29 +585,33 @@ class PlayerActivity : Activity() {
             .build()
     }
 
-    private fun buildPlayer(): ExoPlayer {
+    /** Starts a clean HTTP session, closing whatever the last playback left. */
+    private fun replaceSession(): StreamSession {
+        session?.close()
+        val fresh = StreamSession()
+        session = fresh
+        return fresh
+    }
+
+    /**
+     * The media source is built per playback instead of once per player, so it
+     * carries this attempt's data source: the current URL, this session's
+     * cookies and no cached manifest.
+     */
+    private fun sourceFor(channel: Channel, url: String): MediaSource {
         // A browser-like UA fixes most HTTP 403/404 failures from CDNs that
         // reject the default ExoPlayer agent.
-        val http = DefaultHttpDataSource.Factory()
-            .setUserAgent(Http.USER_AGENT)
-            .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(15_000)
-            .setReadTimeoutMs(20_000)
-            .setDefaultRequestProperties(
-                mapOf(
-                    "Accept" to "*/*",
-                    "Accept-Language" to "en-US,en;q=0.9",
-                )
-            )
+        val http = (session ?: replaceSession()).dataSource()
 
-        val sourceFactory = DefaultMediaSourceFactory(http)
+        return DefaultMediaSourceFactory(http)
             .setLoadErrorHandlingPolicy(DefaultLoadErrorHandlingPolicy(2))
             // Only consulted when the manifest turns out to be encrypted.
             .setDrmSessionManagerProvider { clearKey ?: DrmSessionManager.DUMMY }
+            .createMediaSource(mediaItemFor(channel, url))
+    }
 
-        val exo = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(sourceFactory)
-            .build()
+    private fun buildPlayer(): ExoPlayer {
+        val exo = ExoPlayer.Builder(this).build()
 
         exo.volume = savedVolume
 
@@ -539,7 +633,11 @@ class PlayerActivity : Activity() {
                 lastCode = error.errorCodeName
                 lastStatus =
                     (error.cause as? HttpDataSource.InvalidResponseCodeException)?.responseCode
-                if (!retryQuietly() && !nextSource()) fail(describe(error), error.errorCodeName)
+                // A refused link is not a hiccup: re-preparing it on the same
+                // session only spends the retries, so go straight to a mirror
+                // and then to a freshly pulled address.
+                if (!isLinkDead() && retryQuietly()) return
+                if (!nextSource()) fail(describe(error), error.errorCodeName)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -613,6 +711,12 @@ class PlayerActivity : Activity() {
         main.postDelayed(watchdog, 1_000)
         main.postDelayed({
             if (isFinishing || failed) return@postDelayed
+            val channel = queue.getOrNull(index) ?: return@postDelayed
+            val url = sources.getOrNull(sourceIndex) ?: channel.url
+            // Retrying over the same socket is what turned one 410 into a dead
+            // channel: start on a clean session instead.
+            replaceSession()
+            exo.setMediaSource(sourceFor(channel, url))
             exo.prepare()
             exo.playWhenReady = true
         }, RECOVER_DELAY_MS)
@@ -759,6 +863,7 @@ class PlayerActivity : Activity() {
 
         showFavouriteState()
         showPlayState()
+        showEpg(channel)
     }
 
     // ---- input ------------------------------------------------------------
@@ -780,6 +885,12 @@ class PlayerActivity : Activity() {
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
             KeyEvent.KEYCODE_HEADSETHOOK -> {
                 togglePlayback(); true
+            }
+
+            // INFO / GUIDE on a remote, and MENU on a phone remote app.
+            KeyEvent.KEYCODE_MENU,
+            KeyEvent.KEYCODE_INFO -> {
+                showGuide(); true
             }
 
             KeyEvent.KEYCODE_DPAD_CENTER,
@@ -838,5 +949,9 @@ class PlayerActivity : Activity() {
         main.removeCallbacksAndMessages(null)
         player?.release()
         player = null
+        // Every playlist this session fetched and every socket it opened goes
+        // with it; the next window is not supposed to inherit this one.
+        session?.close()
+        session = null
     }
 }

@@ -140,6 +140,12 @@ Thank you for supporting the project!</string>
     <string name="player_quality">Quality</string>
     <string name="player_quality_auto">Auto</string>
     <string name="player_volume">Volume</string>
+    <string name="player_guide">Guide</string>
+    <string name="epg_now">NOW %1$s · %2$s</string>
+    <string name="epg_next">NEXT %1$s · %2$s</string>
+    <string name="epg_loading">Guide: loading…</string>
+    <string name="epg_none">No guide data for this channel</string>
+    <string name="epg_title">Guide · %1$s</string>
     <string name="player_close">Close the player</string>
     <string name="maintenance_title">ZENKTX has stopped</string>
     <string name="maintenance_body">This project is no longer running. Thank you for watching.</string>

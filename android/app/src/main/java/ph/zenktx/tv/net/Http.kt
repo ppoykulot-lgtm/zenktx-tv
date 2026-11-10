@@ -1,8 +1,10 @@
 package ph.zenktx.tv.net
 
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.GZIPInputStream
 
 /**
  * Small blocking HTTP helper. Always called from a background thread.
@@ -19,6 +21,26 @@ object Http {
             val code = conn.responseCode
             if (code !in 200..299) throw IOException("HTTP $code")
             conn.inputStream.bufferedReader().use { it.readText() }
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    /**
+     * Raw bytes, for the guides that ship as a .gz file rather than as text.
+     * The gzip is unpacked here so callers always parse plain XMLTV.
+     */
+    fun getBytes(url: String, timeoutMs: Int = 30_000): ByteArray {
+        val conn = open(url, null, timeoutMs)
+        return try {
+            val code = conn.responseCode
+            if (code !in 200..299) throw IOException("HTTP $code")
+            val raw = conn.inputStream.use { it.readBytes() }
+            if (raw.size > 2 && raw[0] == 0x1f.toByte() && raw[1] == 0x8b.toByte()) {
+                GZIPInputStream(ByteArrayInputStream(raw)).use { it.readBytes() }
+            } else {
+                raw
+            }
         } finally {
             conn.disconnect()
         }

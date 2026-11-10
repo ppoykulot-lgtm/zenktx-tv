@@ -384,6 +384,8 @@ async function boot() {
   currentVersion = await window.zenk.version();
   document.title = `ZENKTX TV Stream — v${currentVersion}`;
   readLiveCache();
+  // Started alongside the channel list: two downloads, neither one waiting.
+  guideLoad();
   await loadAll();
   applyLive();
   rebuild();
@@ -393,6 +395,8 @@ async function boot() {
   // Awaited: the welcome screen covers this fetch, and a launch starts from the
   // current catalogue rather than from whatever was cached last time.
   if (Date.now() - catalogAt > CATALOG_TTL) await refreshCatalog();
+  // The guide is a second download; it never holds up the channel list.
+  guideLoad();
 }
 
 /* ------------------------------------------------------------ load failures */
@@ -735,13 +739,37 @@ function switchChannel(delta) {
   beginPlayback();
 }
 
-function beginPlayback() {
-  const channel = state.queue[state.index];
+// The address a channel carries in the queue is the address it had when the
+// viewer picked it. The published catalogue is re-read on every start so a
+// channel the admin fixed ten minutes ago is not played with its old link.
+function freshest(channel) {
+  const known = state.base.find((c) => c.key === channel.key);
+  if (!known || !known.url) return channel;
+  return Object.assign({}, channel, {
+    url: known.url,
+    streamType: known.streamType || channel.streamType,
+    drmType: known.drmType || channel.drmType,
+    keyId: known.keyId || channel.keyId,
+    drmKey: known.drmKey || channel.drmKey,
+  });
+}
+
+async function beginPlayback() {
+  let channel = state.queue[state.index];
   if (!channel) return;
+
+  channel = freshest(channel);
+  state.queue[state.index] = channel;
 
   cleanupPlayer();
   wantPlaying = true;
   state.failed = false;
+
+  // Start this playback on its own HTTP session: empty cookie jar, empty
+  // socket pool, no cached playlist. Without this the previous channel's
+  // cookies travelled into the next request and the provider answered 410.
+  try { await window.zenk?.mediaBegin?.(channel.url); } catch (error) { /* older build */ }
+
   state.sources = channelSources(channel);
   state.sourceIndex = 0;
   $('player').classList.add('on');
@@ -753,6 +781,8 @@ function beginPlayback() {
   $('pchipMeta').textContent = 'CONNECTING…';
   setImage($('pchipLogo'), channel.logo);
   updatePlayerInfo(channel);
+  showEpg(channel);
+  guideLoad();
   renderPlayerList();
 
   const video = $('video');
@@ -846,13 +876,22 @@ function playSource(channel) {
   } else if (type === 'hls' && window.Hls && window.Hls.isSupported()) {
     const hls = new window.Hls({
       enableWorker: true, backBufferLength: 30, maxBufferLength: 20, startFragPrefetch: true,
+      // Playlists and segments are fetched fresh for this playback only.
+      xhrSetup: (xhr) => {
+        try {
+          xhr.setRequestHeader('Cache-Control', 'no-cache');
+          xhr.setRequestHeader('Pragma', 'no-cache');
+        } catch (error) { /* request already opened */ }
+      },
     });
     state.hls = hls;
     hls.loadSource(sourceUrl);
     hls.attachMedia(video);
     hls.on(window.Hls.Events.ERROR, (_event, data) => {
       if (!data.fatal) return;
-      const code = data.response?.code;
+      // 410 arrives on the manifest, on a level playlist and on a segment, and
+      // older hls.js builds only carry it in networkDetails.
+      const code = data.response?.code || data.networkDetails?.status;
       window.__zenkLastStreamError = `${data.details}: ${data.error?.message || data.response?.text || ''}`;
       // The old code handed the detail name over as the failure code, so an
       // expired token arrived here as "manifestLoadError" and never reached the
@@ -1098,6 +1137,9 @@ function closePlayer() {
   togglePlayerFullscreen(false);
   stopPlayerChrome();
   cleanupPlayer();
+  // Drop the connections this playback was holding. Leaving them pooled is
+  // what made the next open inherit a session the provider had already closed.
+  try { window.zenk?.mediaEnd?.(); } catch (error) { /* older build */ }
   $('player').classList.remove('on');
   $('playerError').classList.remove('on');
 }
@@ -1546,6 +1588,71 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && !donateSheet.hidden) setDonate(false);
 });
 
+/* --------------------------------------------------------------- guide */
+
+function guideLoad() {
+  const epg = window.ZenkEpg;
+  if (!epg) return;
+  epg.load((url) => window.zenk.fetchText(url)).then(() => {
+    const channel = state.queue[state.index];
+    if (channel && $('player').classList.contains('on')) showEpg(channel);
+  }).catch(() => {});
+}
+
+function showEpg(channel) {
+  const epg = window.ZenkEpg;
+  const box = $('pEpg');
+  if (!epg || !box || !channel) return;
+
+  const now = epg.now(channel.name);
+  const following = epg.next(channel.name);
+  if (!now && !following) {
+    box.hidden = true;
+    return;
+  }
+
+  $('pEpgNow').textContent = now ? `${timeOf(now.start)} ${now.title}` : '—';
+  $('pEpgNext').textContent = following ? `${timeOf(following.start)} ${following.title}` : '—';
+  box.hidden = false;
+}
+
+function timeOf(epochMs) {
+  return new Date(epochMs).toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+}
+
+function openGuide() {
+  const channel = state.queue[state.index];
+  if (!channel) return;
+
+  const rows = window.ZenkEpg ? window.ZenkEpg.schedule(channel.name) : [];
+  $('guideTitle').textContent = `Guide \u00b7 ${channel.name}`;
+
+  const list = $('guideList');
+  list.innerHTML = '';
+  if (!rows.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'The guide has no schedule for this channel.';
+    list.appendChild(empty);
+  }
+  for (const row of rows) {
+    const line = document.createElement('div');
+    line.className = 'guide-row';
+    const when = document.createElement('b');
+    when.textContent = `${timeOf(row.start)}\u2013${timeOf(row.stop)}`;
+    const what = document.createElement('span');
+    what.textContent = row.title;
+    line.append(when, what);
+    list.appendChild(line);
+  }
+  $('dlgGuide').showModal();
+}
+
+$('guideBtn').addEventListener('click', openGuide);
+$('guideClose').addEventListener('click', () => $('dlgGuide').close());
+
 $('retryBtn').addEventListener('click', () => { state.failed = false; state.liveRetries = 0; beginPlayback(); });
 $('nextBtn').addEventListener('click', () => switchChannel(1));
 $('closeBtn').addEventListener('click', closePlayer);
@@ -1673,6 +1780,7 @@ document.addEventListener('keydown', (event) => {
     }
     if (event.key === 'ArrowUp') { event.preventDefault(); switchChannel(1); return; }
     if (event.key === 'ArrowDown') { event.preventDefault(); switchChannel(-1); return; }
+    if (event.key.toLowerCase() === 'g') { event.preventDefault(); openGuide(); return; }
     if (event.key === ' ' && !typing) {
       event.preventDefault();
       $('ppBtn').click();

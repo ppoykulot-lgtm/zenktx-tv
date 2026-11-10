@@ -66,6 +66,19 @@
                 android:textColor="@color/mint"
                 android:textSize="8sp"
                 android:textStyle="bold" />
+
+            <!-- What the guide says is on now, under the channel name. -->
+            <TextView
+                android:id="@+id/epgNow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:maxWidth="320dp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textColor="#D8E6FF"
+                android:textSize="10sp"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 
@@ -197,6 +210,23 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:text="@string/player_quality_auto"
+                android:textColor="@color/mint"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btnGuide"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/bg_player_chip"
+                android:focusable="true"
+                android:gravity="center"
+                android:letterSpacing="0.08"
+                android:minWidth="70dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="@string/player_guide"
                 android:textColor="@color/mint"
                 android:textSize="10sp"
                 android:textStyle="bold" />

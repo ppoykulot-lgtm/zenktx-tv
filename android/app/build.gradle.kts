@@ -125,6 +125,9 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-hls:$media3")
     implementation("androidx.media3:media3-exoplayer-dash:$media3")
     implementation("androidx.media3:media3-datasource:$media3")
+    // OkHttp gives each playback its own cookie jar and connection pool, which
+    // the stock HttpURLConnection data source cannot do.
+    implementation("androidx.media3:media3-datasource-okhttp:$media3")
     implementation("androidx.media3:media3-ui:$media3")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
