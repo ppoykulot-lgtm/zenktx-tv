@@ -749,7 +749,15 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.9 <span class="tagx">latest</span></h3>
+        <h3>1.5.10 <span class="tagx">latest</span></h3>
+        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
+        <ul>
+          <li><b>The donation sheet shows what you left switched on.</b> Both codes shipped inside every build and stayed there whatever admin.html said, so a viewer could scan a method you had already turned off. All three builds now read the same <i>donation.json</i> the site reads before they paint the sheet: a method set to off loses its card, the hint names the one that is left, and with both off the codes give way to the paused line. Only an explicit <i>false</i> hides a code, so a dead network never hides the only way to give.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.9</h3>
         <div class="meta">10 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.8</div>
         <ul>
           <li><b>The remote can reach the Guide.</b> The bar could not be walked past the running-time slider: a focused slider eats left and right to scrub, so the quality chip and the Guide were unreachable from the sofa. The sliders are no longer D-pad stops on the TV layout, and the bar chains Play → Mute → Auto → Guide with the same path back.</li>
@@ -789,14 +797,6 @@
         </ul>
       </article>
 
-      <article class="entry">
-        <h3>1.5.5</h3>
-        <div class="meta">8 November 2026 · Android TV · Android mobile and Windows unchanged</div>
-        <ul>
-          <li><b>Room above the first row.</b> The mint outline on a highlighted tile came within a hair of the search bar, because the grid sat 10dp under it and the tile lifts into that gap on focus. The gap is 18dp and the grid keeps 14dp of its own, so the ring now has air on every side; the cell is 120dp to keep two full rows on screen.</li>
-          <li><b>Discord and the download button sit at the edge on a phone.</b> With the nav links hidden under 860px nothing was pushing them right, so they sat against the brand with a wide empty strip down the side of the page.</li>
-        </ul>
-      </article>
 
       </div>
     </div>
@@ -893,8 +893,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.9", mobile: "1.5.9", win: "1.5.8" };
-  const TAGS = { tv: "v1.5.9", mobile: "v1.5.9", win: "v1.5.8" };
+  const VERSIONS = { tv: "1.5.10", mobile: "1.5.10", win: "1.5.10" };
+  const TAGS = { tv: "v1.5.10", mobile: "v1.5.10", win: "v1.5.10" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
