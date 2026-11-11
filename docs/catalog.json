@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T12:08:55Z",
+ "updatedAt": "2026-11-11T12:09:54Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -1573,9 +1573,9 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "ac87b335cfd44a8589f96a4f8534c674",
-   "key": "4b9066c7778e74b899c2f57d977149b1",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+   "keyId": "b750a40736a24e60b5a4f256208b92c5",
+   "key": "af07292597f692726dcac2bd297ddf8e",
+   "note": ""
   },
   {
    "id": 53,
