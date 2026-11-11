@@ -70,7 +70,9 @@ object Logos {
                 // The host's ten-minute Cache-Control is what emptied the guide
                 // between launches; the files themselves never change.
                 .respectCacheHeaders(false)
-                .crossfade(true)
+                // No crossfade: every badge refresh rebinds the tiles, and a
+                // fade on each rebind is what read as a logo "still loading".
+                .crossfade(false)
                 .build()
                 .also { loader = it }
         }
@@ -95,6 +97,13 @@ object Logos {
                 logo.setImageDrawable(fallback)
                 logo.visibility = View.VISIBLE
             }
+            return
+        }
+
+        // A rebind (badge refresh, resume) must not throw away artwork that is
+        // already painted: the grid asked for the same address as before.
+        if (logo.tag == address && logo.drawable != null) {
+            logo.visibility = View.VISIBLE
             return
         }
 

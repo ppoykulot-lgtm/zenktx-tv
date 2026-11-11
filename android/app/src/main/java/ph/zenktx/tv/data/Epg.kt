@@ -1,6 +1,7 @@
 package ph.zenktx.tv.data
 
 import android.content.Context
+import org.json.JSONArray
 import org.json.JSONObject
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
@@ -21,23 +22,34 @@ data class Program(
  * The electronic programme guide.
  *
  * The apps do not carry a schedule: these are free channels and whatever guide
- * covers them is published elsewhere, so [INDEX_URL] names the XMLTV feed the
+ * covers them is published elsewhere, so [INDEX_URL] names the XMLTV feeds the
  * apps should read. Republishing `docs/epg.json` moves every installed copy onto
  * a better guide without an APK.
  *
- * The XMLTV channel ids ("GMA.ph") mean nothing to a catalogue row called
- * "GMA HD", so rows are matched on their display names, normalised the same way
- * the mirror search normalises channel names.
+ * Two feeds are read and merged. One feed alone is not enough: epgshare01 knows
+ * GMA and TV5 but its per-channel coverage comes and goes, while iptv-epg has
+ * eighty channels with a full day each but has never heard of GMA. Merged, a
+ * channel is covered when either feed has it.
+ *
+ * What was fetched is merged with what the device already had rather than
+ * replacing it, and the merged rows are cached as JSON. A feed that ships a
+ * truncated or half-generated file can therefore only add rows, never erase a
+ * schedule that was already on the device.
  */
 object Epg {
 
     const val INDEX_URL = "https://ppoykulot-lgtm.github.io/zenktx-tv/epg.json"
 
     /** Used when the published index cannot be read. */
-    private const val DEFAULT_GUIDE =
-        "https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz"
+    private val DEFAULT_GUIDES = listOf(
+        "https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz",
+        "https://iptv-epg.org/files/epg-ph.xml.gz",
+    )
 
-    private const val FILE = "epg.xml"
+    /** Pre-merged-XML cache, kept only to absorb a guide downloaded by 1.5.11. */
+    private const val LEGACY_FILE = "epg.xml"
+
+    private const val FILE = "epg-cache.json"
     private const val TTL_MS = 6 * 60 * 60 * 1000L
 
     /** Two days back, two days ahead: enough for a live guide, small enough to hold. */
@@ -53,8 +65,12 @@ object Epg {
     @Volatile
     private var loadedOnce = false
 
-    /** Channel name as the guide spells it: no quality suffix, no punctuation. */
+    /**
+     * Channel name as the guide spells it: no quality suffix, no country prefix
+     * ("PH - A2Z"), no punctuation.
+     */
     fun normalise(name: String): String = name.lowercase()
+        .replace(Regex("^\\s*[a-z]{2}\\s*-\\s*"), "")
         .replace(Regex("\\b(hd|fhd|sd|uhd|4k)\\b"), " ")
         .replace(Regex("[^a-z0-9]+"), " ")
         .trim()
@@ -64,12 +80,9 @@ object Epg {
         if (loadedOnce) return guide
         synchronized(this) {
             if (loadedOnce) return guide
-            val text = runCatching { File(context.applicationContext.filesDir, FILE).readText() }
-                .getOrDefault("")
-            if (text.isNotBlank()) {
-                guide = runCatching { parse(text) }.getOrDefault(emptyMap())
-                loadedAt = System.currentTimeMillis()
-            }
+            val app = context.applicationContext
+            guide = runCatching { readCache(app) }.getOrDefault(emptyMap())
+            loadedAt = System.currentTimeMillis()
             loadedOnce = true
             return guide
         }
@@ -84,20 +97,25 @@ object Epg {
     /** Blocking: downloads, parses and caches the guide. Background thread only. */
     fun refresh(context: Context): Boolean = synchronized(this) {
         val app = context.applicationContext
-        val url = runCatching { JSONObject(Http.getText(INDEX_URL, 10_000)).optString("url") }
-            .getOrDefault("")
-            .ifBlank { DEFAULT_GUIDE }
+        val existing = cached(context)
 
-        val text = runCatching { String(Http.getBytes(url), Charsets.UTF_8) }
-            .getOrNull()
-            ?.takeIf { it.contains("<tv") }
-            ?: return false
+        val fetched = ArrayList<Map<String, List<Program>>>()
+        for (url in guides(app)) {
+            val text = runCatching { String(Http.getBytes(url), Charsets.UTF_8) }
+                .getOrNull()
+                ?.takeIf { it.contains("<tv") }
+                ?: continue
+            val parsed = runCatching { parse(text) }.getOrDefault(emptyMap())
+            if (parsed.isNotEmpty()) fetched += parsed
+        }
+        if (fetched.isEmpty()) return false
 
-        val parsed = runCatching { parse(text) }.getOrDefault(emptyMap())
-        if (parsed.isEmpty()) return false
+        val merged = merge(existing, *fetched.toTypedArray())
+        if (merged.isEmpty()) return false
 
-        runCatching { File(app.filesDir, FILE).writeText(text) }
-        guide = parsed
+        runCatching { File(app.filesDir, FILE).writeText(serialise(merged)) }
+        runCatching { File(app.filesDir, LEGACY_FILE).delete() }
+        guide = merged
         loadedAt = System.currentTimeMillis()
         loadedOnce = true
         return true
@@ -125,6 +143,119 @@ object Epg {
         if (guide.isEmpty()) return emptyList()
         val key = normalise(channelName)
         return guide[key] ?: guide[key.removeSuffix(" tv").trim()] ?: emptyList()
+    }
+
+    // ---- feeds -------------------------------------------------------------
+
+    /**
+     * The guides the published index names. `urls` is the current shape; `url`
+     * is what 1.5.11 and older published, and it still has to work.
+     */
+    private fun guides(context: Context): List<String> {
+        val index = runCatching { JSONObject(Http.getText(INDEX_URL, 10_000)) }.getOrNull()
+            ?: return DEFAULT_GUIDES
+        val list = ArrayList<String>()
+        val urls = index.optJSONArray("urls")
+        if (urls != null) {
+            for (i in 0 until urls.length()) {
+                val url = urls.optString(i).trim()
+                if (url.startsWith("http")) list += url
+            }
+        }
+        if (list.isEmpty()) {
+            val url = index.optString("url").trim()
+            if (url.startsWith("http")) list += url
+        }
+        return if (list.isEmpty()) DEFAULT_GUIDES else list
+    }
+
+    private fun readCache(app: Context): Map<String, List<Program>> {
+        val json = File(app.filesDir, FILE)
+        if (json.exists()) {
+            val parsed = runCatching { parseCache(json.readText()) }.getOrDefault(emptyMap())
+            if (parsed.isNotEmpty()) return parsed
+        }
+        // A 1.5.11 cache is one merged XML file; read it once so the guide is
+        // not empty on the first launch after updating.
+        val legacy = File(app.filesDir, LEGACY_FILE)
+        if (!legacy.exists()) return emptyMap()
+        val text = runCatching { legacy.readText() }.getOrDefault("")
+        return if (text.isBlank()) emptyMap() else runCatching { parse(text) }.getOrDefault(emptyMap())
+    }
+
+    /** [{"key":[[title,start,stop,desc],…],…}] laid out as one flat JSON object. */
+    private fun serialise(rows: Map<String, List<Program>>): String {
+        val channels = JSONObject()
+        for ((key, list) in rows) {
+            val array = JSONArray()
+            for (program in list) {
+                array.put(
+                    JSONArray()
+                        .put(program.title)
+                        .put(program.start)
+                        .put(program.stop)
+                        .put(program.description),
+                )
+            }
+            channels.put(key, array)
+        }
+        return JSONObject()
+            .put("at", System.currentTimeMillis())
+            .put("rows", channels)
+            .toString()
+    }
+
+    private fun parseCache(text: String): Map<String, List<Program>> {
+        val root = JSONObject(text)
+        val channels = root.optJSONObject("rows") ?: return emptyMap()
+        val now = System.currentTimeMillis()
+        val from = now - WINDOW_BEFORE_MS
+        val to = now + WINDOW_AFTER_MS
+
+        val out = HashMap<String, List<Program>>()
+        for (key in channels.keys()) {
+            val list = channels.optJSONArray(key) ?: continue
+            val rows = ArrayList<Program>(list.length())
+            for (i in 0 until list.length()) {
+                val row = list.optJSONArray(i) ?: continue
+                val program = Program(
+                    title = row.optString(0),
+                    start = row.optLong(1),
+                    stop = row.optLong(2),
+                    description = row.optString(3),
+                )
+                if (program.title.isBlank() || program.stop <= program.start) continue
+                if (program.stop < from || program.start > to) continue
+                rows += program
+            }
+            if (rows.isNotEmpty()) out[key] = rows.sortedBy { it.start }
+        }
+        return out
+    }
+
+    // ---- merging -----------------------------------------------------------
+
+    /**
+     * Union of every guide, keyed the way a channel is looked up, then by start
+     * time: the same programme arriving from two feeds is stored once.
+     */
+    private fun merge(vararg parts: Map<String, List<Program>>): Map<String, List<Program>> {
+        val now = System.currentTimeMillis()
+        val from = now - WINDOW_BEFORE_MS
+        val to = now + WINDOW_AFTER_MS
+
+        val out = HashMap<String, MutableList<Program>>()
+        for (part in parts) {
+            for ((key, list) in part) {
+                val rows = out.getOrPut(key) { ArrayList() }
+                val starts = rows.mapTo(HashSet()) { it.start }
+                for (program in list) {
+                    if (program.stop < from || program.start > to) continue
+                    if (starts.add(program.start)) rows += program
+                }
+            }
+        }
+        return out.mapValues { (_, rows) -> rows.sortedBy { it.start } }
     }
 
     // ---- XMLTV -------------------------------------------------------------
@@ -187,13 +318,8 @@ object Epg {
             event = parser.next()
         }
 
-        val now = System.currentTimeMillis()
-        val from = now - WINDOW_BEFORE_MS
-        val to = now + WINDOW_AFTER_MS
         val out = HashMap<String, MutableList<Program>>()
-
         for ((id, program) in pending) {
-            if (program.stop < from || program.start > to) continue
             val display = names[id] ?: continue
             val key = normalise(display)
             if (key.isEmpty()) continue

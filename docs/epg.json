@@ -1,5 +1,9 @@
 {
   "url": "https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz",
-  "source": "epgshare01 — Philippine guide",
-  "updatedAt": "2026-11-10T00:00:00Z"
+  "urls": [
+    "https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz",
+    "https://iptv-epg.org/files/epg-ph.xml.gz"
+  ],
+  "source": "epgshare01 + iptv-epg — Philippine guides, merged on the device",
+  "updatedAt": "2026-11-11T00:00:00Z"
 }

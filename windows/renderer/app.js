@@ -585,6 +585,10 @@ function renderGrid() {
 
     if (channel.logo) {
       const img = document.createElement('img');
+      // 462 logos over one connection: paint the tiles that are on screen and
+      // let the rest wait, so the grid is not kept busy by pictures nobody sees.
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.src = channel.logo;
       img.alt = '';
       img.addEventListener('error', () => {

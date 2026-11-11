@@ -12,7 +12,12 @@
 
 (() => {
   const INDEX_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/epg.json';
-  const DEFAULT_GUIDE = 'https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz';
+  // Two feeds, merged: epgshare01 knows GMA and TV5 but drops channels between
+  // regenerations, iptv-epg has a full day for eighty channels but no GMA.
+  const DEFAULT_GUIDES = [
+    'https://epgshare01.online/epgshare01/epg_ripper_PH2.xml.gz',
+    'https://iptv-epg.org/files/epg-ph.xml.gz',
+  ];
   const CACHE_KEY = 'zenktx.epg.v1';
   const TTL = 6 * 60 * 60 * 1000;
   const WINDOW = 2 * 24 * 60 * 60 * 1000;
@@ -24,6 +29,7 @@
   function normalise(name) {
     return String(name || '')
       .toLowerCase()
+      .replace(/^\s*[a-z]{2}\s*-\s*/, '')
       .replace(/\b(hd|fhd|sd|uhd|4k)\b/g, ' ')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
@@ -109,6 +115,28 @@
     }
   }
 
+  // Union of two guides: the same programme from both feeds is stored once,
+  // keyed by channel and start time, so a feed that lost a channel cannot take
+  // it away from the other one. Rows that fell out of the window are dropped.
+  function merge(base, extra) {
+    const floor = Date.now() - WINDOW;
+    const out = new Map();
+    for (const [key, list] of base) out.set(key, list.filter((p) => p.stop > floor).slice());
+    for (const [key, list] of extra) {
+      if (!out.has(key)) out.set(key, list.filter((p) => p.stop > floor).slice());
+      const into = out.get(key);
+      const starts = new Set(into.map((p) => p.start));
+      for (const program of list) {
+        if (program.stop <= floor || starts.has(program.start)) continue;
+        starts.add(program.start);
+        into.push(program);
+      }
+      into.sort((a, b) => a.start - b.start);
+    }
+    for (const [key, list] of out) if (!list.length) out.delete(key);
+    return out;
+  }
+
   async function load(fetchText) {
     if (!rows.size) readCache();
     if (rows.size && Date.now() - loadedAt < TTL) return rows;
@@ -116,17 +144,23 @@
 
     loading = (async () => {
       try {
-        let url = DEFAULT_GUIDE;
+        let urls = DEFAULT_GUIDES;
         try {
           const index = JSON.parse(await fetchText(INDEX_URL));
-          if (index && index.url) url = index.url;
+          if (index && Array.isArray(index.urls) && index.urls.length) urls = index.urls;
+          else if (index && index.url) urls = [index.url];
         } catch (error) {
-          // The published index is optional; the built-in guide still answers.
+          // The published index is optional; the built-in guides still answer.
         }
-        const xml = await fetchText(url);
-        const parsed = parse(xml);
-        if (parsed.size) {
-          rows = parsed;
+        const answers = await Promise.allSettled(urls.map((url) => fetchText(url)));
+        let merged = rows;
+        for (const answer of answers) {
+          if (answer.status !== 'fulfilled') continue;
+          const parsed = parse(answer.value);
+          if (parsed.size) merged = merge(merged, parsed);
+        }
+        if (merged.size) {
+          rows = merged;
           loadedAt = Date.now();
           writeCache();
         }
