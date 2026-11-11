@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T16:03:02Z",
+ "updatedAt": "2026-11-11T16:07:27Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -5881,7 +5881,7 @@
   {
    "id": 226,
    "order": 236,
-   "name": "Jeepney TV Stream 3",
+   "name": "Jeepney TV Stream 2",
    "category": "Movies",
    "tags": [
     "movies",
@@ -5892,7 +5892,7 @@
     "iwanttfc"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0226-02f12835c2.png",
-   "url": "https://aka-live1050.delivery.roku.com/fac576ef-0c1d-4675-91cc-47b2badfae40/t2-origin/out/v1/live.m3u8",
+   "url": "https://ovh.rise2the.top/aldous/1794420017/-SueUoWpNchCdaPYHqvIgg/cv4/001/2/ch00000090990000001250/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20TsXah2%2FZLFNNIdWrVrXDMApGbNnk2H5Bi8k4yR%2B9AHGFsyK4TH4mOENKJ45mwOyS0g%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
