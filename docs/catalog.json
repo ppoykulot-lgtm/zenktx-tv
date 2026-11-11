@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T15:58:48Z",
+ "updatedAt": "2026-11-11T16:03:02Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -455,9 +455,9 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
+   "drmType": "clearkey",
+   "keyId": "dc9fec234a5841bb8d06e92042c741ec",
+   "key": "225676f32612dc803cb4d0f950d063d0",
    "note": ""
   },
   {
