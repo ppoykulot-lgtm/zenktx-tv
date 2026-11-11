@@ -833,6 +833,13 @@ class PlayerActivity : Activity() {
                 error.errorCode == PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES ->
                 getString(R.string.err_codec)
 
+            // A ClearKey pair the provider has since rotated arrives here: the
+            // manifest still names a key id the feed no longer uses, so no build
+            // can open it until the channel list carries the new pair. Say that,
+            // instead of handing the viewer a raw ERROR_CODE_DRM_* name.
+            error.errorCodeName.startsWith("ERROR_CODE_DRM") ->
+                getString(R.string.err_drm)
+
             error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED ||
                 error.errorCode == PlaybackException.ERROR_CODE_PARSING_MANIFEST_UNSUPPORTED ->
                 getString(R.string.err_generic, error.errorCodeName)

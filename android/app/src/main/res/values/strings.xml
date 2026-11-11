@@ -126,6 +126,7 @@ Thank you for supporting the project!</string>
     <string name="err_network">Cannot reach the stream.\nCheck the internet connection on this device.</string>
     <string name="err_timeout">The stream took too long to answer.</string>
     <string name="err_codec">This device cannot decode this stream (codec not supported).</string>
+    <string name="err_drm">The provider changed the key for this channel, so the copy in the channel list no longer opens it.\nRefresh the channel list, or pick another channel.</string>
     <string name="err_unstable">The stream keeps failing (%1$s).\nMany free links behave like this — try the next channel.</string>
     <string name="err_stall">The stream stopped sending video (%1$s).\nSome channels go down like this; try the next one.</string>
     <string name="err_empty">This channel is not broadcasting right now.</string>
