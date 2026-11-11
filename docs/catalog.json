@@ -1,17 +1,17 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T15:15:53Z",
+ "updatedAt": "2026-11-11T15:20:03Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
   {
    "id": 1002,
    "order": 1,
-   "name": "AllTimeMovies",
+   "name": "CHARGE!",
    "category": "Movies",
    "tags": [],
-   "logo": "https://yt3.googleusercontent.com/U4INXhwmEUOABHoemQBpI6C9t4jb9iBmDvZ3ZT3lAb9Au_jVl32NL8XDpy-9cBjRJ2LP69Ovzg=s900-c-k-c0x00ffffff-no-rj",
-   "url": "https://fta.ektv.in/live/54/54_0.m3u8",
+   "logo": "https://static.wikia.nocookie.net/logopedia/images/0/09/Charge!_network_logo.png/revision/latest/scale-to-width-down/512/",
+   "url": "https://fast-channels.sinclairstoryline.com/CHARGE/index.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
