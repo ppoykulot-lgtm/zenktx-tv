@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T12:10:50Z",
+ "updatedAt": "2026-11-11T12:11:33Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -1517,15 +1517,15 @@
     "Philippines"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0050-2c017ad573.png",
-   "url": "https://abslive.akamaized.net/dash/live/2027618/pinoybigbrothercollabedition30live/manifest.mpd",
+   "url": "https://absp-live.akamaized.net/dash/live/2099522/pinoybigbrothercollabedition30live/manifest.mpd",
    "streamType": "mpd",
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "02b0d6aa78d547af890c9e27113e81af",
-   "key": "890160f8ece56b8cd232889acb74e276",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+   "keyId": "c7e5a2199d644b318f702a6c4e5d8139",
+   "key": "300778996b5a71594db508982256f365",
+   "note": ""
   },
   {
    "id": 51,
