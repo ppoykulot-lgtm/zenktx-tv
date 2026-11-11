@@ -1,13 +1,13 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T14:55:36Z",
+ "updatedAt": "2026-11-11T14:55:45Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
   {
    "id": 1001,
    "order": 1,
-   "name": "ClaroCinemannel",
+   "name": "ClaroCinema",
    "category": "GeneraMoviesl",
    "tags": [],
    "logo": "https://i.imgur.com/SOLGQxQ.jpg",
