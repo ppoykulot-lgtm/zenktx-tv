@@ -404,9 +404,9 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "",
-   "keyId": "",
-   "key": "",
+   "drmType": "clearkey",
+   "keyId": "dc9fec234a5841bb8d06e92042c741ec",
+   "key": "225676f32612dc803cb4d0f950d063d0",
    "note": ""
   },
   {
@@ -1573,8 +1573,8 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "b750a40736a24e60b5a4f256208b92c5",
-   "key": "af07292597f692726dcac2bd297ddf8e",
+   "keyId": "ea6588d030c94ca89925ac0c49974430",
+   "key": "3e6de4afee1eff8e14f9506b76ac9ee6",
    "note": ""
   },
   {
@@ -1598,8 +1598,8 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "58b949986ed13294bc01b0f330abc527",
-   "key": "23e8c5f2fe202906ac2d6554d9527299",
+   "keyId": "b750a40736a24e60b5a4f256208b92c5",
+   "key": "af07292597f692726dcac2bd297ddf8e",
    "note": ""
   },
   {
