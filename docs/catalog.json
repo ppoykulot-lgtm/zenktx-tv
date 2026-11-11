@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T16:12:23Z",
+ "updatedAt": "2026-11-11T23:31:46Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -231,10 +231,10 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "widevine",
-   "keyId": "",
-   "key": "",
-   "note": "Widevine/PlayReady: needs a licence server, so no ZENKTX build can open it."
+   "drmType": "clearkey",
+   "keyId": "58d0e56991194043b8fb82feb4db7276",
+   "key": "c116c612201e178193693eced13d7319",
+   "note": ""
   },
   {
    "id": 313,
