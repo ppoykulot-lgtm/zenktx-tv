@@ -1,17 +1,17 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T15:23:41Z",
+ "updatedAt": "2026-11-11T15:26:01Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
   {
    "id": 1003,
    "order": 1,
-   "name": "CineRomantico",
+   "name": "CineSony",
    "category": "General",
    "tags": [],
-   "logo": "https://i.imgur.com/FUrrDrb.png",
-   "url": "https://d1si3n1st4nkgb.cloudfront.net/10502/88886011/hls/master.m3u8?ads.xumo_channelId=88886011",
+   "logo": "https://i.imgur.com/bZWoDTg.png",
+   "url": "http://186.148.196.82:8001/play/a0a4",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
