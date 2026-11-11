@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-11T12:20:34Z",
+ "updatedAt": "2026-11-11T14:22:07Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -404,9 +404,9 @@
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
-   "drmType": "clearkey",
-   "keyId": "dc9fec234a5841bb8d06e92042c741ec",
-   "key": "225676f32612dc803cb4d0f950d063d0",
+   "drmType": "",
+   "keyId": "",
+   "key": "",
    "note": ""
   },
   {
@@ -1523,8 +1523,8 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "c7e5a2199d644b318f702a6c4e5d8139",
-   "key": "300778996b5a71594db508982256f365",
+   "keyId": "1044e7ece2d741bcafe80d8613da104f",
+   "key": "f5e17f169ff05ea40c5d3f065f523942",
    "note": ""
   },
   {
@@ -1573,8 +1573,8 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "ea6588d030c94ca89925ac0c49974430",
-   "key": "3e6de4afee1eff8e14f9506b76ac9ee6",
+   "keyId": "b750a40736a24e60b5a4f256208b92c5",
+   "key": "af07292597f692726dcac2bd297ddf8e",
    "note": ""
   },
   {
@@ -1598,8 +1598,8 @@
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
-   "keyId": "b750a40736a24e60b5a4f256208b92c5",
-   "key": "af07292597f692726dcac2bd297ddf8e",
+   "keyId": "58b949986ed13294bc01b0f330abc527",
+   "key": "23e8c5f2fe202906ac2d6554d9527299",
    "note": ""
   },
   {
