@@ -384,6 +384,10 @@
       build();
       wire();
       $('movies').hidden = false;
+      // The welcome panel owns the first seconds of a launch; the poster wall is
+      // opaque on purpose, so leaving it underneath only costs a composited layer.
+      const splash = document.getElementById('splash');
+      if (splash) splash.style.display = 'none';
       $('mvHero').innerHTML = '<div class="mv-hero-empty">Loading the catalogue…</div>';
       try {
         await load();
