@@ -641,6 +641,15 @@ body[data-skin="studio"] .skin-chip { border-radius: 7px; }
 .mv-kicker { font-size: 9px; letter-spacing: .3em; color: var(--mint); font-weight: 800; margin-bottom: 8px; }
 .mv-hero-copy h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.02em; }
 .mv-hero-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
+/* The shared .chip is block-level inside the live grid; here it has to sit on
+   the same line as the year and the genres. */
+.mv-hero-meta > * { display: inline-block; flex: 0 0 auto; }
+/* The shared .chip is a full-width row in the category column; on the billboard
+   it is a small badge, so the width has to be handed back. */
+.mv-hero-meta > .chip {
+  width: auto; display: inline-flex; margin: 0; padding: 4px 9px;
+  border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.07); color: #c9d4e8;
+}
 .mv-hero-copy p { margin: 0 0 16px; font-size: 12.5px; line-height: 1.6; color: #c3cde3;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .mv-hero-actions .play { cursor: pointer; }
