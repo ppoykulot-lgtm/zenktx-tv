@@ -41,3 +41,6 @@ android/build*.log
 # copies made by tools/import-donation-qr.py are committed.
 inbox/*
 !inbox/README.md
+
+# local API keys
+tools/tmdb.key

@@ -153,6 +153,9 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      // Movies & Series play through third-party embed pages, which send
+      // X-Frame-Options that an iframe obeys and a webview does not.
+      webviewTag: true,
     },
   });
 
