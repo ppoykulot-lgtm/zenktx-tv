@@ -26,7 +26,12 @@
     episode: 1,
     timer: 0,
     tries: 0,
+    shown: 0,
   };
+
+  /* One screenful of posters at a time. The catalogue holds a few thousand of
+     them now, and opening the screen should not mean a thousand image decodes. */
+  const CHUNK = 28;
 
   const $ = (id) => document.getElementById(id);
 
@@ -78,7 +83,7 @@
     search.placeholder = 'Search titles…  (Esc to close)';
     search.addEventListener('input', () => {
       state.search = search.value;
-      renderRail();
+      renderRail(true);
     });
     head.appendChild(search);
 
@@ -95,6 +100,11 @@
     const rail = make('div', 'mv-rail');
     rail.id = 'mvRail';
     body.appendChild(rail);
+    /* The wall follows the wheel: another twenty-eight once the reader is close
+       to the bottom, so the list feels endless without being pre-built. */
+    body.addEventListener('scroll', () => {
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 480) moreRail();
+    });
     root.appendChild(body);
 
     const side = make('aside', 'mv-side');
@@ -144,7 +154,7 @@
     }
     if (!state.item) state.item = list[0];
     renderHero(state.item);
-    renderRail();
+    renderRail(true);
     renderSide(state.item);
   }
 
@@ -176,25 +186,51 @@
     hero.appendChild(copy);
   }
 
-  function renderRail() {
+  function railCard(item) {
+    const card = make('button', 'mv-card' + (state.item && item.id === state.item.id ? ' on' : ''));
+    card.dataset.id = String(item.id);
+    const img = make('img', '');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.src = item.poster;
+    img.alt = '';
+    card.appendChild(img);
+    card.appendChild(make('span', 'mv-card-name', item.title));
+    card.addEventListener('click', () => {
+      /* Picking a poster is not a reason to rebuild the wall: it would drop the
+         reader back to twenty-eight cards and to the top of the list. */
+      state.item = item;
+      document.querySelectorAll('.mv-card').forEach((node) => {
+        node.classList.toggle('on', node.dataset.id === String(item.id));
+      });
+      renderHero(item);
+      renderSide(item);
+    });
+    return card;
+  }
+
+  function renderRail(reset) {
     const rail = $('mvRail');
     if (!rail) return;
-    rail.innerHTML = '';
-    filtered().forEach((item) => {
-      const card = make('button', 'mv-card' + (state.item && item.id === state.item.id ? ' on' : ''));
-      const img = make('img', '');
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.src = item.poster;
-      img.alt = '';
-      card.appendChild(img);
-      card.appendChild(make('span', 'mv-card-name', item.title));
-      card.addEventListener('click', () => {
-        state.item = item;
-        render();
-      });
-      rail.appendChild(card);
-    });
+    const list = filtered();
+    if (reset) {
+      rail.innerHTML = '';
+      state.shown = 0;
+    }
+    if (!list.length) return;
+    if (!state.shown) state.shown = Math.min(list.length, CHUNK);
+    const target = Math.min(list.length, Math.max(state.shown, CHUNK));
+    while (rail.childElementCount < target) {
+      rail.appendChild(railCard(list[rail.childElementCount]));
+    }
+    state.shown = rail.childElementCount;
+  }
+
+  function moreRail() {
+    const list = filtered();
+    if (!list.length || state.shown >= list.length) return;
+    state.shown = Math.min(list.length, state.shown + CHUNK);
+    renderRail(false);
   }
 
   function renderSide(item) {

@@ -625,8 +625,8 @@ class MoviesActivity : Activity() {
     }
 
     private companion object {
-        /** How many posters a scroll adds; about three phone screens. */
-        const val PAGE = 45
+        /** First screenful, and how many a scroll adds. */
+        const val PAGE = 28
     }
 }
 

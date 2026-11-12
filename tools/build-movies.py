@@ -74,11 +74,11 @@ def pick(item, names, kind):
 # One page of TMDB holds twenty titles, so every feed is walked several pages
 # deep. Trending is capped because TMDB only keeps a few pages of it.
 FEEDS = [
-    ("trending/{kind}/week", {}, 3),
-    ("{kind}/popular", {}, 12),
-    ("{kind}/top_rated", {}, 12),
-    ("discover/{kind}", {"sort_by": "{sort}", "vote_count.gte": 40}, 12),
-    ("discover/{kind}", {"sort_by": "{sort}", "vote_count.gte": 300}, 8),
+    ("trending/{kind}/week", {}, 5),
+    ("{kind}/popular", {}, 20),
+    ("{kind}/top_rated", {}, 20),
+    ("discover/{kind}", {"sort_by": "{sort}", "vote_count.gte": 20}, 20),
+    ("discover/{kind}", {"sort_by": "vote_average.desc", "vote_count.gte": 500}, 20),
 ]
 
 
@@ -139,8 +139,10 @@ def main():
              "movie": "https://player.vidzee.wtf/embed/movie/{id}",
              "tv": "https://player.vidzee.wtf/embed/tv/{id}/{season}/{episode}"},
         ],
-        "movies": movies[:220],
-        "series": series[:220],
+        # Everything the feeds returned: the apps show 28 at a time and walk
+        # the rest as the reader scrolls, so there is no reason to drop any.
+        "movies": movies,
+        "series": series,
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
