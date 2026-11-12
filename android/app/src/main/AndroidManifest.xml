@@ -54,6 +54,12 @@
             android:screenOrientation="${orientation}" />
 
         <activity
+            android:name=".MoviesActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|uiMode"
+            android:exported="false"
+            android:screenOrientation="${orientation}" />
+
+        <activity
             android:name=".PlaylistsActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|uiMode"
             android:exported="false"

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ZENKTX · Movies &amp; Series — design mockup</title>
+<style>
+  :root{
+    --bg:#060911; --deep:#04070e; --surface:#0d1524; --card:#111a2b; --card-hi:#16213a;
+    --line:#1e2a42; --mint:#35e7c0; --blue:#5b8cff; --text:#f2f5ff; --muted:#8b98b4;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:44px 32px 72px; background:var(--deep); color:var(--text);
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  .page-head{max-width:1240px;margin:0 auto 30px}
+  .page-head .kicker{color:var(--mint);font-size:11px;letter-spacing:.32em;font-weight:700;text-transform:uppercase}
+  .page-head h1{margin:8px 0 6px;font-size:30px;letter-spacing:-.02em}
+  .page-head p{margin:0;color:var(--muted);font-size:14px;max-width:760px;line-height:1.6}
+  .shot{max-width:1240px;margin:0 auto 46px}
+  .shot.phone-shot{max-width:392px}
+  .shot .cap{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+  .shot .cap b{font-size:14px;letter-spacing:.04em}
+  .shot .cap span{color:var(--muted);font-size:12px}
+  .shot{position:relative}
+  .frame{
+    position:absolute;left:0;top:0;transform-origin:top left;
+    overflow:hidden;background:var(--bg);border:1px solid var(--line);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.9);
+  }
+  .tv{width:1240px;height:697px;border-radius:14px}
+  .phone{width:392px;height:812px;border-radius:34px}
+  .desk{width:1240px;height:775px;border-radius:14px}
+
+  /* shared bits */
+  .nav{display:flex;align-items:center;gap:18px;padding:0 26px;height:64px;border-bottom:1px solid var(--line);background:rgba(6,9,17,.86)}
+  .brand{display:flex;align-items:center;gap:9px}
+  .brand i{width:26px;height:26px;border-radius:8px;background:linear-gradient(140deg,var(--mint),var(--blue));display:block}
+  .brand b{font-size:12px;letter-spacing:.2em}
+  .tabs{display:flex;gap:6px;margin-left:6px}
+  .tab{padding:8px 15px;border-radius:999px;font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600}
+  .tab.on{background:rgba(53,231,192,.12);color:var(--mint);border:1px solid rgba(53,231,192,.35)}
+  .nav .sp{flex:1}
+  .nav .who{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
+  .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(140deg,#2b3d61,#16213a);border:1px solid var(--line)}
+
+  .chip{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:5px 9px;border-radius:6px;background:rgba(91,140,255,.14);color:#a9c1ff}
+  .chip.mint{background:rgba(53,231,192,.14);color:var(--mint)}
+  .dot{color:var(--muted)}
+
+  .poster{border-radius:12px;overflow:hidden;position:relative;border:1px solid var(--line);background:var(--card)}
+  .poster .art{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
+  .poster .art b{font-size:12px;line-height:1.25;letter-spacing:.01em;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+  .poster .art small{font-size:9px;color:rgba(255,255,255,.62);letter-spacing:.1em;margin-top:3px}
+  .poster .badge{position:absolute;top:8px;left:8px;font-size:8.5px;letter-spacing:.12em;font-weight:800;padding:3px 6px;border-radius:4px;background:rgba(6,9,17,.72);border:1px solid rgba(255,255,255,.14)}
+  .poster .prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.14)}
+  .poster .prog i{display:block;height:100%;background:var(--mint)}
+  .a1{background:linear-gradient(150deg,#1d3a52,#0b1622 62%)}
+  .a2{background:linear-gradient(150deg,#40224a,#140b1a 62%)}
+  .a3{background:linear-gradient(150deg,#173d33,#08130f 62%)}
+  .a4{background:linear-gradient(150deg,#4a2a1c,#160d08 62%)}
+  .a5{background:linear-gradient(150deg,#22304f,#0a1020 62%)}
+  .a6{background:linear-gradient(150deg,#4b1f2e,#170a10 62%)}
+  .a7{background:linear-gradient(150deg,#2f3b1a,#0e1208 62%)}
+  .a8{background:linear-gradient(150deg,#1b3444,#080f15 62%)}
+
+  .row-title{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+  .row-title b{font-size:15px}
+  .row-title span{font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+  .row-title .more{margin-left:auto;font-size:10px;letter-spacing:.14em;color:var(--mint);font-weight:700}
+
+  /* ---- TV ---- */
+  .tv .hero{position:relative;height:calc(100% - 64px)}
+  .tv .hero .bg{position:absolute;inset:0;background:
+     radial-gradient(120% 90% at 78% 18%, rgba(91,140,255,.30), transparent 55%),
+     radial-gradient(90% 80% at 92% 78%, rgba(53,231,192,.16), transparent 60%),
+     linear-gradient(120deg,#0a1424 0%,#060911 58%)}
+  .tv .hero .veil{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,9,17,.96) 0%,rgba(6,9,17,.72) 42%,rgba(6,9,17,.24) 70%)}
+  .tv .hero .copy{position:absolute;left:56px;top:96px;width:620px}
+  .tv .hero .net{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.3em;font-weight:800;color:#e8484f;margin-bottom:14px}
+  .tv .hero .net i{width:6px;height:18px;background:#e8484f;display:block;border-radius:1px}
+  .tv .hero h2{margin:0 0 12px;font-size:52px;line-height:1.02;letter-spacing:-.03em}
+  .tv .hero .meta{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin-bottom:14px}
+  .tv .hero p{margin:0 0 22px;font-size:13.5px;line-height:1.65;color:#c3cde3;max-width:540px}
+  .tv .actions{display:flex;gap:12px;align-items:center}
+  .play{display:flex;align-items:center;gap:9px;background:var(--text);color:#08101f;border:0;border-radius:10px;padding:13px 26px;font-size:14px;font-weight:800;letter-spacing:.02em}
+  .ghost{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:13px 20px;font-size:13px;font-weight:700}
+  .focus{outline:3px solid var(--mint);outline-offset:3px}
+  .tv .rows{position:absolute;left:56px;right:56px;bottom:34px}
+  .tv .rail{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+  .tv .rail .poster{aspect-ratio:2/3}
+
+  /* ---- phone ---- */
+  .phone .status{display:flex;justify-content:space-between;padding:12px 22px 0;font-size:10px;color:var(--muted);letter-spacing:.06em}
+  .phone .head{padding:14px 18px 10px;display:flex;align-items:center;gap:10px}
+  .phone .head h2{margin:0;font-size:20px;letter-spacing:-.02em}
+  .phone .seg{display:flex;gap:6px;padding:0 18px 12px}
+  .phone .seg span{font-size:11px;font-weight:700;letter-spacing:.08em;padding:7px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .phone .seg span.on{background:rgba(53,231,192,.12);border-color:rgba(53,231,192,.4);color:var(--mint)}
+  .phone .hero{margin:0 14px 16px;border-radius:16px;overflow:hidden;position:relative;height:172px;border:1px solid var(--line);background:linear-gradient(140deg,#1d3a52,#0b1622 60%)}
+  .phone .hero .c{position:absolute;inset:auto 12px 12px 12px}
+  .phone .hero b{display:block;font-size:17px;margin-bottom:4px}
+  .phone .hero small{font-size:9.5px;color:rgba(255,255,255,.66);letter-spacing:.1em}
+  .phone .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:0 14px}
+  .phone .grid .poster{aspect-ratio:2/3}
+  .phone .tabbar{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;justify-content:space-around;background:rgba(9,13,22,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+  .phone .tabbar div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;letter-spacing:.1em;color:var(--muted);font-weight:700}
+  .phone .tabbar div i{width:18px;height:18px;border-radius:5px;border:1.6px solid currentColor;display:block}
+  .phone .tabbar div.on{color:var(--mint)}
+  .phone .sheet{position:absolute;left:0;right:0;bottom:64px;background:var(--surface);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:14px 16px 16px}
+  .phone .sheet .grab{width:36px;height:4px;border-radius:999px;background:#2a3a58;margin:0 auto 12px}
+  .phone .sheet h3{margin:0 0 4px;font-size:15px}
+  .phone .sheet .sub{font-size:10.5px;color:var(--muted);margin-bottom:11px}
+  .servers{display:flex;flex-wrap:wrap;gap:7px}
+  .srv{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:#b9c6de}
+  .srv.on{border-color:rgba(53,231,192,.5);background:rgba(53,231,192,.12);color:var(--mint)}
+
+  /* ---- desktop ---- */
+  .desk .body{display:grid;grid-template-columns:78px 1fr 340px;height:calc(100% - 64px)}
+  .desk .railnav{border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 0}
+  .desk .railnav i{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:block}
+  .desk .railnav i.on{background:rgba(53,231,192,.14);border-color:rgba(53,231,192,.45)}
+  .desk .main{padding:20px 24px;overflow:hidden}
+  .desk .sect{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+  .desk .sect b{font-size:16px}
+  .desk .sect span{font-size:10px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+  .desk .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  .desk .grid .poster{aspect-ratio:2/3}
+  .desk .side{border-left:1px solid var(--line);background:rgba(13,21,36,.72);padding:20px}
+  .desk .side .big{border-radius:14px;height:210px;background:linear-gradient(150deg,#22304f,#0a1020 62%);position:relative;border:1px solid var(--line);margin-bottom:14px}
+  .desk .side .big .t{position:absolute;left:14px;bottom:12px;right:14px}
+  .desk .side .big b{font-size:17px;display:block;margin-bottom:3px}
+  .desk .side .big small{font-size:9.5px;letter-spacing:.12em;color:rgba(255,255,255,.6)}
+  .desk .side p{font-size:11.5px;line-height:1.65;color:#b9c6de;margin:0 0 14px}
+  .desk .side .kv{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);padding:6px 0;border-bottom:1px solid rgba(30,42,66,.7)}
+  .desk .side .kv b{color:var(--text);font-weight:600}
+  .kbd{font-size:9px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:#b9c6de;background:var(--card)}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">ZENKTX · Movies &amp; Series</div>
+  <h1>Isang bagong section, tatlong magkaibang layout</h1>
+  <p>Pareho ang datos (OMDB/TMDB metadata + <i>player_servers</i>) at pareho ang lenggwahe ng disenyo — mint accent, navy surface — pero iba ang pag-navigate: D-pad sa TV, hinlalaki sa phone, mouse at keyboard sa Windows.</p>
+</div>
+
+<div class="shot">
+  <div class="cap"><b>Android TV</b><span>· D-pad rows · hero billboard · focus ring · walang hover</span></div>
+  <div class="frame tv">
+    <div class="nav">
+      <div class="brand"><i></i><b>ZENKTX</b></div>
+      <div class="tabs">
+        <div class="tab">Live TV</div>
+        <div class="tab on">Movies &amp; Series</div>
+        <div class="tab">Guide</div>
+        <div class="tab">Playlists</div>
+      </div>
+      <div class="sp"></div>
+      <div class="who">FILIPINO · HD</div>
+      <div class="avatar"></div>
+    </div>
+    <div class="hero">
+      <div class="bg"></div><div class="veil"></div>
+      <div class="copy">
+        <div class="net"><i></i>NETFLIX</div>
+        <h2>The Quiet Signal</h2>
+        <div class="meta">
+          <span class="chip mint">2026</span><span class="chip">16+</span>
+          <span>2 Seasons</span><span class="dot">·</span><span>Sci-Fi · Thriller</span>
+          <span class="dot">·</span><span>4K HDR</span>
+        </div>
+        <p>Isang radio astronomer sa Palawan ang nakakuha ng signal na bumabalik sa kanya tuwing gabi — at may pangalan ng taong hindi pa niya nakikilala.</p>
+        <div class="actions">
+          <button class="play">▶ Play S2 E1</button>
+          <button class="ghost">＋ My List</button>
+          <button class="ghost focus">ⓘ Details</button>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row-title"><b>Trending this week</b><span>12 TITLES</span><span class="more">SEE ALL ›</span></div>
+        <div class="rail">
+          <div class="poster"><div class="art a1"><b>Manila After Dark</b><small>2026 · MOVIE</small></div><div class="badge">4K</div></div>
+          <div class="poster"><div class="art a2"><b>Lihim ng Dagat</b><small>2025 · SERIES</small></div><div class="badge">S2</div><div class="prog"><i style="width:62%"></i></div></div>
+          <div class="poster focus"><div class="art a3"><b>The Quiet Signal</b><small>2026 · SERIES</small></div><div class="badge">NEW</div><div class="prog"><i style="width:18%"></i></div></div>
+          <div class="poster"><div class="art a4"><b>Bakunawa</b><small>2025 · MOVIE</small></div></div>
+          <div class="poster"><div class="art a5"><b>Neon Ermita</b><small>2026 · MOVIE</small></div><div class="badge">HDR</div></div>
+          <div class="poster"><div class="art a6"><b>Hatinggabi</b><small>2024 · SERIES</small></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="shot phone-shot">
+  <div class="cap"><b>Android Mobile</b><span>· bottom tabs · 3-column grid · detail sheet · server picker</span></div>
+  <div class="frame phone">
+    <div class="status"><span>9:41</span><span>5G ▮▮▮ 84%</span></div>
+    <div class="head"><h2>Movies &amp; Series</h2></div>
+    <div class="seg"><span class="on">Movies</span><span>Series</span><span>My List</span></div>
+    <div class="hero">
+      <div class="c"><b>The Quiet Signal</b><small>2026 · S2 E1 · 47M</small></div>
+    </div>
+    <div class="grid">
+      <div class="poster"><div class="art a1"><b>Manila After Dark</b><small>MOVIE</small></div><div class="badge">4K</div></div>
+      <div class="poster"><div class="art a2"><b>Lihim ng Dagat</b><small>SERIES</small></div><div class="prog"><i style="width:62%"></i></div></div>
+      <div class="poster"><div class="art a3"><b>The Quiet Signal</b><small>SERIES</small></div><div class="badge">NEW</div></div>
+      <div class="poster"><div class="art a4"><b>Bakunawa</b><small>MOVIE</small></div></div>
+      <div class="poster"><div class="art a5"><b>Neon Ermita</b><small>MOVIE</small></div></div>
+      <div class="poster"><div class="art a6"><b>Hatinggabi</b><small>SERIES</small></div></div>
+    </div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <h3>Neon Ermita</h3>
+      <div class="sub">2026 · 1h 52m · Action · 16+ · <span style="color:#35e7c0">6.8 ★</span></div>
+      <div class="servers">
+        <span class="srv on">Player 1</span><span class="srv">Player 2</span>
+        <span class="srv">Player 3</span><span class="srv">Backup</span>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div><i></i>LIVE</div>
+      <div class="on"><i></i>MOVIES</div>
+      <div><i></i>GUIDE</div>
+      <div><i></i>SETTINGS</div>
+    </div>
+  </div>
+</div>
+
+<div class="shot">
+  <div class="cap"><b>Windows x86_64</b><span>· left rail · 6-column grid · details pane · hover + shortcut</span></div>
+  <div class="frame desk">
+    <div class="nav">
+      <div class="brand"><i></i><b>ZENKTX</b></div>
+      <div class="tabs"><div class="tab">Live TV</div><div class="tab on">Movies &amp; Series</div><div class="tab">Guide</div></div>
+      <div class="sp"></div>
+      <div class="who">SEARCH <span class="kbd">Ctrl</span> <span class="kbd">K</span></div>
+      <div class="avatar"></div>
+    </div>
+    <div class="body">
+      <div class="railnav"><i class="on"></i><i></i><i></i><i></i></div>
+      <div class="main">
+        <div class="sect"><b>Trending this week</b><span>12 TITLES</span></div>
+        <div class="grid">
+          <div class="poster"><div class="art a1"><b>Manila After Dark</b><small>MOVIE</small></div><div class="badge">4K</div></div>
+          <div class="poster"><div class="art a2"><b>Lihim ng Dagat</b><small>SERIES</small></div><div class="prog"><i style="width:62%"></i></div></div>
+          <div class="poster"><div class="art a3"><b>The Quiet Signal</b><small>SERIES</small></div><div class="badge">NEW</div></div>
+          <div class="poster"><div class="art a4"><b>Bakunawa</b><small>MOVIE</small></div></div>
+          <div class="poster focus"><div class="art a5"><b>Neon Ermita</b><small>MOVIE</small></div><div class="badge">HDR</div></div>
+          <div class="poster"><div class="art a6"><b>Hatinggabi</b><small>SERIES</small></div></div>
+        </div>
+        <div class="sect" style="margin-top:20px"><b>Continue watching</b><span>FOR YOU</span></div>
+        <div class="grid">
+          <div class="poster"><div class="art a7"><b>Anino sa Salamin</b><small>MOVIE</small></div><div class="prog"><i style="width:34%"></i></div></div>
+          <div class="poster"><div class="art a8"><b>Tala ng Umaga</b><small>SERIES</small></div><div class="prog"><i style="width:78%"></i></div></div>
+          <div class="poster"><div class="art a2"><b>Puting Ulan</b><small>MOVIE</small></div><div class="prog"><i style="width:12%"></i></div></div>
+          <div class="poster"><div class="art a3"><b>Alon</b><small>SERIES</small></div></div>
+          <div class="poster"><div class="art a4"><b>Pintuan</b><small>MOVIE</small></div></div>
+          <div class="poster"><div class="art a6"><b>Sirena</b><small>MOVIE</small></div></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="big"><div class="t"><b>Neon Ermita</b><small>2026 · ACTION · 1H 52M</small></div></div>
+        <p>Isang babaeng detective ang bumabalik sa Ermita para sa isang kaso na may kinalaman sa nawawalang pelikula ng yumaong ama niya.</p>
+        <div class="kv"><span>Rating</span><b>6.8 / 10</b></div>
+        <div class="kv"><span>Director</span><b>R. Salazar</b></div>
+        <div class="kv"><span>Cast</span><b>3 names</b></div>
+        <div class="kv"><span>Quality</span><b>1080p HDR</b></div>
+        <div style="display:flex;gap:8px;margin:16px 0 10px">
+          <button class="play" style="padding:11px 20px;font-size:12.5px">▶ Play</button>
+          <button class="ghost" style="padding:11px 14px;font-size:12px">＋</button>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.16em;color:var(--muted);font-weight:700;margin-bottom:8px">PLAYER SERVER</div>
+        <div class="servers"><span class="srv on">Player 1</span><span class="srv">Player 2</span><span class="srv">Player 3</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function fit(){
+    document.querySelectorAll('.shot').forEach(function(shot){
+      var f=shot.querySelector('.frame');
+      if(!f) return;
+      var w=parseFloat(f.style.width||getComputedStyle(f).width);
+      var h=parseFloat(f.style.height||getComputedStyle(f).height);
+      var s=Math.min(1, shot.clientWidth/w);
+      f.style.transform='scale('+s+')';
+      shot.style.height=(h*s)+'px';
+    });
+  }
+  window.addEventListener('resize',fit);
+  fit();
+</script>
+</body>
+</html>

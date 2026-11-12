@@ -83,6 +83,22 @@
                 android:textSize="14sp" />
 
             <TextView
+                android:id="@+id/moviesButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bg_chip_active"
+                android:focusable="true"
+                android:gravity="center"
+                android:letterSpacing="0.1"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:text="Movies"
+                android:textColor="@color/mint"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
                 android:id="@+id/menuButton"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"

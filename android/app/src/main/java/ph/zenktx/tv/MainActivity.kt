@@ -164,6 +164,10 @@ class MainActivity : Activity() {
         binding.grid.itemAnimator = null
         binding.scrollHint.attach(binding.grid)
 
+        Ui.attachFocusEffect(binding.moviesButton, scale = 1.04f)
+        binding.moviesButton.setOnClickListener {
+            startActivity(Intent(this, MoviesActivity::class.java))
+        }
         Ui.attachFocusEffect(binding.menuButton, scale = 1.04f)
         binding.menuButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
