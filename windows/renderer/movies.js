@@ -103,7 +103,10 @@
     /* The wall follows the wheel: another twenty-eight once the reader is close
        to the bottom, so the list feels endless without being pre-built. */
     body.addEventListener('scroll', () => {
-      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 480) moreRail();
+      /* Only a reader who has actually moved the wall gets another row; layout
+         shifts during load also fire scroll at position zero. */
+      if (body.scrollTop < 8) return;
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 300) moreRail();
     });
     root.appendChild(body);
 
