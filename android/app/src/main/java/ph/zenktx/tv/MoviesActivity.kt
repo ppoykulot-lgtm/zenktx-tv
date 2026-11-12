@@ -9,6 +9,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.TextUtils
 import android.util.LruCache
 import android.util.TypedValue
 import android.view.Gravity
@@ -19,6 +20,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -30,6 +32,7 @@ import ph.zenktx.tv.data.PlayerServer
 import ph.zenktx.tv.net.Http
 import java.util.concurrent.Executors
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Movies & Series.
@@ -39,6 +42,10 @@ import kotlin.math.max
  * player in a WebView -- X-Frame-Options does not apply to a WebView, which is
  * why this works where an iframe would be refused -- and a server that paints
  * nothing is walked past instead of shown as a black rectangle.
+ *
+ * One layout serves a 55" television and a 6" phone: the width decides whether
+ * the tabs share the header row or get their own, how many posters fit, and
+ * whether the details sit beside the wall or under it.
  */
 class MoviesActivity : Activity() {
 
@@ -49,6 +56,11 @@ class MoviesActivity : Activity() {
     private var serverIndex = 0
     private var season = 1
     private var episode = 1
+
+    /** A phone is narrow enough that a poster is finger-sized, not D-pad-sized. */
+    private val compact: Boolean by lazy {
+        resources.displayMetrics.widthPixels / resources.displayMetrics.density < 600f
+    }
 
     private lateinit var grid: LinearLayout
     private lateinit var scroller: ScrollView
@@ -62,6 +74,10 @@ class MoviesActivity : Activity() {
     private lateinit var seasonRow: LinearLayout
     private lateinit var seasonValue: TextView
     private lateinit var episodeValue: TextView
+
+    private var titlesNow: List<MovieTitle> = emptyList()
+    private var rendered = 0
+    private var appending = false
 
     private var playerLayer: FrameLayout? = null
     private var web: WebView? = null
@@ -80,45 +96,61 @@ class MoviesActivity : Activity() {
     private fun dp(value: Int): Int =
         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics).toInt()
 
+    private val padH: Int get() = if (compact) dp(16) else dp(40)
+    private val gap: Int get() = if (compact) dp(8) else dp(10)
+
     private fun buildUi() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(ContextCompatColor.bg)
-            setPadding(dp(40), dp(18), dp(40), dp(14))
+            setPadding(padH, if (compact) dp(10) else dp(18), padH, if (compact) dp(8) else dp(14))
         }
 
-        /* header */
-        val header = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
+        val top = LinearLayout(this).apply {
+            orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
+
         val back = pill("←  Live TV", primary = false)
         back.setOnClickListener { finish() }
-        header.addView(back)
 
         val title = TextView(this).apply {
             text = "Movies & Series"
             setTextColor(ContextCompatColor.text)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 17f else 18f)
             setTypeface(typeface, Typeface.BOLD)
-            setPadding(dp(16), 0, dp(20), 0)
+            setPadding(if (compact) dp(2) else dp(16), if (compact) dp(10) else 0, dp(16), 0)
         }
-        header.addView(title)
 
-        tabMovies = pill("Movies", primary = true)
+        tabMovies = if (compact) segment("Movies") else pill("Movies", primary = true)
         tabMovies.setOnClickListener { switchKind("movies") }
-        header.addView(tabMovies)
-
-        tabSeries = pill("Series", primary = false).apply {
-            setPadding(dp(18), dp(7), dp(18), dp(7))
-        }
+        tabSeries = if (compact) segment("Series") else pill("Series", primary = false)
         tabSeries.setOnClickListener { switchKind("series") }
-        header.addView(tabSeries)
 
-        header.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
-        })
-        root.addView(header)
+        if (compact) {
+            /* the phone puts the tabs on their own full-width row */
+            val bar = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            bar.addView(back)
+            bar.addView(title)
+            top.addView(bar)
+            val tabs = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, dp(10), 0, 0)
+            }
+            tabs.addView(tabMovies, LinearLayout.LayoutParams(0, dp(38), 1f).apply { marginEnd = dp(8) })
+            tabs.addView(tabSeries, LinearLayout.LayoutParams(0, dp(38), 1f))
+            top.addView(tabs)
+        } else {
+            top.addView(back)
+            top.addView(title)
+            top.addView(tabMovies)
+            top.addView(tabSeries)
+            top.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
+        }
+        root.addView(top)
 
         /* grid */
         progress = ProgressBar(this).apply {
@@ -129,12 +161,12 @@ class MoviesActivity : Activity() {
             text = ""
             setTextColor(ContextCompatColor.muted)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setPadding(0, dp(30), 0, 0)
+            setPadding(0, dp(24), 0, 0)
             gravity = Gravity.CENTER
         }
         grid = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(16), 0, dp(16))
+            setPadding(0, dp(14), 0, dp(10))
         }
         val gridWrap = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -144,23 +176,25 @@ class MoviesActivity : Activity() {
         }
         scroller = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
-            isFillViewport = true
             addView(gridWrap)
+            setOnScrollChangeListener { _, _, _, _, _ -> maybeAppend() }
         }
         root.addView(scroller)
 
-        /* detail strip */
-        val detail = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
+        /* details: beside the wall on a TV, under it on a phone */
+        val footer = LinearLayout(this).apply {
+            orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+            gravity = if (compact) Gravity.START else Gravity.CENTER_VERTICAL
             setPadding(0, dp(10), 0, 0)
         }
         val textCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         detailTitle = TextView(this).apply {
             text = "Pick a title"
             setTextColor(ContextCompatColor.text)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 17f else 15f)
             setTypeface(typeface, Typeface.BOLD)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
         detailMeta = TextView(this).apply {
             text = ""
@@ -169,10 +203,17 @@ class MoviesActivity : Activity() {
         }
         textCol.addView(detailTitle)
         textCol.addView(detailMeta)
+        textCol.layoutParams = LinearLayout.LayoutParams(
+            if (compact) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+        footer.addView(textCol)
+
         seasonRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             visibility = View.GONE
+            setPadding(0, dp(8), 0, 0)
         }
         val seasonMinus = pill("S−", primary = false, small = true)
         seasonValue = pill("S1", primary = false, small = true)
@@ -186,19 +227,26 @@ class MoviesActivity : Activity() {
         episodePlus.setOnClickListener { episode += 1; paintSteppers() }
         listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus)
             .forEach { seasonRow.addView(it) }
-        textCol.addView(seasonRow)
-        detail.addView(textCol)
-
-        detail.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 1, 1f)
-        })
+        footer.addView(seasonRow)
 
         detailServerRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        detail.addView(detailServerRow)
-        root.addView(detail)
+        if (compact) {
+            /* four servers plus Play overflow a phone's width, so they scroll */
+            val chipsScroll = HorizontalScrollView(this).apply {
+                isHorizontalScrollBarEnabled = false
+                setPadding(0, dp(8), 0, 0)
+                clipToPadding = false
+                addView(detailServerRow)
+            }
+            footer.addView(chipsScroll)
+        } else {
+            footer.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
+            footer.addView(detailServerRow)
+        }
+        root.addView(footer)
 
         setContentView(root)
     }
@@ -224,6 +272,15 @@ class MoviesActivity : Activity() {
                 view.animate().scaleX(if (hasFocus) 1.05f else 1f).scaleY(if (hasFocus) 1.05f else 1f)
                     .setDuration(120).start()
             }
+        }
+
+    /** The phone's two-up switch: a filled half when on, an outlined half when off. */
+    private fun segment(label: String): TextView =
+        pill(label, primary = false).apply {
+            gravity = Gravity.CENTER
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setTextColor(ContextCompatColor.mint)
+            setBackgroundResource(R.drawable.bg_chip_active)
         }
 
     /* -------------------------------------------------------------- loading */
@@ -254,7 +311,9 @@ class MoviesActivity : Activity() {
         if (kind == next) return
         kind = next
         selected = null
-        paintTabs()
+        season = 1
+        episode = 1
+        scroller.scrollTo(0, 0)
         render()
     }
 
@@ -269,43 +328,72 @@ class MoviesActivity : Activity() {
 
     private fun render() {
         val data = catalog ?: return
-        val titles = data.titles(kind)
-        scroller.scrollTo(0, 0)
+        titlesNow = data.titles(kind)
         grid.removeAllViews()
-        if (titles.isEmpty()) {
+        rendered = 0
+        if (titlesNow.isEmpty()) {
             empty.text = "Nothing to show yet."
             return
         }
+        empty.text = ""
         paintTabs()
-        if (selected == null) selected = titles.first()
-
-        val columns = max(3, (resources.displayMetrics.widthPixels - dp(80)) / dp(170))
-        var index = 0
-        while (index < titles.size) {
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, 0, 0, dp(14))
-            }
-            for (column in 0 until columns) {
-                val item = titles.getOrNull(index++) ?: break
-                row.addView(card(item))
-            }
-            grid.addView(row)
-        }
+        val keep = selected?.let { current -> titlesNow.firstOrNull { it.id == current.id } }
+        selected = keep ?: titlesNow.first()
+        appendRows()
         paintDetail()
     }
 
-    private fun card(item: MovieTitle): View {
+    /**
+     * Two hundred posters is two hundred decodes; the wall is filled a screenful
+     * at a time as the reader scrolls instead of all at once on the main thread.
+     */
+    private fun appendRows() {
+        if (appending || rendered >= titlesNow.size) return
+        appending = true
+        try {
+            val width = resources.displayMetrics.widthPixels - padH * 2
+            val columns = if (compact) 3 else max(4, width / dp(165))
+            val cardW = (width - gap * (columns - 1)) / columns
+            val posterH = (cardW * 1.5f).toInt()
+            val limit = min(titlesNow.size, rendered + PAGE)
+            while (rendered < limit) {
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    setPadding(0, 0, 0, gap)
+                }
+                var column = 0
+                while (column < columns && rendered < titlesNow.size) {
+                    val item = titlesNow[rendered]
+                    row.addView(card(item, cardW, posterH, column == columns - 1))
+                    rendered += 1
+                    column += 1
+                }
+                grid.addView(row)
+            }
+        } finally {
+            appending = false
+        }
+    }
+
+    private fun maybeAppend() {
+        if (rendered >= titlesNow.size) return
+        val content = scroller.getChildAt(0) ?: return
+        if (scroller.scrollY + scroller.height >= content.height - dp(400)) {
+            grid.post { appendRows() }
+        }
+    }
+
+    private fun card(item: MovieTitle, width: Int, posterH: Int, lastColumn: Boolean): View {
         val wrap = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             isFocusable = true
             isClickable = true
-            setPadding(dp(5), dp(5), dp(5), dp(5))
-            layoutParams = LinearLayout.LayoutParams(dp(160), ViewGroup.LayoutParams.WRAP_CONTENT)
-                .apply { marginEnd = dp(10) }
+            tag = item
+            layoutParams = LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { if (!lastColumn) marginEnd = gap }
         }
         val poster = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(150), dp(225))
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, posterH)
             scaleType = ImageView.ScaleType.CENTER_CROP
             setBackgroundResource(R.drawable.bg_tile)
             contentDescription = item.title
@@ -315,24 +403,48 @@ class MoviesActivity : Activity() {
             setTextColor(ContextCompatColor.muted)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
             maxLines = 1
-            setPadding(dp(2), dp(6), 0, 0)
+            ellipsize = TextUtils.TruncateAt.END
+            setPadding(dp(2), dp(6), dp(2), 0)
         }
         wrap.addView(poster)
         wrap.addView(name)
         PosterLoader.load(item.poster, poster)
+        paintCard(wrap, name)
 
-        wrap.setOnFocusChangeListener { view, hasFocus ->
-            view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
-                .setDuration(120).start()
-            name.setTextColor(if (hasFocus) ContextCompatColor.text else ContextCompatColor.muted)
-            view.setBackgroundResource(if (hasFocus) R.drawable.bg_tile_glow else 0)
+        if (!compact) {
+            /* a television is driven by the D-pad, so the focused poster grows */
+            wrap.setOnFocusChangeListener { view, hasFocus ->
+                view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
+                    .setDuration(120).start()
+                name.setTextColor(if (hasFocus) ContextCompatColor.text else ContextCompatColor.muted)
+                view.setBackgroundResource(if (hasFocus) R.drawable.bg_tile_glow else 0)
+            }
         }
         wrap.setOnClickListener {
             selected = item
             paintDetail()
+            paintSelection()
         }
-        wrap.setOnLongClickListener { openPlayer().let { true } }
         return wrap
+    }
+
+    /** Marks the picked poster so the wall shows where the details came from. */
+    private fun paintCard(wrap: View, name: TextView) {
+        val item = wrap.tag as? MovieTitle ?: return
+        val on = item.id == selected?.id
+        name.setTextColor(if (on) ContextCompatColor.mint else ContextCompatColor.muted)
+        name.setTypeface(null, if (on) Typeface.BOLD else Typeface.NORMAL)
+    }
+
+    private fun paintSelection() {
+        for (row in 0 until grid.childCount) {
+            val line = grid.getChildAt(row) as? LinearLayout ?: continue
+            for (column in 0 until line.childCount) {
+                val card = line.getChildAt(column) as? LinearLayout ?: continue
+                val name = card.getChildAt(1) as? TextView ?: continue
+                paintCard(card, name)
+            }
+        }
     }
 
     private fun paintDetail() {
@@ -358,7 +470,12 @@ class MoviesActivity : Activity() {
         }
         val play = pill("▶  Play", primary = true)
         play.setOnClickListener { openPlayer() }
-        detailServerRow.addView(play)
+        if (compact) {
+            play.gravity = Gravity.CENTER
+            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(96), dp(36)))
+        } else {
+            detailServerRow.addView(play)
+        }
     }
 
     private fun paintSteppers() {
@@ -395,7 +512,7 @@ class MoviesActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setBackgroundColor(ContextCompatColor.surface)
-            setPadding(dp(24), dp(10), dp(24), dp(10))
+            setPadding(dp(if (compact) 10 else 24), dp(8), dp(if (compact) 10 else 24), dp(8))
         }
         val chips = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -406,17 +523,23 @@ class MoviesActivity : Activity() {
             setTextColor(ContextCompatColor.mint)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
             setTypeface(typeface, Typeface.BOLD)
-            setPadding(0, 0, dp(16), 0)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
+            setPadding(0, 0, dp(10), 0)
+            maxWidth = dp(if (compact) 110 else 220)
         }
         bar.addView(label)
-        bar.addView(chips)
-        bar.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
-        val close = pill("✕  Close", primary = false)
+        val chipsScroll = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            addView(chips)
+        }
+        bar.addView(chipsScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        val close = pill("✕", primary = false, small = true)
         close.setOnClickListener { closePlayer() }
-        bar.addView(close)
+        bar.addView(close, LinearLayout.LayoutParams(dp(34), dp(30)))
 
         layer.addView(bar, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(60), Gravity.BOTTOM,
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(if (compact) 52 else 60), Gravity.BOTTOM,
         ))
 
         (window.decorView as FrameLayout).addView(layer)
@@ -499,6 +622,11 @@ class MoviesActivity : Activity() {
             return
         }
         super.onBackPressed()
+    }
+
+    private companion object {
+        /** How many posters a scroll adds; about three phone screens. */
+        const val PAGE = 45
     }
 }
 

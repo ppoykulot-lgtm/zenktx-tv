@@ -78,14 +78,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="38dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_chip_active"
+                android:background="@drawable/bg_pill_red"
                 android:focusable="true"
                 android:gravity="center"
                 android:letterSpacing="0.08"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="Movies"
-                android:textColor="@color/mint"
+                android:textColor="#FFFFFF"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 

@@ -71,29 +71,41 @@ def pick(item, names, kind):
     }
 
 
+# One page of TMDB holds twenty titles, so every feed is walked several pages
+# deep. Trending is capped because TMDB only keeps a few pages of it.
+FEEDS = [
+    ("trending/{kind}/week", {}, 3),
+    ("{kind}/popular", {}, 12),
+    ("{kind}/top_rated", {}, 12),
+    ("discover/{kind}", {"sort_by": "{sort}", "vote_count.gte": 40}, 12),
+    ("discover/{kind}", {"sort_by": "{sort}", "vote_count.gte": 300}, 8),
+]
+
+
 def collect(kind, names, seen):
     """Trending first, then popular, so the newest titles lead the rows."""
+    # TMDB names the date field differently for films and shows.
+    date_field = "primary_release_date" if kind == "movie" else "first_air_date"
+    sort = f"{date_field}.desc"
     rows = []
-    feeds = [
-        (f"/trending/{kind}/week", {}),
-        (f"/{kind}/popular", {}),
-        (f"/discover/{kind}", {
-            "sort_by": "primary_release_date.desc" if kind == "movie" else "first_air_date.desc",
-            "vote_count.gte": 20,
-        }),
-    ]
-    for path, params in feeds:
-        try:
-            data = get(path, **params)
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
-            print(f"  skip {path}: {e}")
-            continue
-        for item in data.get("results", []):
-            card = pick(item, names, kind)
-            if not card or card["id"] in seen:
-                continue
-            seen.add(card["id"])
-            rows.append(card)
+    for raw_path, raw_params, page_count in FEEDS:
+        path = "/" + raw_path.format(kind=kind)
+        params = {str(k).format(sort=sort): str(v).format(sort=sort) for k, v in raw_params.items()}
+        for page in range(1, page_count + 1):
+            try:
+                data = get(path, page=page, **params)
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+                print(f"  skip {path} p{page}: {e}")
+                break
+            results = data.get("results", [])
+            if not results:
+                break
+            for item in results:
+                card = pick(item, names, kind)
+                if not card or card["id"] in seen:
+                    continue
+                seen.add(card["id"])
+                rows.append(card)
     return rows
 
 
@@ -127,8 +139,8 @@ def main():
              "movie": "https://player.vidzee.wtf/embed/movie/{id}",
              "tv": "https://player.vidzee.wtf/embed/tv/{id}/{season}/{episode}"},
         ],
-        "movies": movies[:90],
-        "series": series[:90],
+        "movies": movies[:220],
+        "series": series[:220],
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
