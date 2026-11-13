@@ -11,8 +11,7 @@ import json
 import re
 import urllib.request
 
-FEED = ('https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/'
-        'channels.json')
+FEED = ('https://iyadtv.pages.dev')
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/124.0 Safari/537.36')
 WIDEVINE = 'edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'
