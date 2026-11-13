@@ -1,5 +1,5 @@
 {
- "maintenance": true,
- "message": "Maintenance Mode.\nThis upgrade is necessary to improve server security, stability, performance, and the protection of our private URL stream sources.",
- "updatedAt": "2026-11-13T07:17:50Z"
+ "maintenance": false,
+ "message": "Maintenance Mode. This upgrade is necessary to improve server security, stability, performance, and the protection of our private URL stream sources.",
+ "updatedAt": "2026-11-13T08:20:10Z"
 }
