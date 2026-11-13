@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-13T06:53:59Z",
+ "updatedAt": "2026-11-13T07:03:25Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -53,7 +53,7 @@
     "abs cbn"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0228-1a97099425.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772021/8zmNnkZySWChtpziOBoqGQ/hls/kapamilyahd/stream.m3u8",
+   "url": "https://ovh.rise2the.top/aldous/1794549615/ZLnQ9n4KSBcNDbcptD581Q/hls/kapamilyahd/stream.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
