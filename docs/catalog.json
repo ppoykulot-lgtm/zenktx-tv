@@ -1,7 +1,7 @@
 {
  "version": 1,
- "updatedAt": "2026-11-13T07:08:28Z",
- "source": "https://iyadtv.pages.dev",
+ "updatedAt": "2026-11-13T10:10:53Z",
+ "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
   {
@@ -15,12 +15,11 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": false,
+   "enabled": true,
    "drmType": "",
    "keyId": "",
    "key": "",
-   "note": "",
-   "tombstone": true
+   "note": ""
   },
   {
    "id": 1003,
@@ -33,12 +32,11 @@
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": false,
+   "enabled": true,
    "drmType": "",
    "keyId": "",
    "key": "",
-   "note": "",
-   "tombstone": true
+   "note": ""
   },
   {
    "id": "custom-1793102402188",
