@@ -12,7 +12,7 @@
  * the X-Frame-Options the players send, which an iframe would obey.
  */
 (function () {
-  const DATA_URL = 'https://ppoykulot-lgtm.github.io/zenktx-tv/movies.json';
+  const CATALOGUE = 'https://ppoykulot-lgtm.github.io/zenktx-tv/movies/';
   // A server that shows nothing after this long is treated as dark.
   const WATCHDOG_MS = 12000;
 
@@ -27,6 +27,9 @@
     timer: 0,
     tries: 0,
     shown: 0,
+    meta: null,
+    pages: { movies: 0, series: 0 },
+    loading: false,
   };
 
   /* One screenful of posters at a time. The catalogue holds a few thousand of
@@ -68,10 +71,14 @@
     [['movies', 'Movies'], ['series', 'Series']].forEach(([key, label]) => {
       const b = make('button', 'mv-tab' + (key === 'movies' ? ' on' : ''), label);
       b.dataset.tab = key;
-      b.addEventListener('click', () => {
+      b.addEventListener('click', async () => {
         state.tab = key;
         document.querySelectorAll('.mv-tab').forEach((t) => t.classList.toggle('on', t.dataset.tab === key));
         state.item = null;
+        if (!items().length) {
+          $('mvHero').innerHTML = '<div class="mv-hero-empty">Loading the catalogue…</div>';
+          try { await loadPage(key); } catch (error) { /* the empty state covers it */ }
+        }
         render();
       });
       tabs.appendChild(b);
@@ -81,9 +88,15 @@
     const search = make('input', 'search mv-search');
     search.type = 'search';
     search.placeholder = 'Search titles…  (Esc to close)';
-    search.addEventListener('input', () => {
+    search.addEventListener('input', async () => {
       state.search = search.value;
       renderRail(true);
+      /* Searching should reach the whole catalogue, not just what has been
+         scrolled past, so the remaining pages are pulled in the background. */
+      if (state.search.trim()) {
+        await loadAll(state.tab);
+        renderRail(true);
+      }
     });
     head.appendChild(search);
 
@@ -229,10 +242,18 @@
     state.shown = rail.childElementCount;
   }
 
-  function moreRail() {
+  async function moreRail() {
     const list = filtered();
-    if (!list.length || state.shown >= list.length) return;
-    state.shown = Math.min(list.length, state.shown + CHUNK);
+    if (state.shown < list.length) {
+      state.shown = Math.min(list.length, state.shown + CHUNK);
+      renderRail(false);
+      return;
+    }
+    const meta = state.meta && state.meta[state.tab];
+    if (!meta || (state.pages[state.tab] || 0) >= meta.files.length) return;
+    const loaded = await loadPage(state.tab);
+    if (!loaded) return;
+    state.shown = Math.min(filtered().length, state.shown + CHUNK);
     renderRail(false);
   }
 
@@ -397,11 +418,48 @@
 
   let wired = false;
 
+  /**
+   * The catalogue is an index plus pages of titles: opening the screen costs one
+   * small request, and the rest arrives as the reader scrolls towards it.
+   */
   async function load() {
-    if (state.data) return;
-    const text = await window.zenk.fetchText(DATA_URL + '?t=' + Date.now());
-    state.data = JSON.parse(text);
+    if (state.meta) return;
+    const text = await window.zenk.fetchText(CATALOGUE + 'index.json?t=' + Date.now());
+    const index = JSON.parse(text);
+    state.meta = index;
+    state.data = { servers: index.servers || [], movies: [], series: [] };
+    state.pages = { movies: 0, series: 0 };
     state.item = null;
+    await loadPage(state.tab);
+  }
+
+  async function loadPage(tab) {
+    const meta = state.meta && state.meta[tab];
+    if (!meta || !meta.files) return false;
+    const next = state.pages[tab] || 0;
+    if (next >= meta.files.length) return false;
+    if (state.loading) return false;
+    state.loading = true;
+    try {
+      const text = await window.zenk.fetchText(CATALOGUE + meta.files[next] + '?t=' + Date.now());
+      const page = JSON.parse(text);
+      const list = Array.isArray(page.items) ? page.items : [];
+      state.data[tab].push(...list);
+      state.pages[tab] = next + 1;
+    } finally {
+      state.loading = false;
+    }
+    return true;
+  }
+
+  /** Used by search, where a partial catalogue would give a wrong answer. */
+  async function loadAll(tab) {
+    const meta = state.meta && state.meta[tab];
+    if (!meta || !meta.files) return;
+    while ((state.pages[tab] || 0) < meta.files.length) {
+      const loaded = await loadPage(tab);
+      if (!loaded) break;
+    }
   }
 
   function wire() {

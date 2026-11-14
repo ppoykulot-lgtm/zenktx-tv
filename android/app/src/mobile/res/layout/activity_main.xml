@@ -75,8 +75,8 @@
 
             <TextView
                 android:id="@+id/moviesButton"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
+                android:layout_width="96dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_pill_red"
                 android:focusable="true"
@@ -91,8 +91,8 @@
 
             <TextView
                 android:id="@+id/menuButton"
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
+                android:layout_width="96dp"
+                android:layout_height="40dp"
                 android:background="@drawable/bg_pill"
                 android:focusable="true"
                 android:gravity="center"

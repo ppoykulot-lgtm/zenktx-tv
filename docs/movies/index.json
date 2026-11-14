@@ -1,0 +1,87 @@
+{
+ "updatedAt": "2026-11-14T07:20:24Z",
+ "note": "Metadata from TMDB. Poster and backdrop URLs resolve without a key; the shells hold none.",
+ "posterBase": "https://image.tmdb.org/t/p/w500",
+ "backdropBase": "https://image.tmdb.org/t/p/w780",
+ "chunkSize": 150,
+ "servers": [
+  {
+   "id": "vidlink",
+   "name": "Player 1",
+   "movie": "https://vidlink.pro/movie/{id}",
+   "tv": "https://vidlink.pro/tv/{id}/{season}/{episode}"
+  },
+  {
+   "id": "vidsrc",
+   "name": "Player 2",
+   "movie": "https://vidsrc.sh/embed/movie?tmdb={id}",
+   "tv": "https://vidsrc.sh/embed/tv?tmdb={id}&season={season}&episode={episode}"
+  },
+  {
+   "id": "vsembed",
+   "name": "Player 3",
+   "movie": "https://vsembed.ru/embed/movie?tmdb={id}",
+   "tv": "https://vsembed.ru/embed/tv?tmdb={id}&season={season}&episode={episode}"
+  },
+  {
+   "id": "vidzee",
+   "name": "Player 4",
+   "movie": "https://player.vidzee.wtf/embed/movie/{id}",
+   "tv": "https://player.vidzee.wtf/embed/tv/{id}/{season}/{episode}"
+  }
+ ],
+ "movies": {
+  "count": 3147,
+  "files": [
+   "movies-01.json",
+   "movies-02.json",
+   "movies-03.json",
+   "movies-04.json",
+   "movies-05.json",
+   "movies-06.json",
+   "movies-07.json",
+   "movies-08.json",
+   "movies-09.json",
+   "movies-10.json",
+   "movies-11.json",
+   "movies-12.json",
+   "movies-13.json",
+   "movies-14.json",
+   "movies-15.json",
+   "movies-16.json",
+   "movies-17.json",
+   "movies-18.json",
+   "movies-19.json",
+   "movies-20.json",
+   "movies-21.json"
+  ]
+ },
+ "series": {
+  "count": 3307,
+  "files": [
+   "series-01.json",
+   "series-02.json",
+   "series-03.json",
+   "series-04.json",
+   "series-05.json",
+   "series-06.json",
+   "series-07.json",
+   "series-08.json",
+   "series-09.json",
+   "series-10.json",
+   "series-11.json",
+   "series-12.json",
+   "series-13.json",
+   "series-14.json",
+   "series-15.json",
+   "series-16.json",
+   "series-17.json",
+   "series-18.json",
+   "series-19.json",
+   "series-20.json",
+   "series-21.json",
+   "series-22.json",
+   "series-23.json"
+  ]
+ }
+}

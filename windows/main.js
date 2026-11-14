@@ -1,6 +1,20 @@
 'use strict';
 
 const { app, BrowserWindow, ipcMain, shell, dialog, Menu, session } = require('electron');
+
+// Ad networks the embed pages pull from. Everything else is left alone.
+const AD_HOSTS = [
+  'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
+  'adservice.google.com', 'popads.net', 'popcash.net', 'propellerads.com',
+  'propellerpops.com', 'juicyads.com', 'exoclick.com', 'exosrv.com',
+  'trafficjunky.com', 'adsterra.com', 'hilltopads.net', 'clickadu.com',
+  'onclicksuper.com', 'mgid.com', 'revcontent.com', 'taboola.com',
+  'outbrain.com', 'criteo.com', 'criteo.net', 'adnxs.com', 'pubmatic.com',
+  'rubiconproject.com', 'openx.net', 'zedo.com', 'ad-score.com',
+  'scorecardresearch.com', 'quantserve.com', 'moatads.com',
+  'adsafeprotected.com', 'doubleverify.com', 'histats.com',
+  'serving-sys.com', 'smartadserver.com',
+];
 const { spawn } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -256,6 +270,25 @@ app.whenReady().then(() => {
   }
 
   ipcMain.handle('app:version', () => app.getVersion());
+
+  // The Movies screen runs its embeds in their own partition, and those pages
+  // are funded by video ads and pop-unders. Answering the ad networks with a
+  // cancelled request leaves the player itself untouched.
+  const moviesSession = session.fromPartition('persist:zenktx-movies');
+  moviesSession.webRequest.onBeforeRequest({ urls: ['<all_urls>'] }, (details, callback) => {
+    let host = '';
+    try {
+      host = new URL(details.url).hostname.toLowerCase();
+    } catch (error) {
+      host = '';
+    }
+    callback({ cancel: Boolean(host) && AD_HOSTS.some((name) => host === name || host.endsWith('.' + name)) });
+  });
+
+  // A pop-under is a window this app never asked for.
+  app.on('web-contents-created', (_event, contents) => {
+    contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  });
 
   // The renderer requests media from a file:// page with Electron's own user
   // agent, and several of these CDNs answer that with 403 or a CORS failure

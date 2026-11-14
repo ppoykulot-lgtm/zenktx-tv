@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,7 +17,10 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -25,11 +30,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import ph.zenktx.tv.data.MovieCatalog
 import ph.zenktx.tv.data.MovieTitle
 import ph.zenktx.tv.data.PlayerServer
 import ph.zenktx.tv.net.Http
+import java.io.ByteArrayInputStream
 import java.util.concurrent.Executors
 import kotlin.math.max
 import kotlin.math.min
@@ -38,14 +45,16 @@ import kotlin.math.min
  * Movies & Series.
  *
  * Deliberately its own screen: the guide's D-pad model is built for zapping and
- * a poster wall needs a different one. Playback is the publisher's embedded
- * player in a WebView -- X-Frame-Options does not apply to a WebView, which is
- * why this works where an iframe would be refused -- and a server that paints
- * nothing is walked past instead of shown as a black rectangle.
+ * a poster wall needs a different one. The catalogue is an index plus pages, so
+ * the wall grows by 28 posters as the reader reaches the bottom of what it has.
  *
- * One layout serves a 55" television and a 6" phone: the width decides whether
- * the tabs share the header row or get their own, how many posters fit, and
- * whether the details sit beside the wall or under it.
+ * Playback is the publisher's embedded player in a WebView -- X-Frame-Options
+ * does not apply to a WebView, which is why this works where an iframe would be
+ * refused -- with our own transport row over it, because the embedded page's
+ * controls sit under the cutout on a phone. A server that paints nothing is
+ * walked past instead of shown as a black rectangle.
+ *
+ * The whole screen runs immersive: no status bar, no navigation bar, no clock.
  */
 class MoviesActivity : Activity() {
 
@@ -57,7 +66,11 @@ class MoviesActivity : Activity() {
     private var season = 1
     private var episode = 1
 
-    /** A phone is narrow enough that a poster is finger-sized, not D-pad-sized. */
+    /** Titles pulled so far, per kind, and how many pages are behind them. */
+    private val loaded = mutableMapOf<String, MutableList<MovieTitle>>()
+    private val cursor = mutableMapOf<String, Int>()
+    private var loadingPage = false
+
     private val compact: Boolean by lazy {
         resources.displayMetrics.widthPixels / resources.displayMetrics.density < 600f
     }
@@ -75,20 +88,49 @@ class MoviesActivity : Activity() {
     private lateinit var seasonValue: TextView
     private lateinit var episodeValue: TextView
 
-    private var titlesNow: List<MovieTitle> = emptyList()
     private var rendered = 0
     private var appending = false
 
     private var playerLayer: FrameLayout? = null
     private var web: WebView? = null
     private var playerChips: LinearLayout? = null
+    private var playToggle: TextView? = null
+    private var muted = false
+    private var volume = 100
+    private var embedHost = ""
     private var tries = 0
     private val watchdog = Runnable { probePlayback() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyImmersive()
         buildUi()
         load()
+    }
+
+    /* --------------------------------------------------------------- window */
+
+    /** Nothing but the app: the clock strip and the navigation bar go away. */
+    @Suppress("DEPRECATION")
+    private fun applyImmersive() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes = window.attributes.apply {
+                layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) applyImmersive()
     }
 
     /* ------------------------------------------------------------------ ui */
@@ -103,7 +145,7 @@ class MoviesActivity : Activity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(ContextCompatColor.bg)
-            setPadding(padH, if (compact) dp(10) else dp(18), padH, if (compact) dp(8) else dp(14))
+            setPadding(padH, if (compact) dp(16) else dp(22), padH, if (compact) dp(10) else dp(14))
         }
 
         val top = LinearLayout(this).apply {
@@ -122,13 +164,12 @@ class MoviesActivity : Activity() {
             setPadding(if (compact) dp(2) else dp(16), if (compact) dp(10) else 0, dp(16), 0)
         }
 
-        tabMovies = if (compact) segment("Movies") else pill("Movies", primary = true)
+        tabMovies = if (compact) segment("Movies") else pill("Movies", primary = false)
         tabMovies.setOnClickListener { switchKind("movies") }
         tabSeries = if (compact) segment("Series") else pill("Series", primary = false)
         tabSeries.setOnClickListener { switchKind("series") }
 
         if (compact) {
-            /* the phone puts the tabs on their own full-width row */
             val bar = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -140,8 +181,8 @@ class MoviesActivity : Activity() {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, dp(10), 0, 0)
             }
-            tabs.addView(tabMovies, LinearLayout.LayoutParams(0, dp(38), 1f).apply { marginEnd = dp(8) })
-            tabs.addView(tabSeries, LinearLayout.LayoutParams(0, dp(38), 1f))
+            tabs.addView(tabMovies, LinearLayout.LayoutParams(0, dp(40), 1f).apply { marginEnd = dp(8) })
+            tabs.addView(tabSeries, LinearLayout.LayoutParams(0, dp(40), 1f))
             top.addView(tabs)
         } else {
             top.addView(back)
@@ -185,7 +226,7 @@ class MoviesActivity : Activity() {
         val footer = LinearLayout(this).apply {
             orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
             gravity = if (compact) Gravity.START else Gravity.CENTER_VERTICAL
-            setPadding(0, dp(10), 0, 0)
+            setPadding(0, dp(8), 0, 0)
         }
         val textCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         detailTitle = TextView(this).apply {
@@ -234,7 +275,6 @@ class MoviesActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         if (compact) {
-            /* four servers plus Play overflow a phone's width, so they scroll */
             val chipsScroll = HorizontalScrollView(this).apply {
                 isHorizontalScrollBarEnabled = false
                 setPadding(0, dp(8), 0, 0)
@@ -274,13 +314,37 @@ class MoviesActivity : Activity() {
             }
         }
 
-    /** The phone's two-up switch: a filled half when on, an outlined half when off. */
+    /** A player server: dark when idle, mint-edged once chosen. */
+    private fun serverChip(label: String, on: Boolean, small: Boolean = true): TextView =
+        TextView(this).apply {
+            text = label
+            isFocusable = true
+            isClickable = true
+            gravity = Gravity.CENTER
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (small) 9f else 10f)
+            setTypeface(typeface, Typeface.BOLD)
+            letterSpacing = 0.04f
+            setTextColor(if (on) ContextCompatColor.mint else ContextCompatColor.chipText)
+            setBackgroundResource(if (on) R.drawable.bg_chip_mint else R.drawable.bg_chip)
+            val padH = if (small) dp(10) else dp(14)
+            setPadding(padH, dp(7), padH, dp(7))
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ).apply { marginEnd = dp(8) }
+            setOnFocusChangeListener { view, hasFocus ->
+                view.animate().scaleX(if (hasFocus) 1.05f else 1f).scaleY(if (hasFocus) 1.05f else 1f)
+                    .setDuration(120).start()
+            }
+        }
+
+    /** The phone's two-up switch. */
     private fun segment(label: String): TextView =
         pill(label, primary = false).apply {
             gravity = Gravity.CENTER
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            setTextColor(ContextCompatColor.mint)
-            setBackgroundResource(R.drawable.bg_chip_active)
+            setTextColor(ContextCompatColor.chipText)
+            setBackgroundResource(R.drawable.bg_chip)
         }
 
     /* -------------------------------------------------------------- loading */
@@ -289,20 +353,54 @@ class MoviesActivity : Activity() {
         progress.visibility = View.VISIBLE
         empty.text = "Loading the catalogue…"
         Thread {
-            val loaded = try {
+            val index = try {
                 MovieCatalog.load()
             } catch (error: Exception) {
                 null
             }
             main.post {
                 progress.visibility = View.GONE
-                if (loaded == null) {
+                if (index == null) {
                     empty.text = "The Movies catalogue could not be loaded."
                     return@post
                 }
-                catalog = loaded
+                catalog = index
                 empty.text = ""
-                render()
+                loadNextPage()
+            }
+        }.start()
+    }
+
+    /** Pulls the next published page; the wall stays usable while it arrives. */
+    private fun loadNextPage() {
+        val data = catalog ?: return
+        if (loadingPage) return
+        val pages = data.pages(kind)
+        val next = cursor[kind] ?: 0
+        if (next >= pages.files.size) return
+        loadingPage = true
+        if (loaded[kind].isNullOrEmpty()) progress.visibility = View.VISIBLE
+        Thread {
+            val titles = try {
+                MovieCatalog.loadPage(data, kind, next)
+            } catch (error: Exception) {
+                emptyList()
+            }
+            main.post {
+                loadingPage = false
+                progress.visibility = View.GONE
+                val list = loaded.getOrPut(kind) { mutableListOf() }
+                list.addAll(titles)
+                cursor[kind] = next + 1
+                if (list.isEmpty()) {
+                    empty.text = "Nothing to show yet."
+                    return@post
+                }
+                empty.text = ""
+                paintTabs()
+                if (selected == null) selected = list.first()
+                appendRows()
+                paintDetail()
             }
         }.start()
     }
@@ -314,57 +412,47 @@ class MoviesActivity : Activity() {
         season = 1
         episode = 1
         scroller.scrollTo(0, 0)
+        paintTabs()
         render()
+        if (loaded[kind].isNullOrEmpty()) loadNextPage()
     }
 
     private fun paintTabs() {
-        val on = ContextCompatColor.mint
-        val off = ContextCompatColor.chipText
-        tabMovies.setTextColor(if (kind == "movies") on else off)
-        tabSeries.setTextColor(if (kind == "series") on else off)
-        tabMovies.setBackgroundResource(if (kind == "movies") R.drawable.bg_chip_active else R.drawable.bg_chip)
-        tabSeries.setBackgroundResource(if (kind == "series") R.drawable.bg_chip_active else R.drawable.bg_chip)
+        tabMovies.setBackgroundResource(if (kind == "movies") R.drawable.bg_segment_on else R.drawable.bg_chip)
+        tabSeries.setBackgroundResource(if (kind == "series") R.drawable.bg_segment_on else R.drawable.bg_chip)
+        tabMovies.setTextColor(if (kind == "movies") ContextCompatColor.mint else ContextCompatColor.chipText)
+        tabSeries.setTextColor(if (kind == "series") ContextCompatColor.mint else ContextCompatColor.chipText)
     }
 
     private fun render() {
-        val data = catalog ?: return
-        titlesNow = data.titles(kind)
         grid.removeAllViews()
         rendered = 0
-        if (titlesNow.isEmpty()) {
-            empty.text = "Nothing to show yet."
-            return
-        }
-        empty.text = ""
-        paintTabs()
-        val keep = selected?.let { current -> titlesNow.firstOrNull { it.id == current.id } }
-        selected = keep ?: titlesNow.first()
+        val list = loaded[kind].orEmpty()
+        if (list.isEmpty()) return
+        if (selected == null) selected = list.first()
         appendRows()
         paintDetail()
     }
 
-    /**
-     * Two hundred posters is two hundred decodes; the wall is filled a screenful
-     * at a time as the reader scrolls instead of all at once on the main thread.
-     */
     private fun appendRows() {
-        if (appending || rendered >= titlesNow.size) return
+        val list = loaded[kind].orEmpty()
+        if (list.isEmpty() || appending) return
         appending = true
         try {
+            if (rendered == 0) grid.removeAllViews()
             val width = resources.displayMetrics.widthPixels - padH * 2
             val columns = if (compact) 3 else max(4, width / dp(165))
             val cardW = (width - gap * (columns - 1)) / columns
             val posterH = (cardW * 1.5f).toInt()
-            val limit = min(titlesNow.size, rendered + PAGE)
+            val limit = min(list.size, rendered + PAGE)
             while (rendered < limit) {
                 val row = LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     setPadding(0, 0, 0, gap)
                 }
                 var column = 0
-                while (column < columns && rendered < titlesNow.size) {
-                    val item = titlesNow[rendered]
-                    row.addView(card(item, cardW, posterH, column == columns - 1))
+                while (column < columns && rendered < list.size) {
+                    row.addView(card(list[rendered], cardW, posterH, column == columns - 1))
                     rendered += 1
                     column += 1
                 }
@@ -376,11 +464,14 @@ class MoviesActivity : Activity() {
     }
 
     private fun maybeAppend() {
-        if (rendered >= titlesNow.size) return
         val content = scroller.getChildAt(0) ?: return
-        if (scroller.scrollY + scroller.height >= content.height - dp(400)) {
+        if (scroller.scrollY + scroller.height < content.height - dp(400)) return
+        if (rendered < loaded[kind].orEmpty().size) {
             grid.post { appendRows() }
+            return
         }
+        val pages = catalog?.pages(kind) ?: return
+        if ((cursor[kind] ?: 0) < pages.files.size) loadNextPage()
     }
 
     private fun card(item: MovieTitle, width: Int, posterH: Int, lastColumn: Boolean): View {
@@ -412,7 +503,6 @@ class MoviesActivity : Activity() {
         paintCard(wrap, name)
 
         if (!compact) {
-            /* a television is driven by the D-pad, so the focused poster grows */
             wrap.setOnFocusChangeListener { view, hasFocus ->
                 view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
                     .setDuration(120).start()
@@ -428,7 +518,6 @@ class MoviesActivity : Activity() {
         return wrap
     }
 
-    /** Marks the picked poster so the wall shows where the details came from. */
     private fun paintCard(wrap: View, name: TextView) {
         val item = wrap.tag as? MovieTitle ?: return
         val on = item.id == selected?.id
@@ -459,22 +548,31 @@ class MoviesActivity : Activity() {
         paintSteppers()
 
         detailServerRow.removeAllViews()
-        val servers = catalog?.servers.orEmpty()
-        servers.forEachIndexed { index, server ->
-            val chip = pill(server.name, primary = index == serverIndex, small = true)
+        catalog?.servers.orEmpty().forEachIndexed { index, server ->
+            val chip = serverChip(server.name, index == serverIndex)
             chip.setOnClickListener {
                 serverIndex = index
                 paintDetail()
             }
             detailServerRow.addView(chip)
         }
-        val play = pill("▶  Play", primary = true)
-        play.setOnClickListener { openPlayer() }
+        val play = TextView(this).apply {
+            text = "▶  Play"
+            isFocusable = true
+            isClickable = true
+            gravity = Gravity.CENTER
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+            setTypeface(typeface, Typeface.BOLD)
+            letterSpacing = 0.04f
+            setTextColor(Color.WHITE)
+            setBackgroundResource(R.drawable.bg_pill_red)
+            setPadding(dp(16), dp(8), dp(16), dp(8))
+            setOnClickListener { openPlayer() }
+        }
         if (compact) {
-            play.gravity = Gravity.CENTER
-            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(96), dp(36)))
+            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(100), dp(36)))
         } else {
-            detailServerRow.addView(play)
+            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(110), dp(34)))
         }
     }
 
@@ -492,29 +590,77 @@ class MoviesActivity : Activity() {
         val server = data.servers.getOrNull(serverIndex) ?: return
         closePlayer()
 
-        val layer = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
+        val layer = FrameLayout(this).apply {
+            setBackgroundColor(Color.BLACK)
+            isClickable = true
+        }
+        val url = data.address(server, item, season, episode)
+        embedHost = Uri.parse(url).host.orEmpty()
+        muted = false
+        volume = 100
+
         val view = WebView(this).apply {
             setBackgroundColor(Color.BLACK)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            settings.setSupportMultipleWindows(false)
             settings.userAgentString = Http.USER_AGENT
-            webViewClient = WebViewClient()
-            webChromeClient = WebChromeClient()
-            loadUrl(data.address(server, item, season, episode))
+            webViewClient = EmbedClient()
+            webChromeClient = object : WebChromeClient() {
+                /* Pop-unders are how these pages pay for themselves; refuse them. */
+                override fun onCreateWindow(
+                    view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message?,
+                ): Boolean = false
+            }
+            loadUrl(url)
         }
         layer.addView(view, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
         ))
 
-        val bar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setBackgroundColor(ContextCompatColor.surface)
-            setPadding(dp(if (compact) 10 else 24), dp(8), dp(if (compact) 10 else 24), dp(8))
+        val chrome = playerChrome(item)
+        layer.addView(chrome, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM,
+        ))
+
+        /* A corner toggle so full screen is always one tap away, and one tap back. */
+        val corner = TextView(this).apply {
+            text = "⛶"
+            isClickable = true
+            isFocusable = true
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompatColor.text)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setPadding(dp(10), dp(6), dp(10), dp(6))
+            setBackgroundColor(Color.parseColor("#66000000"))
+            setOnClickListener {
+                chrome.visibility = if (chrome.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                applyImmersive()
+            }
         }
-        val chips = LinearLayout(this).apply {
+        layer.addView(corner, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+        ).apply { gravity = Gravity.TOP or Gravity.END; topMargin = dp(14); marginEnd = dp(14) })
+
+        (window.decorView as FrameLayout).addView(layer)
+        playerLayer = layer
+        web = view
+        tries = 0
+        paintPlayerChips()
+        armWatchdog()
+    }
+
+    /** Transport, volume and close, in one strip wired to the guest's <video>. */
+    private fun playerChrome(item: MovieTitle): LinearLayout {
+        val bar = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.parseColor("#CC0D1524"))
+            setPadding(dp(if (compact) 10 else 20), dp(6), dp(if (compact) 10 else 20), dp(8))
+        }
+
+        val topRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
@@ -525,37 +671,94 @@ class MoviesActivity : Activity() {
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
+            maxWidth = dp(if (compact) 100 else 220)
             setPadding(0, 0, dp(10), 0)
-            maxWidth = dp(if (compact) 110 else 220)
         }
-        bar.addView(label)
-        val chipsScroll = HorizontalScrollView(this).apply {
+        topRow.addView(label)
+        val chips = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        topRow.addView(HorizontalScrollView(this).apply {
             isHorizontalScrollBarEnabled = false
             addView(chips)
-        }
-        bar.addView(chipsScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        val close = pill("✕", primary = false, small = true)
+        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        val close = serverChip("✕", on = false)
         close.setOnClickListener { closePlayer() }
-        bar.addView(close, LinearLayout.LayoutParams(dp(34), dp(30)))
+        topRow.addView(close, LinearLayout.LayoutParams(dp(34), dp(30)))
+        bar.addView(topRow)
 
-        layer.addView(bar, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(if (compact) 52 else 60), Gravity.BOTTOM,
-        ))
+        val controls = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(4), 0, 0)
+        }
+        fun control(text: String, width: Int, action: () -> Unit) {
+            controls.addView(serverChip(text, on = false).apply {
+                setOnClickListener { action() }
+            }, LinearLayout.LayoutParams(dp(width), dp(32)))
+        }
+        control("−10", 46) { nudge(-10) }
+        playToggle = serverChip("▶", on = true)
+        playToggle?.setOnClickListener { togglePlay() }
+        controls.addView(playToggle, LinearLayout.LayoutParams(dp(44), dp(32)))
+        control("+10", 46) { nudge(10) }
+        control(if (muted) "🔇" else "🔊", 42) { toggleMute() }
+        val slider = SeekBar(this).apply {
+            max = 100
+            progress = volume
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) {
+                    if (!fromUser) return
+                    volume = value
+                    muted = value == 0
+                    js("(function(){var v=document.querySelector('video');if(!v)return;v.muted=${muted};v.volume=${value / 100f};})()")
+                }
+                override fun onStartTrackingTouch(bar: SeekBar) {}
+                override fun onStopTrackingTouch(bar: SeekBar) {}
+            })
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        controls.addView(slider)
+        bar.addView(controls)
 
-        (window.decorView as FrameLayout).addView(layer)
-        playerLayer = layer
-        web = view
         playerChips = chips
-        tries = 0
-        paintPlayerChips()
-        armWatchdog()
+        return bar
+    }
+
+    private fun js(code: String) = web?.evaluateJavascript(code, null)
+
+    private fun togglePlay() {
+        js(
+            "(function(){var v=document.querySelector('video');if(!v)return;" +
+                "if(v.paused){v.play();}else{v.pause();}})()",
+        )
+        playToggle?.text = if (playToggle?.text == "▶") "❚❚" else "▶"
+    }
+
+    private fun nudge(seconds: Int) {
+        js("(function(){var v=document.querySelector('video');if(!v)return;v.currentTime=Math.max(0,v.currentTime+($seconds));})()")
+    }
+
+    private fun toggleMute() {
+        muted = !muted
+        js("(function(){var v=document.querySelector('video');if(!v)return;v.muted=$muted;" +
+            "if(!$muted&&v.volume===0){v.volume=1;}})()")
+        paintMuteState()
+    }
+
+    private fun paintMuteState() {
+        val controls = (playerLayer?.getChildAt(1) as? LinearLayout) ?: return
+        val row = controls.getChildAt(1) as? LinearLayout ?: return
+        val button = row.getChildAt(3) as? TextView ?: return
+        button.text = if (muted) "🔇" else "🔊"
     }
 
     private fun paintPlayerChips() {
         val chips = playerChips ?: return
         chips.removeAllViews()
         catalog?.servers.orEmpty().forEachIndexed { index, server ->
-            val chip = pill(server.name, primary = index == serverIndex, small = true)
+            val chip = serverChip(server.name, index == serverIndex)
             chip.setOnClickListener {
                 serverIndex = index
                 tries = 0
@@ -570,8 +773,39 @@ class MoviesActivity : Activity() {
         val data = catalog ?: return
         val item = selected ?: return
         val server = data.servers.getOrNull(serverIndex) ?: return
-        web?.loadUrl(data.address(server, item, season, episode))
+        val url = data.address(server, item, season, episode)
+        embedHost = Uri.parse(url).host.orEmpty()
+        web?.loadUrl(url)
         armWatchdog()
+    }
+
+    /**
+     * These pages are funded by video ads and pop-unders. Requests to the ad
+     * networks are answered empty and navigations off the embed's own host are
+     * refused, which leaves the player itself untouched.
+     */
+    private inner class EmbedClient : WebViewClient() {
+        override fun shouldInterceptRequest(
+            view: WebView, request: WebResourceRequest,
+        ): WebResourceResponse? {
+            val host = request.url.host?.lowercase().orEmpty()
+            if (AD_HOSTS.any { host == it || host.endsWith(".$it") }) {
+                return WebResourceResponse("text/plain", "utf-8", ByteArrayInputStream(ByteArray(0)))
+            }
+            return null
+        }
+
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            val host = request.url.host?.lowercase().orEmpty()
+            if (host.isEmpty() || host == embedHost) return false
+            return true
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            super.onPageFinished(view, url)
+            /* Belt and braces: some pages open windows from script. */
+            view.evaluateJavascript("window.open=function(){return null;};", null)
+        }
     }
 
     /** Ask the guest page for a decoded frame; a dead mirror returns 200 and paints black. */
@@ -606,8 +840,10 @@ class MoviesActivity : Activity() {
         }
         web = null
         playerChips = null
+        playToggle = null
         playerLayer?.let { (window.decorView as FrameLayout).removeView(it) }
         playerLayer = null
+        applyImmersive()
     }
 
     override fun onDestroy() {
@@ -627,6 +863,22 @@ class MoviesActivity : Activity() {
     private companion object {
         /** First screenful, and how many a scroll adds. */
         const val PAGE = 28
+
+        /** Ad networks the embed pages pull from; everything else is left alone. */
+        val AD_HOSTS = listOf(
+            "doubleclick.net", "googlesyndication.com", "googleadservices.com",
+            "adservice.google.com", "pagead2.googlesyndication.com",
+            "popads.net", "popcash.net", "propellerads.com", "propellerpops.com",
+            "juicyads.com", "exoclick.com", "exosrv.com", "trafficjunky.com",
+            "adsterra.com", "hilltopads.net", "clickadu.com", "onclicksuper.com",
+            "mgid.com", "revcontent.com", "taboola.com", "outbrain.com",
+            "criteo.com", "criteo.net", "adnxs.com", "pubmatic.com",
+            "rubiconproject.com", "openx.net", "zedo.com", "ad-score.com",
+            "scorecardresearch.com", "quantserve.com", "moatads.com",
+            "adsafeprotected.com", "doubleverify.com", "histats.com",
+            "adcolony.com", "applovin.com", "unityads.unity3d.com",
+            "s.adroll.com", "adroll.com", "serving-sys.com", "smartadserver.com",
+        )
     }
 }
 
