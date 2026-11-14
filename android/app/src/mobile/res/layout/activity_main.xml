@@ -65,9 +65,13 @@
 
             <TextView
                 android:id="@+id/channelCount"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:letterSpacing="0.08"
                 android:textColor="@color/muted"
                 android:textSize="8sp"
@@ -75,7 +79,7 @@
 
             <TextView
                 android:id="@+id/moviesButton"
-                android:layout_width="96dp"
+                android:layout_width="72dp"
                 android:layout_height="40dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_pill_red"
@@ -91,7 +95,7 @@
 
             <TextView
                 android:id="@+id/menuButton"
-                android:layout_width="96dp"
+                android:layout_width="72dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_pill"
                 android:focusable="true"

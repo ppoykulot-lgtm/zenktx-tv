@@ -5,6 +5,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
@@ -95,6 +96,7 @@ class MoviesActivity : Activity() {
     private var web: WebView? = null
     private var playerChips: LinearLayout? = null
     private var playToggle: TextView? = null
+    private var muteButton: TextView? = null
     private var muted = false
     private var volume = 100
     private var embedHost = ""
@@ -223,10 +225,14 @@ class MoviesActivity : Activity() {
         root.addView(scroller)
 
         /* details: beside the wall on a TV, under it on a phone */
+        root.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1))
+            setBackgroundColor(ContextCompatColor.line)
+        })
         val footer = LinearLayout(this).apply {
             orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
             gravity = if (compact) Gravity.START else Gravity.CENTER_VERTICAL
-            setPadding(0, dp(8), 0, 0)
+            setPadding(0, dp(6), 0, if (compact) dp(2) else 0)
         }
         val textCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         detailTitle = TextView(this).apply {
@@ -277,7 +283,7 @@ class MoviesActivity : Activity() {
         if (compact) {
             val chipsScroll = HorizontalScrollView(this).apply {
                 isHorizontalScrollBarEnabled = false
-                setPadding(0, dp(8), 0, 0)
+                setPadding(0, dp(6), 0, 0)
                 clipToPadding = false
                 addView(detailServerRow)
             }
@@ -477,7 +483,9 @@ class MoviesActivity : Activity() {
     private fun card(item: MovieTitle, width: Int, posterH: Int, lastColumn: Boolean): View {
         val wrap = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            isFocusable = true
+            /* On a phone nothing should take focus: doing so scrolls the wall
+               down on open and cuts the first row in half. */
+            isFocusable = !compact
             isClickable = true
             tag = item
             layoutParams = LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -570,7 +578,7 @@ class MoviesActivity : Activity() {
             setOnClickListener { openPlayer() }
         }
         if (compact) {
-            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(100), dp(36)))
+            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(92), dp(34)))
         } else {
             detailServerRow.addView(play, LinearLayout.LayoutParams(dp(110), dp(34)))
         }
@@ -616,13 +624,22 @@ class MoviesActivity : Activity() {
             }
             loadUrl(url)
         }
-        layer.addView(view, FrameLayout.LayoutParams(
+        /* The embed owns only the stage. Its own controls then sit above our strip
+           instead of behind it, which is what made the bar look smeared. */
+        val stage = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
+        stage.addView(view, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
         ))
-
+        val column = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        column.addView(stage, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
+        ))
         val chrome = playerChrome(item)
-        layer.addView(chrome, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM,
+        column.addView(chrome, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+        ))
+        layer.addView(column, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
         ))
 
         /* A corner toggle so full screen is always one tap away, and one tap back. */
@@ -640,7 +657,7 @@ class MoviesActivity : Activity() {
                 applyImmersive()
             }
         }
-        layer.addView(corner, FrameLayout.LayoutParams(
+        stage.addView(corner, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { gravity = Gravity.TOP or Gravity.END; topMargin = dp(14); marginEnd = dp(14) })
 
@@ -656,8 +673,8 @@ class MoviesActivity : Activity() {
     private fun playerChrome(item: MovieTitle): LinearLayout {
         val bar = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#CC0D1524"))
-            setPadding(dp(if (compact) 10 else 20), dp(6), dp(if (compact) 10 else 20), dp(8))
+            setBackgroundColor(ContextCompatColor.surface)
+            setPadding(dp(if (compact) 10 else 20), dp(5), dp(if (compact) 10 else 20), dp(7))
         }
 
         val topRow = LinearLayout(this).apply {
@@ -703,10 +720,16 @@ class MoviesActivity : Activity() {
         playToggle?.setOnClickListener { togglePlay() }
         controls.addView(playToggle, LinearLayout.LayoutParams(dp(44), dp(32)))
         control("+10", 46) { nudge(10) }
-        control(if (muted) "🔇" else "🔊", 42) { toggleMute() }
+        muteButton = serverChip(if (muted) "🔇" else "🔊", on = false).apply {
+            setOnClickListener { toggleMute() }
+        }
+        controls.addView(muteButton, LinearLayout.LayoutParams(dp(42), dp(32)))
         val slider = SeekBar(this).apply {
             max = 100
             progress = volume
+            progressTintList = ColorStateList.valueOf(ContextCompatColor.mint)
+            thumbTintList = ColorStateList.valueOf(ContextCompatColor.mint)
+            setPadding(dp(6), 0, dp(6), 0)
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) {
                     if (!fromUser) return
@@ -748,10 +771,7 @@ class MoviesActivity : Activity() {
     }
 
     private fun paintMuteState() {
-        val controls = (playerLayer?.getChildAt(1) as? LinearLayout) ?: return
-        val row = controls.getChildAt(1) as? LinearLayout ?: return
-        val button = row.getChildAt(3) as? TextView ?: return
-        button.text = if (muted) "🔇" else "🔊"
+        muteButton?.text = if (muted) "🔇" else "🔊"
     }
 
     private fun paintPlayerChips() {
@@ -841,6 +861,7 @@ class MoviesActivity : Activity() {
         web = null
         playerChips = null
         playToggle = null
+        muteButton = null
         playerLayer?.let { (window.decorView as FrameLayout).removeView(it) }
         playerLayer = null
         applyImmersive()
@@ -886,6 +907,7 @@ class MoviesActivity : Activity() {
 private object ContextCompatColor {
     val bg = Color.parseColor("#060911")
     val surface = Color.parseColor("#0D1524")
+    val line = Color.parseColor("#1E2A42")
     val text = Color.parseColor("#F2F5FF")
     val muted = Color.parseColor("#8B98B4")
     val mint = Color.parseColor("#35E7C0")
