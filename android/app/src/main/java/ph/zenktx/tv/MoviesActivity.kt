@@ -83,6 +83,7 @@ class MoviesActivity : Activity() {
     private lateinit var detailTitle: TextView
     private lateinit var detailMeta: TextView
     private lateinit var detailServerRow: LinearLayout
+    private var playHost: LinearLayout? = null
     private lateinit var seasonRow: LinearLayout
     private lateinit var seasonValue: TextView
     private lateinit var episodeValue: TextView
@@ -253,7 +254,7 @@ class MoviesActivity : Activity() {
         footer.addView(textCol)
 
         seasonRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
+            orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             visibility = View.GONE
             setPadding(0, dp(8), 0, 0)
@@ -266,15 +267,26 @@ class MoviesActivity : Activity() {
         val episodePlus = pill("E+", primary = false, small = true)
         listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus).forEach {
             it.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            it.setPadding(dp(14), dp(9), dp(14), dp(9))
-            it.minWidth = dp(52)
+            it.setPadding(dp(12), dp(9), dp(12), dp(9))
+            it.minWidth = dp(if (compact) 58 else 52)
         }
         seasonMinus.setOnClickListener { season = max(1, season - 1); paintSteppers() }
         seasonPlus.setOnClickListener { season += 1; paintSteppers() }
         episodeMinus.setOnClickListener { episode = max(1, episode - 1); paintSteppers() }
         episodePlus.setOnClickListener { episode += 1; paintSteppers() }
-        listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus)
-            .forEach { seasonRow.addView(it) }
+        if (compact) {
+            /* Seasons on one line, episodes on the next: three chips fit, six do not. */
+            listOf(seasonMinus, seasonValue, seasonPlus).forEach { seasonRow.addView(it) }
+            val episodeLine = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(0, dp(6), 0, 0)
+            }
+            listOf(episodeMinus, episodeValue, episodePlus).forEach { episodeLine.addView(it) }
+            seasonRow.addView(episodeLine)
+        } else {
+            listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus)
+                .forEach { seasonRow.addView(it) }
+        }
         footer.addView(seasonRow)
 
         detailServerRow = LinearLayout(this).apply {
@@ -282,13 +294,30 @@ class MoviesActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         if (compact) {
+            /* Play sits outside the scrolling chips: inside it, the pill was the
+               last thing in a row that runs off the screen. */
+            val chipsRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(6), 0, 0)
+            }
             val chipsScroll = HorizontalScrollView(this).apply {
                 isHorizontalScrollBarEnabled = false
-                setPadding(0, dp(6), 0, 0)
                 clipToPadding = false
                 addView(detailServerRow)
             }
-            footer.addView(chipsScroll)
+            chipsRow.addView(chipsScroll, LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
+            ))
+            playHost = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(8), 0, 0, 0)
+            }
+            chipsRow.addView(playHost, LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+            ))
+            footer.addView(chipsRow)
         } else {
             footer.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
             footer.addView(detailServerRow)
@@ -579,7 +608,8 @@ class MoviesActivity : Activity() {
             setOnClickListener { openPlayer() }
         }
         if (compact) {
-            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(92), dp(34)))
+            playHost?.removeAllViews()
+            playHost?.addView(play, LinearLayout.LayoutParams(dp(84), dp(34)))
         } else {
             detailServerRow.addView(play, LinearLayout.LayoutParams(dp(110), dp(34)))
         }
