@@ -5,7 +5,6 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
@@ -31,7 +30,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
-import android.widget.SeekBar
 import android.widget.TextView
 import ph.zenktx.tv.data.MovieCatalog
 import ph.zenktx.tv.data.MovieTitle
@@ -95,8 +93,6 @@ class MoviesActivity : Activity() {
     private var playerLayer: FrameLayout? = null
     private var web: WebView? = null
     private var playerChips: LinearLayout? = null
-    private var playToggle: TextView? = null
-    private var muteButton: TextView? = null
     private var muted = false
     private var volume = 100
     private var embedHost = ""
@@ -268,6 +264,11 @@ class MoviesActivity : Activity() {
         val episodeMinus = pill("E−", primary = false, small = true)
         episodeValue = pill("E1", primary = false, small = true)
         val episodePlus = pill("E+", primary = false, small = true)
+        listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus).forEach {
+            it.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            it.setPadding(dp(14), dp(9), dp(14), dp(9))
+            it.minWidth = dp(52)
+        }
         seasonMinus.setOnClickListener { season = max(1, season - 1); paintSteppers() }
         seasonPlus.setOnClickListener { season += 1; paintSteppers() }
         episodeMinus.setOnClickListener { episode = max(1, episode - 1); paintSteppers() }
@@ -683,6 +684,7 @@ class MoviesActivity : Activity() {
         }
         val label = TextView(this).apply {
             text = if (item.kind == "tv") "S$season E$episode" else item.title
+            visibility = if (compact) View.GONE else View.VISIBLE
             setTextColor(ContextCompatColor.mint)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
             setTypeface(typeface, Typeface.BOLD)
@@ -705,74 +707,11 @@ class MoviesActivity : Activity() {
         topRow.addView(close, LinearLayout.LayoutParams(dp(34), dp(30)))
         bar.addView(topRow)
 
-        val controls = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(4), 0, 0)
-        }
-        fun control(text: String, width: Int, action: () -> Unit) {
-            controls.addView(serverChip(text, on = false).apply {
-                setOnClickListener { action() }
-            }, LinearLayout.LayoutParams(dp(width), dp(32)))
-        }
-        control("−10", 46) { nudge(-10) }
-        playToggle = serverChip("▶", on = true)
-        playToggle?.setOnClickListener { togglePlay() }
-        controls.addView(playToggle, LinearLayout.LayoutParams(dp(44), dp(32)))
-        control("+10", 46) { nudge(10) }
-        muteButton = serverChip(if (muted) "🔇" else "🔊", on = false).apply {
-            setOnClickListener { toggleMute() }
-        }
-        controls.addView(muteButton, LinearLayout.LayoutParams(dp(42), dp(32)))
-        val slider = SeekBar(this).apply {
-            max = 100
-            progress = volume
-            progressTintList = ColorStateList.valueOf(ContextCompatColor.mint)
-            thumbTintList = ColorStateList.valueOf(ContextCompatColor.mint)
-            setPadding(dp(6), 0, dp(6), 0)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(bar: SeekBar, value: Int, fromUser: Boolean) {
-                    if (!fromUser) return
-                    volume = value
-                    muted = value == 0
-                    js("(function(){var v=document.querySelector('video');if(!v)return;v.muted=${muted};v.volume=${value / 100f};})()")
-                }
-                override fun onStartTrackingTouch(bar: SeekBar) {}
-                override fun onStopTrackingTouch(bar: SeekBar) {}
-            })
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        }
-        controls.addView(slider)
-        bar.addView(controls)
-
         playerChips = chips
         return bar
     }
 
     private fun js(code: String) = web?.evaluateJavascript(code, null)
-
-    private fun togglePlay() {
-        js(
-            "(function(){var v=document.querySelector('video');if(!v)return;" +
-                "if(v.paused){v.play();}else{v.pause();}})()",
-        )
-        playToggle?.text = if (playToggle?.text == "▶") "❚❚" else "▶"
-    }
-
-    private fun nudge(seconds: Int) {
-        js("(function(){var v=document.querySelector('video');if(!v)return;v.currentTime=Math.max(0,v.currentTime+($seconds));})()")
-    }
-
-    private fun toggleMute() {
-        muted = !muted
-        js("(function(){var v=document.querySelector('video');if(!v)return;v.muted=$muted;" +
-            "if(!$muted&&v.volume===0){v.volume=1;}})()")
-        paintMuteState()
-    }
-
-    private fun paintMuteState() {
-        muteButton?.text = if (muted) "🔇" else "🔊"
-    }
 
     private fun paintPlayerChips() {
         val chips = playerChips ?: return
@@ -825,7 +764,26 @@ class MoviesActivity : Activity() {
             super.onPageFinished(view, url)
             /* Belt and braces: some pages open windows from script. */
             view.evaluateJavascript("window.open=function(){return null;};", null)
+            /* Some mirrors float a "confirm you are not a robot" card over the
+               video. Removing it by text is the only handle a wrapper has: it is
+               the page's own markup, not a request we can refuse. */
+            listOf(900L, 2_500L, 5_000L).forEach { delay ->
+                main.postDelayed({ dismissOverlay(view) }, delay)
+            }
         }
+    }
+
+    private fun dismissOverlay(view: WebView) {
+        view.evaluateJavascript(
+            "(function(){var out=[];document.querySelectorAll('div,section,iframe').forEach(function(el){" +
+                "var st=getComputedStyle(el);if(st.position!=='fixed'&&st.position!=='absolute')return;" +
+                "if(parseFloat(st.zIndex||'0')<10)return;var r=el.getBoundingClientRect();" +
+                "if(r.width<innerWidth*0.6||r.height<innerHeight*0.35)return;" +
+                "var t=(el.textContent||'').toLowerCase();" +
+                "if(/not a robot|are you human|captcha|verify you|sponsored/.test(t)){el.remove();out.push(1);}});" +
+                "return out.length;})()",
+            null,
+        )
     }
 
     /** Ask the guest page for a decoded frame; a dead mirror returns 200 and paints black. */
@@ -860,8 +818,6 @@ class MoviesActivity : Activity() {
         }
         web = null
         playerChips = null
-        playToggle = null
-        muteButton = null
         playerLayer?.let { (window.decorView as FrameLayout).removeView(it) }
         playerLayer = null
         applyImmersive()

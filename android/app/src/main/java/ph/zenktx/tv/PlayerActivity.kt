@@ -131,18 +131,10 @@ class PlayerActivity : Activity() {
         }.start()
     }
 
-    // Never pull the bar out from under the D-pad: while one of its views holds
-    // focus the remote is still walking it, so the timer starts again instead of
-    // hiding the very thing the viewer is aiming at.
-    private val hideControls = Runnable { hideControlsWhenIdle() }
-
-    private fun hideControlsWhenIdle() {
-        if (tvDpad && ::binding.isInitialized && binding.controls.hasFocus()) {
-            main.postDelayed(hideControls, CONTROLS_MS)
-        } else {
-            setControlsVisible(false)
-        }
-    }
+    // The strip leaves after a few idle seconds even while it holds focus: a
+    // remote that is not being pressed should not keep it on the picture. A
+    // press brings it straight back (onKeyDown), so nothing is out of reach.
+    private val hideControls = Runnable { setControlsVisible(false) }
 
     /** Keeps the clock and the seek bar honest without touching the video. */
     private val ticker = object : Runnable {
@@ -902,6 +894,13 @@ class PlayerActivity : Activity() {
         val inErrorPanel = binding.errorPanel.visibility == View.VISIBLE
         val controlsUp = binding.controls.visibility == View.VISIBLE
         if (controlsUp) keepControls()
+        /* With the bar gone, a direction press only wakes it up; the next press
+           moves along it. Otherwise the first press would act on a hidden bar. */
+        if (!controlsUp && (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ||
+                keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN)) {
+            showControls()
+            return true
+        }
         return when (keyCode) {
             KeyEvent.KEYCODE_CHANNEL_UP,
             KeyEvent.KEYCODE_MEDIA_NEXT -> {
