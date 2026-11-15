@@ -98,6 +98,7 @@ class MoviesActivity : Activity() {
     private var volume = 100
     private var embedHost = ""
     private var tries = 0
+    private var probes = 0
     private val watchdog = Runnable { probePlayback() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -235,7 +236,7 @@ class MoviesActivity : Activity() {
         detailTitle = TextView(this).apply {
             text = "Pick a title"
             setTextColor(ContextCompatColor.text)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 17f else 15f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 16f else 15f)
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
@@ -266,17 +267,20 @@ class MoviesActivity : Activity() {
         episodeValue = pill("E1", primary = false, small = true)
         val episodePlus = pill("E+", primary = false, small = true)
         listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus).forEach {
-            it.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            it.setPadding(dp(12), dp(9), dp(12), dp(9))
-            it.minWidth = dp(if (compact) 58 else 52)
+            it.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 12f else 10f)
+            it.setPadding(dp(14), dp(if (compact) 8 else 7), dp(14), dp(if (compact) 8 else 7))
+            if (!compact) it.minWidth = dp(52)
         }
         seasonMinus.setOnClickListener { season = max(1, season - 1); paintSteppers() }
         seasonPlus.setOnClickListener { season += 1; paintSteppers() }
         episodeMinus.setOnClickListener { episode = max(1, episode - 1); paintSteppers() }
         episodePlus.setOnClickListener { episode += 1; paintSteppers() }
         if (compact) {
-            /* Seasons on one line, episodes on the next: three chips fit, six do not. */
-            listOf(seasonMinus, seasonValue, seasonPlus).forEach { seasonRow.addView(it) }
+            /* Seasons on one line, episodes on the next: three chips fit, six do not.
+               Each line is horizontal inside the vertical stepper block. */
+            val seasonLine = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            listOf(seasonMinus, seasonValue, seasonPlus).forEach { seasonLine.addView(it) }
+            seasonRow.addView(seasonLine)
             val episodeLine = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, dp(6), 0, 0)
@@ -609,7 +613,7 @@ class MoviesActivity : Activity() {
         }
         if (compact) {
             playHost?.removeAllViews()
-            playHost?.addView(play, LinearLayout.LayoutParams(dp(84), dp(34)))
+            playHost?.addView(play, LinearLayout.LayoutParams(dp(82), dp(34)))
         } else {
             detailServerRow.addView(play, LinearLayout.LayoutParams(dp(110), dp(34)))
         }
@@ -819,16 +823,31 @@ class MoviesActivity : Activity() {
     /** Ask the guest page for a decoded frame; a dead mirror returns 200 and paints black. */
     private fun armWatchdog() {
         main.removeCallbacks(watchdog)
-        main.postDelayed(watchdog, 12_000)
+        probes = 0
+        main.postDelayed(watchdog, 15_000)
     }
 
+    /**
+     * A mirror is given up on only when it has produced no <video> element at
+     * all. A page that already has one is buffering, showing an ad or waiting
+     * for a tap -- switching servers there was yanking the picture away from a
+     * source that worked.
+     */
     private fun probePlayback() {
         val view = web ?: return
         view.evaluateJavascript(
-            "(function(){var v=document.querySelector('video');return v && v.readyState>=2;})()",
+            "(function(){var v=document.querySelector('video');if(!v)return 'none';" +
+                "var alive=v.readyState>=1||v.duration>0||v.currentTime>0||!v.paused;" +
+                "return alive?'alive':'idle';})()",
         ) { result ->
             if (playerLayer == null) return@evaluateJavascript
-            if (result != null && result.contains("true")) return@evaluateJavascript
+            val state = result.orEmpty()
+            if (state.contains("alive")) return@evaluateJavascript
+            if (state.contains("idle") && probes < 1) {
+                probes += 1
+                main.postDelayed(watchdog, 15_000)
+                return@evaluateJavascript
+            }
             val total = catalog?.servers?.size ?: 0
             if (total == 0) return@evaluateJavascript
             tries += 1
