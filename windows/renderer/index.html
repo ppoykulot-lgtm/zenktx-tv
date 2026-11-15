@@ -7,6 +7,9 @@
   <title>ZENKTX TV Stream</title>
   <link rel="icon" href="../assets/icon.png" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- Posters all come from one host; opening the connection while the
+       catalogue is still being fetched saves a TLS handshake per launch. -->
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
 </head>
 <body>
   <!-- Welcome. Stays up until the published catalogue has been fetched, so a

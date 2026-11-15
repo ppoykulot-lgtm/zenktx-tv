@@ -2,8 +2,6 @@ package ph.zenktx.tv
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
@@ -12,7 +10,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import android.util.LruCache
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -36,7 +33,7 @@ import ph.zenktx.tv.data.MovieTitle
 import ph.zenktx.tv.data.PlayerServer
 import ph.zenktx.tv.net.Http
 import java.io.ByteArrayInputStream
-import java.util.concurrent.Executors
+import ph.zenktx.tv.ui.Images
 import kotlin.math.max
 import kotlin.math.min
 
@@ -498,6 +495,12 @@ class MoviesActivity : Activity() {
                 }
                 grid.addView(row)
             }
+            /* The next screenful is warmed while the reader is still on this
+               one, so the following twenty-eight posters are already decoded
+               when they scroll into view. */
+            val from = rendered
+            val to = min(list.size, rendered + PAGE)
+            if (from < to) Images.prefetch(this, list.subList(from, to).map { it.poster }, cardW)
         } finally {
             appending = false
         }
@@ -541,7 +544,7 @@ class MoviesActivity : Activity() {
         }
         wrap.addView(poster)
         wrap.addView(name)
-        PosterLoader.load(item.poster, poster)
+        Images.applyPoster(poster, item.poster, width)
         paintCard(wrap, name)
 
         if (!compact) {
@@ -920,34 +923,3 @@ private object ContextCompatColor {
     val pillText = Color.parseColor("#08101F")
 }
 
-/**
- * Posters are small, numerous and remote; a cache plus four threads keeps the
- * D-pad ahead of the network instead of stalling the main thread on decode.
- */
-private object PosterLoader {
-    private val cache = object : LruCache<String, Bitmap>(48 * 1024 * 1024) {
-        override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount
-    }
-    private val pool = Executors.newFixedThreadPool(4)
-
-    fun load(url: String, into: ImageView) {
-        if (url.isBlank()) return
-        into.tag = url
-        cache.get(url)?.let {
-            into.setImageBitmap(it)
-            return
-        }
-        pool.execute {
-            val bitmap = try {
-                val bytes = Http.getBytes(url, 20_000)
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            } catch (error: Exception) {
-                null
-            } ?: return@execute
-            cache.put(url, bitmap)
-            into.post {
-                if (into.tag == url) into.setImageBitmap(bitmap)
-            }
-        }
-    }
-}

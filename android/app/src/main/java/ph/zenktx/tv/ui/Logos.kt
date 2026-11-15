@@ -1,16 +1,8 @@
 package ph.zenktx.tv.ui
 
-import android.content.Context
 import android.view.View
 import android.widget.ImageView
-import coil.ImageLoader
-import coil.decode.SvgDecoder
-import coil.disk.DiskCache
 import coil.load
-import coil.memory.MemoryCache
-import okhttp3.OkHttpClient
-import ph.zenktx.tv.net.Http
-import java.util.concurrent.TimeUnit
 
 /**
  * Channel logos come from third-party EPG feeds. There is no lettered fallback:
@@ -23,59 +15,15 @@ import java.util.concurrent.TimeUnit
  * says ten minutes, so every launch fetched 400 files again), and a request that
  * timed out during that burst was dropped for good until the tile was rebound.
  * The cache now keeps a logo for good and a failure is retried twice.
+ *
+ * The loader itself is shared with the poster wall ([Images]): one disk cache,
+ * one connection pool, and sixteen requests per host instead of OkHttp's five,
+ * which is what turns "462 logos five at a time" into a single burst.
  */
 object Logos {
 
-    @Volatile
-    private var loader: ImageLoader? = null
-
-    /** 96 MB holds the whole catalogue's artwork, twice over. */
-    private const val CACHE_BYTES = 96L * 1024 * 1024
-
     /** One unchanged logo should never cost three requests. */
     private const val MAX_ATTEMPTS = 3
-
-    private fun loader(context: Context): ImageLoader =
-        loader ?: synchronized(this) {
-            loader ?: ImageLoader.Builder(context.applicationContext)
-                .components { add(SvgDecoder.Factory()) }
-                .okHttpClient {
-                    OkHttpClient.Builder()
-                        .connectTimeout(12, TimeUnit.SECONDS)
-                        .readTimeout(15, TimeUnit.SECONDS)
-                        .callTimeout(30, TimeUnit.SECONDS)
-                        .retryOnConnectionFailure(true)
-                        .addInterceptor { chain ->
-                            chain.proceed(
-                                chain.request().newBuilder()
-                                    .header("User-Agent", Http.USER_AGENT)
-                                    .header("Referer", "https://iyad.click/")
-                                    .header("Accept", "image/*,*/*")
-                                    .build()
-                            )
-                        }
-                        .build()
-                }
-                .diskCache {
-                    DiskCache.Builder()
-                        .directory(context.applicationContext.cacheDir.resolve("logos"))
-                        .maxSizeBytes(CACHE_BYTES)
-                        .build()
-                }
-                .memoryCache {
-                    MemoryCache.Builder(context.applicationContext)
-                        .maxSizePercent(0.25)
-                        .build()
-                }
-                // The host's ten-minute Cache-Control is what emptied the guide
-                // between launches; the files themselves never change.
-                .respectCacheHeaders(false)
-                // No crossfade: every badge refresh rebinds the tiles, and a
-                // fade on each rebind is what read as a logo "still loading".
-                .crossfade(false)
-                .build()
-                .also { loader = it }
-        }
 
     /**
      * Shows [url] when it loads. A channel with no URL at all gets its initials
@@ -113,7 +61,7 @@ object Logos {
     }
 
     private fun load(logo: ImageView, address: String, name: String, attempt: Int) {
-        logo.load(address, loader(logo.context)) {
+        logo.load(address, Images.loader(logo.context)) {
             listener(
                 onSuccess = { _, _ ->
                     if (logo.tag == address) logo.visibility = View.VISIBLE

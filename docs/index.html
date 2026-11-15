@@ -749,7 +749,17 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.13 <span class="tagx">latest</span></h3>
+        <h3>1.5.14 <span class="tagx">latest</span></h3>
+        <div class="meta">16 November 2026 · Android TV · Android mobile · Windows</div>
+        <ul>
+          <li><b>Artwork arrives in one burst, not five at a time.</b> A guide of 462 logos walked five requests at a time — the HTTP client's default — so the first rows of every launch waited on DNS, TLS and a queue rather than on the network itself. All three apps now open sixteen requests per host, preconnect to the logo and poster hosts before the grid asks for anything, and keep what arrives in a disk cache that survives a restart.</li>
+          <li><b>Posters are fetched at the size they are drawn.</b> A rail card was asking TMDB for the 500-pixel file: three times the pixels a 150-pixel tile shows, and three times the bytes over the same link. Cards now ask for the 342-pixel file, and the shelf preloads the next twenty-eight posters while you are still looking at this one, so the next screenful is already on disk.</li>
+          <li><b>Watching a channel no longer empties the logo cache.</b> On Windows each playback cleared the whole HTTP cache to keep a rolled-over token from being replayed, and the channel logos and posters went with it — every trip back from a channel repainted the guide from the network. Only media requests are sent with <i>no-store</i> now; artwork stays on disk.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.13</h3>
         <div class="meta">15 November 2026 · Android TV · Android mobile · Windows</div>
         <ul>
           <li><b>A Movies &amp; Series shelf, on all three apps.</b> One <i>Movies</i> button opens a poster wall built from TMDB metadata — 3,147 films and 3,307 shows, with the year, rating, genres and synopsis on the same screen. Playback runs the publisher's embedded player inside a <i>webview</i> rather than an iframe, which is the only reason the servers answer at all: they send <i>X-Frame-Options</i>. Four mirrors sit behind it (vidlink, vidsrc, vsembed, vidzee), a mirror that never produces a picture is walked past instead, and a mirror that already has one is left strictly alone — a player that is buffering, showing its pre-roll or waiting for a tap is no longer mistaken for a dead server.</li>
@@ -791,16 +801,6 @@
           <li><b>The remote can reach the Guide.</b> The bar could not be walked past the running-time slider: a focused slider eats left and right to scrub, so the quality chip and the Guide were unreachable from the sofa. The sliders are no longer D-pad stops on the TV layout, and the bar chains Play → Mute → Auto → Guide with the same path back.</li>
           <li><b>The bar waits while you walk it.</b> The hide timer kept counting while the D-pad was still moving, so the bar could vanish mid-step and leave the picture with no way to ask for the schedule. Every press restarts it, and it stays up while one of its buttons has focus.</li>
           <li><b>Maintenance shows your message, not a black screen.</b> Published while the app was already open, the notice was written into the welcome panel that had faded out long before, and the guide was hidden as well — a black screen with nothing to read. The panel now comes back with the text you wrote in admin.html, and the app stops loading channels and update checks behind it.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.8</h3>
-        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-          <li><b>A channel that expires heals itself.</b> The provider hands out a link that stops working after a while and then answers HTTP 410, and every build kept the session it opened on the first launch, so a channel that expired sat on an error until the app was restarted. Each playback opens its own session now, and a 410 under the picture is retried once in the background.</li>
-          <li><b>The player has a guide.</b> A chip on the bar says what is on now and next from the published <i>epg.json</i>, and Guide — MENU on a remote, <i>G</i> on Windows — opens the channel's schedule without leaving the picture.</li>
-          <li><b>Nothing arrives stale.</b> The guide and the channel list were fetched through the normal cache, so a change published in admin.html could sit behind an old copy. Those requests ask for a fresh answer every time, on all three builds.</li>
         </ul>
       </article>
 
@@ -911,8 +911,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.13", mobile: "1.5.13", win: "1.5.13" };
-  const TAGS = { tv: "v1.5.13", mobile: "v1.5.13", win: "v1.5.13" };
+  const VERSIONS = { tv: "1.5.14", mobile: "1.5.14", win: "1.5.14" };
+  const TAGS = { tv: "v1.5.14", mobile: "v1.5.14", win: "v1.5.14" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

@@ -584,6 +584,7 @@ function renderGrid() {
     tile.title = `${channel.name} · ${channel.category}`;
 
     if (channel.logo) {
+      warmOrigin(channel.logo);
       const img = document.createElement('img');
       // 462 logos over one connection: paint the tiles that are on screen and
       // let the rest wait, so the grid is not kept busy by pictures nobody sees.
@@ -645,6 +646,25 @@ function renderGrid() {
 function setImage(element, src) {
   if (src) element.setAttribute('src', src);
   else element.removeAttribute('src');
+}
+
+/* Chromium opens at most six sockets per origin and a badge grid asks for many
+   more, so the first rows of every launch paid a DNS + TLS round trip per logo
+   host. Preconnecting to each host once removes that from the visible grid. */
+const preconnected = new Set();
+function warmOrigin(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+    const origin = parsed.origin;
+    if (preconnected.has(origin) || preconnected.size >= 8) return;
+    preconnected.add(origin);
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = origin;
+    link.crossOrigin = '';
+    document.head.appendChild(link);
+  } catch { /* not a URL */ }
 }
 
 function placeholder() {

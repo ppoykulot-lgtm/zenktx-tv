@@ -128,8 +128,11 @@ async function beginMediaSession(ses, url) {
   // Sockets: a pooled connection carries the TLS session and HTTP/2 stream the
   // provider already answered 410 on.
   try { await ses.closeAllConnections(); } catch { /* older Electron */ }
-  // Disk and memory cache: a cached playlist is yesterday's token.
-  try { await ses.clearCache(); } catch { /* nothing cached */ }
+  // The disk cache is deliberately *not* wiped here: emptying it took every
+  // channel logo and poster with it, so the guide repainted from the network
+  // after each playback. Media requests are sent with Cache-Control: no-store
+  // instead (see onBeforeSendHeaders), which keeps a rolled-over token out of
+  // the cache without costing the artwork anything.
   if (origin) {
     try { await ses.clearStorageData({ storages: ['cookies'], origin }); } catch { /* no cookies */ }
   }
@@ -303,7 +306,7 @@ app.whenReady().then(() => {
       // Every request for a playlist or a segment asks for the live copy. The
       // tokens these providers hand out roll over, and a revalidated 200 from
       // the cache is the one answer that keeps a dead channel dead.
-      headers['Cache-Control'] = 'no-cache';
+      headers['Cache-Control'] = 'no-store';
       headers.Pragma = 'no-cache';
     }
     callback({ requestHeaders: headers });

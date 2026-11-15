@@ -38,6 +38,30 @@
 
   const $ = (id) => document.getElementById(id);
 
+  /* TMDB serves the same artwork at /t/p/w92 … w500. A rail card is about
+     150 px wide, so asking for w500 spent three times the bytes for pixels the
+     card throws away -- the reason a wall of posters took seconds to appear. */
+  function posterAt(url, width) {
+    const value = String(url || '');
+    if (!value.includes('image.tmdb.org/t/p/')) return value;
+    return value.replace(/\/t\/p\/(w\d+|original)\//, `/t/p/w${width}/`);
+  }
+
+  /* The rail paints twenty-eight at a time; the twenty-eight after them are
+     fetched in the background so the next scroll starts from the cache. */
+  const warmed = new Set();
+  function warmAhead(list) {
+    const end = Math.min(list.length, state.shown + CHUNK);
+    for (let index = state.shown; index < end; index += 1) {
+      const url = posterAt(list[index] && list[index].poster, 342);
+      if (!url || warmed.has(url)) continue;
+      warmed.add(url);
+      const picture = new Image();
+      picture.decoding = 'async';
+      picture.src = url;
+    }
+  }
+
   function make(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -208,7 +232,7 @@
     const img = make('img', '');
     img.loading = 'lazy';
     img.decoding = 'async';
-    img.src = item.poster;
+    img.src = posterAt(item.poster, 342);
     img.alt = '';
     card.appendChild(img);
     card.appendChild(make('span', 'mv-card-name', item.title));
@@ -240,6 +264,7 @@
       rail.appendChild(railCard(list[rail.childElementCount]));
     }
     state.shown = rail.childElementCount;
+    warmAhead(list);
   }
 
   async function moreRail() {
@@ -261,7 +286,7 @@
     const side = $('mvSide');
     side.innerHTML = '';
     const poster = make('img', 'mv-side-poster');
-    poster.src = item.poster;
+    poster.src = posterAt(item.poster, 342);
     poster.alt = '';
     side.appendChild(poster);
 
