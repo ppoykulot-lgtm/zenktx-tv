@@ -186,12 +186,15 @@
             android:layout_marginTop="18dp"
             android:layout_weight="1">
 
+            <!-- clipToPadding is false so a row that is scrolled a few pixels
+                 keeps its top edge: with it on, the grid's own 14dp padding cut
+                 the border off the first visible row. -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipChildren="true"
-                android:clipToPadding="true"
+                android:clipToPadding="false"
                 android:paddingStart="4dp"
                 android:paddingTop="14dp"
                 android:paddingEnd="18dp"

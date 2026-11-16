@@ -65,19 +65,24 @@ jobs:
               CHANGED="$(git diff --name-only "$PREV" "$GITHUB_SHA")"
             fi
             if grep -q '^windows/' <<< "$CHANGED"; then windows=true; else windows=false; fi
-            # Shared Android code (src/main, the catalogue, Gradle files) ships in
-            # both APKs; a change confined to one flavour ships in that one only.
-            ANDROID="$(grep '^android/' <<< "$CHANGED" || true)"
+            # An Android flavour is rebuilt when its own version line moved, not
+            # when a file under android/ moved. Shared code (src/main) lives in
+            # both APKs, so a TV-only fix used to rebuild the phone with the same
+            # number and hand every phone user a download it never earned. The
+            # version line is the contract: bump the flavour you shipped, and the
+            # other one is left alone.
             tv=false
             mobile=false
-            if [ -n "$ANDROID" ]; then
-              if grep -Evq '^android/app/src/(tv|mobile)/' <<< "$ANDROID"; then
-                tv=true
-                mobile=true
-              else
-                if grep -q '^android/app/src/tv/' <<< "$ANDROID"; then tv=true; fi
-                if grep -q '^android/app/src/mobile/' <<< "$ANDROID"; then mobile=true; fi
-              fi
+            if [ -z "$PREV" ]; then
+              tv=true
+              mobile=true
+            else
+              PREV_TV="$(git show "$PREV:android/versions.properties" 2>/dev/null | sed -n 's/^tv\.versionName=//p' || true)"
+              PREV_MOBILE="$(git show "$PREV:android/versions.properties" 2>/dev/null | sed -n 's/^mobile\.versionName=//p' || true)"
+              NOW_TV="$(sed -n 's/^tv\.versionName=//p' android/versions.properties)"
+              NOW_MOBILE="$(sed -n 's/^mobile\.versionName=//p' android/versions.properties)"
+              if [ "$NOW_TV" != "$PREV_TV" ]; then tv=true; fi
+              if [ "$NOW_MOBILE" != "$PREV_MOBILE" ]; then mobile=true; fi
             fi
           fi
 

@@ -100,7 +100,6 @@ class MoviesActivity : Activity() {
 
     private var playerLayer: FrameLayout? = null
     private var web: WebView? = null
-    private var playerChips: LinearLayout? = null
     private var muted = false
     private var volume = 100
     private var embedHost = ""
@@ -577,12 +576,25 @@ class MoviesActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .apply { if (!lastColumn) marginEnd = gap }
         }
+        /* The highlight is a frame *around* the artwork, not a stroke on it: a
+           stroke drawn on the poster sat under its own edges and corners, and the
+           next card painted over the right-hand side of it. A frame with 3dp of
+           padding cannot be clipped by either. */
+        val frame = FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, posterH,
+            )
+            setPadding(dp(3), dp(3), dp(3), dp(3))
+        }
         val poster = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, posterH)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+            )
             scaleType = ImageView.ScaleType.CENTER_CROP
             setBackgroundResource(R.drawable.bg_tile)
             contentDescription = item.title
         }
+        frame.addView(poster)
         val name = TextView(this).apply {
             text = item.title
             setTextColor(ContextCompatColor.muted)
@@ -591,7 +603,7 @@ class MoviesActivity : Activity() {
             ellipsize = TextUtils.TruncateAt.END
             setPadding(dp(2), dp(6), dp(2), 0)
         }
-        wrap.addView(poster)
+        wrap.addView(frame)
         wrap.addView(name)
         Images.applyPoster(poster, item.poster, width)
         paintCard(wrap, name)
@@ -601,11 +613,12 @@ class MoviesActivity : Activity() {
                 view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
                     .setDuration(120).start()
                 name.setTextColor(if (hasFocus) ContextCompatColor.text else ContextCompatColor.muted)
-                /* The ring is a foreground, not a background: the poster fills the
-                   card edge to edge, so a background ring is painted underneath it
-                   and never seen -- which is why the highlight looked missing. */
-                poster.foreground =
-                    if (hasFocus) getDrawable(R.drawable.bg_poster_focus) else null
+                frame.setBackgroundResource(
+                    if (hasFocus) R.drawable.bg_poster_focus else 0,
+                )
+                /* Raised while focused: without this the card to the right is
+                   painted later and covers the ring's right-hand edge. */
+                view.translationZ = if (hasFocus) dp(12).toFloat() else 0f
             }
         }
         wrap.setOnClickListener { openSheet(item, wrap) }
@@ -746,9 +759,12 @@ class MoviesActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(44),
             ).apply { topMargin = dp(18) }
+            /* No scale on the full-width Play: growing it made the button wider
+               than the sheet, and the parent clipped the left and right sides of
+               its focus border away. */
             setOnFocusChangeListener { view, hasFocus ->
-                view.animate().scaleX(if (hasFocus) 1.03f else 1f)
-                    .scaleY(if (hasFocus) 1.03f else 1f).setDuration(110).start()
+                view.setBackgroundResource(R.drawable.bg_pill_red)
+                view.alpha = if (hasFocus) 1f else 0.92f
             }
         }
         sheet.addView(play)
@@ -836,40 +852,26 @@ class MoviesActivity : Activity() {
             }
             loadUrl(url)
         }
-        /* The embed owns only the stage. Its own controls then sit above our strip
-           instead of behind it, which is what made the bar look smeared. */
-        val stage = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
-        stage.addView(view, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
-        ))
-        val column = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        column.addView(stage, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f,
-        ))
-        val chrome = playerChrome(item)
-        column.addView(chrome, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-        ))
-        layer.addView(column, FrameLayout.LayoutParams(
+        /* The embed owns the whole screen. Its own controls are the player: the
+           strip we drew under them took the D-pad away from the page, and a
+           picture that cannot be started or paused is not a player. */
+        layer.addView(view, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
         ))
 
-        /* A corner toggle so full screen is always one tap away, and one tap back. */
-        val corner = TextView(this).apply {
-            text = "⛶"
+        /* One close button in the corner, so the picture always has a way out. */
+        val close = TextView(this).apply {
+            text = "✕"
             isClickable = true
             isFocusable = true
             gravity = Gravity.CENTER
             setTextColor(ContextCompatColor.text)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-            setPadding(dp(10), dp(6), dp(10), dp(6))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setPadding(dp(12), dp(8), dp(12), dp(8))
             setBackgroundColor(Color.parseColor("#66000000"))
-            setOnClickListener {
-                chrome.visibility = if (chrome.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                applyImmersive()
-            }
+            setOnClickListener { closePlayer() }
         }
-        stage.addView(corner, FrameLayout.LayoutParams(
+        layer.addView(close, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { gravity = Gravity.TOP or Gravity.END; topMargin = dp(14); marginEnd = dp(14) })
 
@@ -877,67 +879,29 @@ class MoviesActivity : Activity() {
         playerLayer = layer
         web = view
         tries = 0
-        paintPlayerChips()
         armWatchdog()
+        /* These pages open on a still frame with their own play button, and a
+           D-pad cannot reach a button inside a page. Ask the page to start a few
+           times instead of leaving the viewer on a poster. */
+        listOf(900L, 2_500L, 5_000L, 9_000L, 14_000L).forEach { delay ->
+            main.postDelayed({ startPlayback() }, delay)
+        }
     }
 
-    /** Transport, volume and close, in one strip wired to the guest's <video>. */
-    private fun playerChrome(item: MovieTitle): LinearLayout {
-        val bar = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(ContextCompatColor.surface)
-            setPadding(dp(if (compact) 10 else 20), dp(5), dp(if (compact) 10 else 20), dp(7))
-        }
-
-        val topRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-        }
-        val label = TextView(this).apply {
-            text = if (item.kind == "tv") "S$season E$episode" else item.title
-            visibility = if (compact) View.GONE else View.VISIBLE
-            setTextColor(ContextCompatColor.mint)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-            setTypeface(typeface, Typeface.BOLD)
-            maxLines = 1
-            ellipsize = TextUtils.TruncateAt.END
-            maxWidth = dp(if (compact) 100 else 220)
-            setPadding(0, 0, dp(10), 0)
-        }
-        topRow.addView(label)
-        val chips = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-        }
-        topRow.addView(HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            addView(chips)
-        }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        val close = serverChip("✕", on = false)
-        close.setOnClickListener { closePlayer() }
-        topRow.addView(close, LinearLayout.LayoutParams(dp(34), dp(30)))
-        bar.addView(topRow)
-
-        playerChips = chips
-        return bar
+    /** Asks the guest page to start: its <video> first, then its own play button. */
+    private fun startPlayback() {
+        if (playerLayer == null) return
+        js(
+            "(function(){var v=document.querySelector('video');" +
+                "if(v){try{v.play().catch(function(){});}catch(e){}}" +
+                "var b=document.querySelector('button[aria-label*=\"lay\" i]," +
+                "[class*=\"big-play\"],[class*=\"play-button\"],[class*=\"playbutton\"]');" +
+                "if(b){try{b.click();}catch(e){}}" +
+                "return !!v;})()",
+        )
     }
 
     private fun js(code: String) = web?.evaluateJavascript(code, null)
-
-    private fun paintPlayerChips() {
-        val chips = playerChips ?: return
-        chips.removeAllViews()
-        catalog?.servers.orEmpty().forEachIndexed { index, server ->
-            val chip = serverChip(server.name, index == serverIndex)
-            chip.setOnClickListener {
-                serverIndex = index
-                tries = 0
-                paintPlayerChips()
-                reloadServer()
-            }
-            chips.addView(chip)
-        }
-    }
 
     private fun reloadServer() {
         val data = catalog ?: return
@@ -1030,7 +994,6 @@ class MoviesActivity : Activity() {
             tries += 1
             if (tries >= total) return@evaluateJavascript
             serverIndex = (serverIndex + 1) % total
-            paintPlayerChips()
             reloadServer()
         }
     }
@@ -1043,7 +1006,6 @@ class MoviesActivity : Activity() {
             destroy()
         }
         web = null
-        playerChips = null
         playerLayer?.let { (window.decorView as FrameLayout).removeView(it) }
         playerLayer = null
         applyImmersive()

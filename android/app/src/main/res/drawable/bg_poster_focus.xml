@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The poster under the D-pad. It is drawn as a *foreground*: the artwork fills
-     the card edge to edge, so a background ring sat underneath the picture and
-     was never seen. A wash plus a 3dp mint edge reads from the sofa without
-     moving the card. -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="10dp" />
-            <solid android:color="#1F35E7C0" />
-            <stroke
-                android:width="3dp"
-                android:color="@color/mint" />
-        </shape>
-    </item>
-</layer-list>
+<!-- The frame around the poster under the D-pad. It sits in the 3dp margin the
+     card keeps around the artwork, so the whole ring is drawn: the previous
+     version was a stroke on the picture itself, whose corners and right edge were
+     covered by the artwork and by the neighbouring card. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="13dp" />
+    <solid android:color="#1A35E7C0" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/mint" />
+</shape>

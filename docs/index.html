@@ -749,7 +749,18 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.15 <span class="tagx">latest</span></h3>
+        <h3>1.5.16 <span class="tagx">latest</span></h3>
+        <div class="meta">16 November 2026 · Android TV only · mobile and Windows stay on 1.5.15</div>
+        <ul>
+          <li><b>The film starts when you press Play.</b> The strip we drew under the picture — the title, the four mirrors, the close cross — took the D-pad away from the page it was covering, so the embed's own play button could not be reached and nothing ever started. The player is the embed, edge to edge, with one close button in the corner. The page is also asked to start itself a few times after it loads, because a remote cannot click a button that lives inside a web page.</li>
+          <li><b>A mirror that dies still switches itself.</b> The four mirrors are now chosen in the sheet before playback, and the watchdog keeps walking past one that paints no picture without showing a second row of chips over the video.</li>
+          <li><b>Borders are drawn where they can be seen.</b> The focused poster's ring is a frame around the artwork instead of a stroke on it, so its corners and right-hand edge are no longer covered by the picture or the next card. The sheet's Play button no longer grows on focus, which is what clipped its left and right edges. The chosen tile in the guide keeps its top border while the grid is scrolled, and a resting tile's edge is 2dp instead of a hairline that read as nothing from the sofa.</li>
+          <li><b>Only the app that changed gets a new number.</b> The release job now rebuilds an Android flavour when that flavour's own version line moves, not when any file under android/ moves: a TV fix no longer re-numbers, re-packages and re-offers the phone app. Windows and mobile stay on 1.5.15.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.15</h3>
         <div class="meta">16 November 2026 · Android TV · Android mobile · Windows unchanged from 1.5.14</div>
         <ul>
           <li><b>Choosing a poster no longer means leaving the wall.</b> A click on a tile used to move the focus down to a strip under the grid, where the mirrors, the season and episode steppers and Play all waited. One sheet opens over the poster now: the player list, the steppers for a series, and Play, with the D-pad starting on Play and returning to the poster it came from when the sheet closes. The strip under the wall is gone, so the artwork fills the screen.</li>
@@ -793,14 +804,6 @@
         <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
         <ul>
           <li><b>An old copy cannot open the guide any more.</b> Every build asks the release feed on launch which number is current, and if a newer one is there it blocks itself until that build is installed: Android TV and mobile show one dialog carrying <i>Download update</i> and <i>Close app</i>, Windows shows its update sheet with the <i>Later</i> button gone. Back, Escape and swiping the dialog away no longer lead anywhere, a download that fails returns to the same block with the reason printed above it, and coming back from the installer without updating blocks again. The check runs whatever the update preference says; the manual check in Settings keeps its ordinary prompt. A device that cannot reach GitHub is left alone instead of being locked out.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.10</h3>
-        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-          <li><b>The donation sheet shows what you left switched on.</b> Both codes shipped inside every build and stayed there whatever admin.html said, so a viewer could scan a method you had already turned off. All three builds now read the same <i>donation.json</i> the site reads before they paint the sheet: a method set to off loses its card, the hint names the one that is left, and with both off the codes give way to the paused line. Only an explicit <i>false</i> hides a code, so a dead network never hides the only way to give.</li>
         </ul>
       </article>
 
@@ -899,8 +902,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.15", mobile: "1.5.15", win: "1.5.15" };
-  const TAGS = { tv: "v1.5.15", mobile: "v1.5.15", win: "v1.5.15" };
+  const VERSIONS = { tv: "1.5.16", mobile: "1.5.15", win: "1.5.15" };
+  const TAGS = { tv: "v1.5.16", mobile: "v1.5.15", win: "v1.5.15" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
