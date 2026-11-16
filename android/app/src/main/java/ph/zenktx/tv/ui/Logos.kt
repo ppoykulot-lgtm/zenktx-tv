@@ -57,6 +57,10 @@ object Logos {
 
         logo.tag = address
         logo.visibility = View.VISIBLE
+        /* Initials first, artwork on top of them. A grid of empty cells for the
+           half minute the feed takes to answer reads as a broken guide; a cell
+           with the channel's initials reads as a guide that is still waking up. */
+        logo.setImageDrawable(MonogramDrawable.of(name))
         load(logo, address, name, 1)
     }
 

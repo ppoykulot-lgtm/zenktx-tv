@@ -57,9 +57,12 @@ object Images {
             .components { add(SvgDecoder.Factory()) }
             .okHttpClient {
                 OkHttpClient.Builder()
-                    .connectTimeout(12, TimeUnit.SECONDS)
-                    .readTimeout(15, TimeUnit.SECONDS)
-                    .callTimeout(30, TimeUnit.SECONDS)
+                    /* A dead logo host used to hold a socket for twelve seconds
+                       before the next one started; six is enough for the feeds
+                       that answer at all on a television's connection. */
+                    .connectTimeout(6, TimeUnit.SECONDS)
+                    .readTimeout(12, TimeUnit.SECONDS)
+                    .callTimeout(20, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .dispatcher(
                         Dispatcher().apply {

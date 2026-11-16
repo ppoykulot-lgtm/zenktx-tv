@@ -523,7 +523,10 @@ class MoviesActivity : Activity() {
         try {
             if (rendered == 0) grid.removeAllViews()
             val width = resources.displayMetrics.widthPixels - padH * 2
-            val columns = if (compact) 3 else max(4, width / dp(165))
+            /* Seven posters across a 1080p television instead of five: at five the
+               artwork was so large that the focus ring and the caption of the row
+               below it were pushed out of the cell. */
+            val columns = if (compact) 3 else max(5, width / dp(125))
             val cardW = (width - gap * (columns - 1)) / columns
             val posterH = (cardW * 1.5f).toInt()
             val limit = min(list.size, rendered + PAGE)
@@ -598,10 +601,10 @@ class MoviesActivity : Activity() {
         val name = TextView(this).apply {
             text = item.title
             setTextColor(ContextCompatColor.muted)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
-            setPadding(dp(2), dp(6), dp(2), 0)
+            setPadding(dp(2), dp(7), dp(2), 0)
         }
         wrap.addView(frame)
         wrap.addView(name)
@@ -610,8 +613,9 @@ class MoviesActivity : Activity() {
 
         if (!compact) {
             wrap.setOnFocusChangeListener { view, hasFocus ->
-                view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
-                    .setDuration(120).start()
+                /* No growth on focus: scaling the card pushed its caption under the
+                   next row, which is why the title read as cut in half. The ring
+                   alone marks the poster now. */
                 name.setTextColor(if (hasFocus) ContextCompatColor.text else ContextCompatColor.muted)
                 frame.setBackgroundResource(
                     if (hasFocus) R.drawable.bg_poster_focus else 0,
@@ -888,16 +892,26 @@ class MoviesActivity : Activity() {
         }
     }
 
-    /** Asks the guest page to start: its <video> first, then its own play button. */
+    /**
+     * Asks the guest page to start, and to stop being silent. These embeds open
+     * muted so the browser will autoplay them, and a muted film with the volume
+     * keys doing nothing reads as a broken player.
+     */
     private fun startPlayback() {
         if (playerLayer == null) return
         js(
-            "(function(){var v=document.querySelector('video');" +
+            "(function(){var vs=document.querySelectorAll('video');" +
+                "for(var i=0;i<vs.length;i++){try{vs[i].muted=false;vs[i].volume=1;" +
+                "vs[i].defaultMuted=false;}catch(e){}}" +
+                "var v=vs[0];" +
                 "if(v){try{v.play().catch(function(){});}catch(e){}}" +
+                "var u=document.querySelectorAll('[aria-label*=\"unmute\" i]," +
+                "[title*=\"unmute\" i],[class*=\"unmute\"]');" +
+                "for(var j=0;j<u.length;j++){try{u[j].click();}catch(e){}}" +
                 "var b=document.querySelector('button[aria-label*=\"lay\" i]," +
                 "[class*=\"big-play\"],[class*=\"play-button\"],[class*=\"playbutton\"]');" +
                 "if(b){try{b.click();}catch(e){}}" +
-                "return !!v;})()",
+                "return vs.length;})()",
         )
     }
 
@@ -1023,6 +1037,26 @@ class MoviesActivity : Activity() {
             return
         }
         super.onBackPressed()
+    }
+
+    /**
+     * A remote's OK and media keys belong to the page while a film is playing.
+     * They are also another chance to unmute: the embeds start their video muted
+     * to satisfy the autoplay policy, and nothing on screen says so.
+     */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (playerLayer != null) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_MEDIA_PLAY,
+                KeyEvent.KEYCODE_HEADSETHOOK,
+                -> {
+                    startPlayback()
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private companion object {
