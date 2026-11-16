@@ -749,7 +749,17 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.14 <span class="tagx">latest</span></h3>
+        <h3>1.5.15 <span class="tagx">latest</span></h3>
+        <div class="meta">16 November 2026 · Android TV · Android mobile · Windows unchanged from 1.5.14</div>
+        <ul>
+          <li><b>Choosing a poster no longer means leaving the wall.</b> A click on a tile used to move the focus down to a strip under the grid, where the mirrors, the season and episode steppers and Play all waited. One sheet opens over the poster now: the player list, the steppers for a series, and Play, with the D-pad starting on Play and returning to the poster it came from when the sheet closes. The strip under the wall is gone, so the artwork fills the screen.</li>
+          <li><b>The focused poster is outlined properly.</b> The highlight was painted as a background, and the poster covers the card edge to edge, so the ring sat underneath the picture and never showed. It is a foreground now — a mint wash and a 3 dp edge over the artwork itself, still with the lift and the brightened title.</li>
+          <li><b>Search, on the wall.</b> A field above the posters filters titles and genres as you type, and pulls the pages that have not scrolled by yet in the background so an answer is never limited to what is already on screen. On a television, walking onto the field opens the on-screen keyboard, down leaves it for the first result, and the clear pill wipes the query without hunting for the delete key.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.14</h3>
         <div class="meta">16 November 2026 · Android TV · Android mobile · Windows</div>
         <ul>
           <li><b>Artwork arrives in one burst, not five at a time.</b> A guide of 462 logos walked five requests at a time — the HTTP client's default — so the first rows of every launch waited on DNS, TLS and a queue rather than on the network itself. All three apps now open sixteen requests per host, preconnect to the logo and poster hosts before the grid asks for anything, and keep what arrives in a disk cache that survives a restart.</li>
@@ -791,28 +801,6 @@
         <div class="meta">10 November 2026 · Android TV · Android mobile · Windows</div>
         <ul>
           <li><b>The donation sheet shows what you left switched on.</b> Both codes shipped inside every build and stayed there whatever admin.html said, so a viewer could scan a method you had already turned off. All three builds now read the same <i>donation.json</i> the site reads before they paint the sheet: a method set to off loses its card, the hint names the one that is left, and with both off the codes give way to the paused line. Only an explicit <i>false</i> hides a code, so a dead network never hides the only way to give.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.9</h3>
-        <div class="meta">10 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.8</div>
-        <ul>
-          <li><b>The remote can reach the Guide.</b> The bar could not be walked past the running-time slider: a focused slider eats left and right to scrub, so the quality chip and the Guide were unreachable from the sofa. The sliders are no longer D-pad stops on the TV layout, and the bar chains Play → Mute → Auto → Guide with the same path back.</li>
-          <li><b>The bar waits while you walk it.</b> The hide timer kept counting while the D-pad was still moving, so the bar could vanish mid-step and leave the picture with no way to ask for the schedule. Every press restarts it, and it stays up while one of its buttons has focus.</li>
-          <li><b>Maintenance shows your message, not a black screen.</b> Published while the app was already open, the notice was written into the welcome panel that had faded out long before, and the guide was hidden as well — a black screen with nothing to read. The panel now comes back with the text you wrote in admin.html, and the app stops loading channels and update checks behind it.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.7</h3>
-        <div class="meta">8 November 2026 · Android TV · Android mobile · Windows unchanged on 1.5.1</div>
-        <ul>
-          <li><b>Every category says how many channels it holds.</b> The count sits after the name in a lighter weight — <i>Pinoy 129</i>, <i>News 80</i> — so the row answers whether Kids is worth opening before the D-pad walks into an empty grid. Favourites counts itself as you star a tile.</li>
-          <li><b>Every category has its own mark.</b> A newspaper for News, a ball for Sports, a clapperboard for Movies, a flag for Pinoy. The glyphs follow the category name, so a new shelf the catalogue grows later still gets one without a new APK.</li>
-          <li><b>The guide says which way there is more.</b> A thin strip on the right edge carries a mint thumb and a chevron at each end, and a chevron only lights up when there is something that way. A D-pad has no scrollbar; this is the one question it cannot answer on its own.</li>
-          <li><b>Logos belong to the right channel again.</b> Artwork was stored under the channel id and skipped whenever that file already existed, so when the feed reused an id the tile kept the old picture: 4k Travel wore the TV Maria logo, Adventure Earth wore A2Z. Each logo is now named after the address it came from and rebuilt from it, AVIF and WebP are converted to PNG for the boxes that cannot decode them, and a channel with no artwork left draws its initials instead of an empty cell.</li>
-          <li><b>The guide opens on your list, not on last build's.</b> The first paint used the catalogue baked into the APK, so a channel removed in admin.html still appeared for a second or two and then vanished when the network answer landed. It paints the catalogue downloaded on the previous launch first, so what you see is what you published.</li>
         </ul>
       </article>
 
@@ -911,8 +899,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.14", mobile: "1.5.14", win: "1.5.14" };
-  const TAGS = { tv: "v1.5.14", mobile: "v1.5.14", win: "v1.5.14" };
+  const VERSIONS = { tv: "1.5.15", mobile: "1.5.15", win: "1.5.15" };
+  const TAGS = { tv: "v1.5.15", mobile: "v1.5.15", win: "v1.5.15" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

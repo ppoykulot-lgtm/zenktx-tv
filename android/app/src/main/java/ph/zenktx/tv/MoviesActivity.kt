@@ -2,25 +2,34 @@ package ph.zenktx.tv
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Dialog
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
@@ -28,6 +37,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayout
 import ph.zenktx.tv.data.MovieCatalog
 import ph.zenktx.tv.data.MovieTitle
 import ph.zenktx.tv.data.PlayerServer
@@ -77,13 +88,12 @@ class MoviesActivity : Activity() {
     private lateinit var empty: TextView
     private lateinit var tabMovies: TextView
     private lateinit var tabSeries: TextView
-    private lateinit var detailTitle: TextView
-    private lateinit var detailMeta: TextView
-    private lateinit var detailServerRow: LinearLayout
-    private var playHost: LinearLayout? = null
-    private lateinit var seasonRow: LinearLayout
-    private lateinit var seasonValue: TextView
-    private lateinit var episodeValue: TextView
+    private lateinit var search: EditText
+    private lateinit var searchClear: TextView
+
+    /** What the field holds, applied to the wall on every keystroke. */
+    private var query = ""
+    private var loadingAll = false
 
     private var rendered = 0
     private var appending = false
@@ -166,6 +176,66 @@ class MoviesActivity : Activity() {
         tabSeries = if (compact) segment("Series") else pill("Series", primary = false)
         tabSeries.setOnClickListener { switchKind("series") }
 
+        /* Search sits on the wall it filters. A television has no keyboard until
+           the field is walked onto (or clicked), so focus opens the on-screen one
+           and the clear pill is there for the rest of the typing. */
+        search = EditText(this).apply {
+            hint = "Search a title"
+            isSingleLine = true
+            setTextColor(ContextCompatColor.text)
+            setHintTextColor(ContextCompatColor.muted)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 13f else 12f)
+            setBackgroundResource(R.drawable.bg_chip)
+            setPadding(dp(14), 0, dp(14), 0)
+            isFocusable = true
+            imeOptions = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_EXTRACT_UI
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                override fun afterTextChanged(s: Editable?) {
+                    query = s?.toString().orEmpty().trim()
+                    searchClear.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+                    render()
+                    if (query.isNotEmpty()) loadAllPages()
+                }
+            })
+            setOnClickListener { showKeyboard() }
+            setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showKeyboard() }
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    hideKeyboard()
+                    focusFirstCard()
+                    true
+                } else {
+                    false
+                }
+            }
+            /* A single-line field has no use for up and down: hand them to the
+               wall, so the D-pad can always leave the keyboard and reach posters. */
+            setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    focusFirstCard()
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+        searchClear = TextView(this).apply {
+            text = "✕"
+            isFocusable = true
+            isClickable = true
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompatColor.chipText)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setBackgroundResource(R.drawable.bg_chip)
+            visibility = View.GONE
+            setOnClickListener {
+                search.setText("")
+                hideKeyboard()
+            }
+        }
+
         if (compact) {
             val bar = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -181,12 +251,28 @@ class MoviesActivity : Activity() {
             tabs.addView(tabMovies, LinearLayout.LayoutParams(0, dp(40), 1f).apply { marginEnd = dp(8) })
             tabs.addView(tabSeries, LinearLayout.LayoutParams(0, dp(40), 1f))
             top.addView(tabs)
+            val searchRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(10), 0, 0)
+            }
+            searchRow.addView(search, LinearLayout.LayoutParams(0, dp(40), 1f))
+            searchRow.addView(
+                searchClear,
+                LinearLayout.LayoutParams(dp(40), dp(40)).apply { marginStart = dp(8) },
+            )
+            top.addView(searchRow)
         } else {
             top.addView(back)
             top.addView(title)
             top.addView(tabMovies)
             top.addView(tabSeries)
             top.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
+            top.addView(search, LinearLayout.LayoutParams(dp(250), dp(38)))
+            top.addView(
+                searchClear,
+                LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginStart = dp(8) },
+            )
         }
         root.addView(top)
 
@@ -218,112 +304,6 @@ class MoviesActivity : Activity() {
             setOnScrollChangeListener { _, _, _, _, _ -> maybeAppend() }
         }
         root.addView(scroller)
-
-        /* details: beside the wall on a TV, under it on a phone */
-        root.addView(View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1))
-            setBackgroundColor(ContextCompatColor.line)
-        })
-        val footer = LinearLayout(this).apply {
-            orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
-            gravity = if (compact) Gravity.START else Gravity.CENTER_VERTICAL
-            setPadding(0, dp(6), 0, if (compact) dp(2) else 0)
-        }
-        val textCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        detailTitle = TextView(this).apply {
-            text = "Pick a title"
-            setTextColor(ContextCompatColor.text)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 16f else 15f)
-            setTypeface(typeface, Typeface.BOLD)
-            maxLines = 1
-            ellipsize = TextUtils.TruncateAt.END
-        }
-        detailMeta = TextView(this).apply {
-            text = ""
-            setTextColor(ContextCompatColor.muted)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
-        }
-        textCol.addView(detailTitle)
-        textCol.addView(detailMeta)
-        textCol.layoutParams = LinearLayout.LayoutParams(
-            if (compact) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-        )
-        footer.addView(textCol)
-
-        seasonRow = LinearLayout(this).apply {
-            orientation = if (compact) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            visibility = View.GONE
-            setPadding(0, dp(8), 0, 0)
-        }
-        val seasonMinus = pill("S−", primary = false, small = true)
-        seasonValue = pill("S1", primary = false, small = true)
-        val seasonPlus = pill("S+", primary = false, small = true)
-        val episodeMinus = pill("E−", primary = false, small = true)
-        episodeValue = pill("E1", primary = false, small = true)
-        val episodePlus = pill("E+", primary = false, small = true)
-        listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus).forEach {
-            it.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 12f else 10f)
-            it.setPadding(dp(14), dp(if (compact) 8 else 7), dp(14), dp(if (compact) 8 else 7))
-            if (!compact) it.minWidth = dp(52)
-        }
-        seasonMinus.setOnClickListener { season = max(1, season - 1); paintSteppers() }
-        seasonPlus.setOnClickListener { season += 1; paintSteppers() }
-        episodeMinus.setOnClickListener { episode = max(1, episode - 1); paintSteppers() }
-        episodePlus.setOnClickListener { episode += 1; paintSteppers() }
-        if (compact) {
-            /* Seasons on one line, episodes on the next: three chips fit, six do not.
-               Each line is horizontal inside the vertical stepper block. */
-            val seasonLine = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            listOf(seasonMinus, seasonValue, seasonPlus).forEach { seasonLine.addView(it) }
-            seasonRow.addView(seasonLine)
-            val episodeLine = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(0, dp(6), 0, 0)
-            }
-            listOf(episodeMinus, episodeValue, episodePlus).forEach { episodeLine.addView(it) }
-            seasonRow.addView(episodeLine)
-        } else {
-            listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus)
-                .forEach { seasonRow.addView(it) }
-        }
-        footer.addView(seasonRow)
-
-        detailServerRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-        }
-        if (compact) {
-            /* Play sits outside the scrolling chips: inside it, the pill was the
-               last thing in a row that runs off the screen. */
-            val chipsRow = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(0, dp(6), 0, 0)
-            }
-            val chipsScroll = HorizontalScrollView(this).apply {
-                isHorizontalScrollBarEnabled = false
-                clipToPadding = false
-                addView(detailServerRow)
-            }
-            chipsRow.addView(chipsScroll, LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f,
-            ))
-            playHost = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(8), 0, 0, 0)
-            }
-            chipsRow.addView(playHost, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-            ))
-            footer.addView(chipsRow)
-        } else {
-            footer.addView(View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) })
-            footer.addView(detailServerRow)
-        }
-        root.addView(footer)
 
         setContentView(root)
     }
@@ -435,9 +415,7 @@ class MoviesActivity : Activity() {
                 }
                 empty.text = ""
                 paintTabs()
-                if (selected == null) selected = list.first()
                 appendRows()
-                paintDetail()
             }
         }.start()
     }
@@ -448,6 +426,8 @@ class MoviesActivity : Activity() {
         selected = null
         season = 1
         episode = 1
+        query = ""
+        search.setText("")
         scroller.scrollTo(0, 0)
         paintTabs()
         render()
@@ -461,18 +441,84 @@ class MoviesActivity : Activity() {
         tabSeries.setTextColor(if (kind == "series") ContextCompatColor.mint else ContextCompatColor.chipText)
     }
 
+    /** The wall's list: the pages pulled so far, narrowed by the search field. */
+    private fun shown(): List<MovieTitle> {
+        val list = loaded[kind].orEmpty()
+        if (query.isEmpty()) return list
+        val needle = query.lowercase()
+        return list.filter { item ->
+            item.title.lowercase().contains(needle) ||
+                item.genres.any { it.lowercase().contains(needle) }
+        }
+    }
+
     private fun render() {
         grid.removeAllViews()
         rendered = 0
-        val list = loaded[kind].orEmpty()
-        if (list.isEmpty()) return
-        if (selected == null) selected = list.first()
+        if (shown().isEmpty()) {
+            empty.text = if (query.isEmpty()) "" else "Nothing matched “$query”."
+            return
+        }
+        empty.text = ""
         appendRows()
-        paintDetail()
+    }
+
+    /**
+     * A search has to look at the whole catalogue, not just the pages that have
+     * scrolled by, so the rest is pulled in the background and the wall repaints
+     * when it lands.
+     */
+    private fun loadAllPages() {
+        val data = catalog ?: return
+        if (loadingAll) return
+        val want = kind
+        val pages = data.pages(want)
+        val from = cursor[want] ?: 0
+        if (from >= pages.files.size) return
+        loadingAll = true
+        Thread {
+            val fresh = mutableListOf<MovieTitle>()
+            var next = from
+            while (next < pages.files.size) {
+                val titles = try {
+                    MovieCatalog.loadPage(data, want, next)
+                } catch (error: Exception) {
+                    emptyList()
+                }
+                if (titles.isEmpty()) break
+                fresh.addAll(titles)
+                next += 1
+            }
+            main.post {
+                loadingAll = false
+                loaded.getOrPut(want) { mutableListOf() }.addAll(fresh)
+                cursor[want] = next
+                if (kind == want && query.isNotEmpty()) render()
+            }
+        }.start()
+    }
+
+    private fun showKeyboard() {
+        val manager = getSystemService(InputMethodManager::class.java) ?: return
+        search.postDelayed(
+            { manager.showSoftInput(search, InputMethodManager.SHOW_IMPLICIT) },
+            120,
+        )
+    }
+
+    private fun hideKeyboard() {
+        val manager = getSystemService(InputMethodManager::class.java) ?: return
+        manager.hideSoftInputFromWindow(search.windowToken, 0)
+        search.clearFocus()
+    }
+
+    private fun focusFirstCard() {
+        val row = grid.getChildAt(0) as? LinearLayout ?: return
+        row.getChildAt(0)?.requestFocus()
     }
 
     private fun appendRows() {
-        val list = loaded[kind].orEmpty()
+        val list = shown()
         if (list.isEmpty() || appending) return
         appending = true
         try {
@@ -509,10 +555,13 @@ class MoviesActivity : Activity() {
     private fun maybeAppend() {
         val content = scroller.getChildAt(0) ?: return
         if (scroller.scrollY + scroller.height < content.height - dp(400)) return
-        if (rendered < loaded[kind].orEmpty().size) {
+        if (rendered < shown().size) {
             grid.post { appendRows() }
             return
         }
+        /* A filtered wall is complete already: every page arrives when the
+           search starts, so scrolling has nothing left to pull. */
+        if (query.isNotEmpty()) return
         val pages = catalog?.pages(kind) ?: return
         if ((cursor[kind] ?: 0) < pages.files.size) loadNextPage()
     }
@@ -552,14 +601,14 @@ class MoviesActivity : Activity() {
                 view.animate().scaleX(if (hasFocus) 1.06f else 1f).scaleY(if (hasFocus) 1.06f else 1f)
                     .setDuration(120).start()
                 name.setTextColor(if (hasFocus) ContextCompatColor.text else ContextCompatColor.muted)
-                view.setBackgroundResource(if (hasFocus) R.drawable.bg_tile_glow else 0)
+                /* The ring is a foreground, not a background: the poster fills the
+                   card edge to edge, so a background ring is painted underneath it
+                   and never seen -- which is why the highlight looked missing. */
+                poster.foreground =
+                    if (hasFocus) getDrawable(R.drawable.bg_poster_focus) else null
             }
         }
-        wrap.setOnClickListener {
-            selected = item
-            paintDetail()
-            paintSelection()
-        }
+        wrap.setOnClickListener { openSheet(item, wrap) }
         return wrap
     }
 
@@ -581,51 +630,176 @@ class MoviesActivity : Activity() {
         }
     }
 
-    private fun paintDetail() {
-        val item = selected ?: return
-        detailTitle.text = item.title
-        detailMeta.text = listOfNotNull(
-            item.year.ifBlank { null },
-            item.genres.take(2).joinToString(" · ").ifBlank { null },
-            if (item.rating > 0) "★ ${item.rating}" else null,
-        ).joinToString("   ")
-        seasonRow.visibility = if (item.kind == "tv") View.VISIBLE else View.GONE
-        paintSteppers()
+    /* ----------------------------------------------------------------- sheet */
 
-        detailServerRow.removeAllViews()
-        catalog?.servers.orEmpty().forEachIndexed { index, server ->
-            val chip = serverChip(server.name, index == serverIndex)
-            chip.setOnClickListener {
-                serverIndex = index
-                paintDetail()
-            }
-            detailServerRow.addView(chip)
+    /**
+     * A poster is the only choice the wall asks for. One sheet then carries the
+     * rest of the job -- the season and episode steppers for a series, the
+     * mirror, and Play -- so starting a title is two D-pad presses on the poster
+     * itself instead of a walk down to a strip under the grid.
+     */
+    private fun openSheet(item: MovieTitle, from: View?) {
+        selected = item
+        season = 1
+        episode = 1
+        paintSelection()
+
+        val sheet = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(20))
+            background = getDrawable(R.drawable.bg_sheet)
         }
+
+        val heading = TextView(this).apply {
+            text = item.title
+            setTextColor(ContextCompatColor.text)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (compact) 16f else 18f)
+            setTypeface(typeface, Typeface.BOLD)
+            maxLines = 2
+            ellipsize = TextUtils.TruncateAt.END
+        }
+        val meta = TextView(this).apply {
+            text = listOfNotNull(
+                item.year.ifBlank { null },
+                item.genres.take(2).joinToString(" · ").ifBlank { null },
+                if (item.rating > 0) "★ ${item.rating}" else null,
+            ).joinToString("   ")
+            setTextColor(ContextCompatColor.muted)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+            setPadding(0, dp(5), 0, 0)
+        }
+        sheet.addView(heading)
+        sheet.addView(meta)
+
+        val steps = FlexboxLayout(this).apply {
+            flexWrap = FlexWrap.WRAP
+            visibility = if (item.kind == "tv") View.VISIBLE else View.GONE
+            setPadding(0, dp(10), 0, 0)
+        }
+        val seasonValue = sheetPill("S$season")
+        val episodeValue = sheetPill("E$episode")
+        fun paintSteps() {
+            seasonValue.text = "S$season"
+            episodeValue.text = "E$episode"
+        }
+        val seasonMinus = sheetPill("S−")
+        val seasonPlus = sheetPill("S+")
+        val episodeMinus = sheetPill("E−")
+        val episodePlus = sheetPill("E+")
+        seasonMinus.setOnClickListener { season = max(1, season - 1); paintSteps() }
+        seasonPlus.setOnClickListener { season += 1; paintSteps() }
+        episodeMinus.setOnClickListener { episode = max(1, episode - 1); paintSteps() }
+        episodePlus.setOnClickListener { episode += 1; paintSteps() }
+        listOf(seasonMinus, seasonValue, seasonPlus, episodeMinus, episodeValue, episodePlus)
+            .forEach {
+                it.layoutParams = FlexboxLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply { marginEnd = dp(8); topMargin = dp(8) }
+                steps.addView(it)
+            }
+        sheet.addView(steps)
+
+        val label = TextView(this).apply {
+            text = "PLAYER"
+            setTextColor(ContextCompatColor.muted)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 9f)
+            letterSpacing = 0.16f
+            setTypeface(typeface, Typeface.BOLD)
+            setPadding(0, dp(16), 0, 0)
+        }
+        sheet.addView(label)
+
+        val chips = FlexboxLayout(this).apply {
+            flexWrap = FlexWrap.WRAP
+            setPadding(0, dp(2), 0, 0)
+        }
+        fun paintChips() {
+            chips.removeAllViews()
+            catalog?.servers.orEmpty().forEachIndexed { index, server ->
+                val chip = serverChip(server.name, index == serverIndex)
+                chip.layoutParams = FlexboxLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply { marginEnd = dp(8); topMargin = dp(8) }
+                chip.setOnClickListener {
+                    serverIndex = index
+                    paintChips()
+                    chips.getChildAt(index)?.requestFocus()
+                }
+                chips.addView(chip)
+            }
+        }
+        paintChips()
+        sheet.addView(chips)
+
         val play = TextView(this).apply {
             text = "▶  Play"
+            isFocusable = true
+            isClickable = true
+            gravity = Gravity.CENTER
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setTypeface(typeface, Typeface.BOLD)
+            letterSpacing = 0.04f
+            setTextColor(Color.WHITE)
+            setBackgroundResource(R.drawable.bg_pill_red)
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(44),
+            ).apply { topMargin = dp(18) }
+            setOnFocusChangeListener { view, hasFocus ->
+                view.animate().scaleX(if (hasFocus) 1.03f else 1f)
+                    .scaleY(if (hasFocus) 1.03f else 1f).setDuration(110).start()
+            }
+        }
+        sheet.addView(play)
+
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(sheet)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                if (compact) dp(320) else dp(540),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            setGravity(Gravity.CENTER)
+        }
+        play.setOnClickListener {
+            dialog.dismiss()
+            openPlayer()
+        }
+        dialog.setOnShowListener { play.requestFocus() }
+        dialog.setOnDismissListener {
+            /* The D-pad goes back to the poster that opened the sheet, not to the
+               top of the wall. */
+            if (!compact) from?.requestFocus()
+        }
+        dialog.show()
+    }
+
+    /** The sheet's steppers: same chip look, a size a television can read. */
+    private fun sheetPill(label: String): TextView =
+        TextView(this).apply {
+            text = label
             isFocusable = true
             isClickable = true
             gravity = Gravity.CENTER
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
             setTypeface(typeface, Typeface.BOLD)
             letterSpacing = 0.04f
-            setTextColor(Color.WHITE)
-            setBackgroundResource(R.drawable.bg_pill_red)
-            setPadding(dp(16), dp(8), dp(16), dp(8))
-            setOnClickListener { openPlayer() }
+            setTextColor(ContextCompatColor.chipText)
+            setBackgroundResource(R.drawable.bg_chip)
+            setPadding(dp(16), dp(9), dp(16), dp(9))
+            minWidth = dp(56)
+            setOnFocusChangeListener { view, hasFocus ->
+                view.animate().scaleX(if (hasFocus) 1.05f else 1f)
+                    .scaleY(if (hasFocus) 1.05f else 1f).setDuration(110).start()
+                view.setBackgroundResource(if (hasFocus) R.drawable.bg_chip_mint else R.drawable.bg_chip)
+                (view as TextView).setTextColor(
+                    if (hasFocus) ContextCompatColor.mint else ContextCompatColor.chipText,
+                )
+            }
         }
-        if (compact) {
-            playHost?.removeAllViews()
-            playHost?.addView(play, LinearLayout.LayoutParams(dp(82), dp(34)))
-        } else {
-            detailServerRow.addView(play, LinearLayout.LayoutParams(dp(110), dp(34)))
-        }
-    }
-
-    private fun paintSteppers() {
-        seasonValue.text = "S$season"
-        episodeValue.text = "E$episode"
-    }
 
     /* --------------------------------------------------------------- player */
 
