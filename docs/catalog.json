@@ -93,7 +93,7 @@
     "local"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0174-2b20264b3f.png",
-   "url": "https://ovh.rise2the.top/aldous/1795020569/2DKJuJanlQwvOOQzTE0u4g/hls/gma/stream.m3u8",
+   "url": "https://ovh.rise2the.top/aldous/1795020569/2DKJuJanlQwvOOQzTE0u4g/cv1/001/2/ch00000090990000001093/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20TsXah2%2FZLFNNIdWrVrXDMAoLvT86fM74ocVChyFS93HUsyK4TH4mOENKJ45mwOyS0g%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
@@ -194,7 +194,7 @@
     "gma"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0180-65f3dc60cf.png",
-   "url": "https://ovh.rise2the.top/aldous/1795020571/JmIdrUEkSFjy_DORjkMyrw/hls/gtv/stream.m3u8",
+   "url": "https://ovh.rise2the.top/aldous/1795020571/JmIdrUEkSFjy_DORjkMyrw/cv1/001/2/ch00000090990000001143/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20TsXah2%2FZLFNNIdWrVrXDMArwAtJC%2BsmBQ5ARU076BdkhsyK4TH4mOENKJ45mwOyS0g%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
@@ -4811,7 +4811,7 @@
     "local"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0175-2b20264b3f.png",
-   "url": "https://ovh.rise2the.top/aldous/1795020569/2DKJuJanlQwvOOQzTE0u4g/cv1/001/2/ch00000090990000001093/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20TsXah2%2FZLFNNIdWrVrXDMAoLvT86fM74ocVChyFS93HUsyK4TH4mOENKJ45mwOyS0g%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
+   "url": "https://ovh.rise2the.top/aldous/1795020569/2DKJuJanlQwvOOQzTE0u4g/hls/gma/stream.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
@@ -4834,7 +4834,7 @@
     "gma"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0176-65f3dc60cf.png",
-   "url": "https://ovh.rise2the.top/aldous/1795020571/JmIdrUEkSFjy_DORjkMyrw/cv1/001/2/ch00000090990000001143/index.m3u8?AuthInfo=v87HD9rEhwHiAdYyrP20TsXah2%2FZLFNNIdWrVrXDMArwAtJC%2BsmBQ5ARU076BdkhsyK4TH4mOENKJ45mwOyS0g%3D%3D&virtualDomain=001.live_hls.zte.com&JITPDRMType=NO",
+   "url": "https://ovh.rise2the.top/aldous/1795020571/JmIdrUEkSFjy_DORjkMyrw/hls/gtv/stream.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
