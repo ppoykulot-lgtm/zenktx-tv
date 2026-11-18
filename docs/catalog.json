@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-18T09:04:02Z",
+ "updatedAt": "2026-11-18T09:31:07Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -120,15 +120,15 @@
     "kapatid tv"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0004-6efdfbe0bb.svg",
-   "url": "https://ovh.rise2the.top/aldous/1793772002/q-VzL_Y2B9oT0WWF4qO9wQ/s/tv5_hd/default1/index.mpd",
-   "streamType": "mpd",
+   "url": "https://flameipt3.vercel.app/cab55861-8801-4d8c-a25a-234140884972",
+   "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
    "enabled": true,
    "drmType": "clearkey",
    "keyId": "9c3e7a516d824f04a9175b8c2e3d7040",
    "key": "524a9c2cec98272f71c347345a3fd12e",
-   "note": "ClearKey: the key below decrypts this stream, so it plays in ZENKTX."
+   "note": ""
   },
   {
    "id": 12,
