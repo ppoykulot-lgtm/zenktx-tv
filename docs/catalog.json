@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-18T09:00:41Z",
+ "updatedAt": "2026-11-18T09:02:20Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos.",
  "channels": [
@@ -93,7 +93,7 @@
     "local"
    ],
    "logo": "https://ppoykulot-lgtm.github.io/zenktx-tv/logos/ch0174-2b20264b3f.png",
-   "url": "https://ovh.rise2the.top/aldous/1793772017/ccR36J7l5Sx-8x0kyW-Rsw/hls/gma/stream.m3u8",
+   "url": "http://202.57.43.60:8443/live/5748aabe4c9d661afbd7f4068248f664/99.m3u8",
    "streamType": "hls",
    "quality": "HD",
    "isFilipino": true,
