@@ -91,6 +91,14 @@ function streamType(url) {
   return 'hls';
 }
 
+/* A row another list contributed keeps its own identity: the live feed rewrites
+   every "b:" address by channel name, and a channel taken from somewhere else
+   is not the feed's to rewrite. */
+function channelKeyPrefix(prefix, channel) {
+  const origin = String((channel && channel.origin) || '').trim();
+  return origin ? `${prefix}-${origin}` : prefix;
+}
+
 function fromJson(text, prefix) {
   const root = JSON.parse(text);
   // The published catalogue flags addresses that no longer answer with
@@ -101,7 +109,7 @@ function fromJson(text, prefix) {
   return (root.channels || [])
     .filter((c) => c && c.url && c.enabled !== false && !(c.tombstone && c.enabled !== true))
     .map((c, i) => ({
-      key: `${prefix}:${c.id ?? i + 1}`,
+      key: `${channelKeyPrefix(prefix, c)}:${c.id ?? i + 1}`,
       name: c.name || `Channel ${i + 1}`,
       category: c.category || 'Entertainment',
       logo: cleanLogo(c.logo),
@@ -205,6 +213,10 @@ function applyLive() {
   if (!Object.keys(liveMap).length) return 0;
   let patched = 0;
   for (const channel of state.base) {
+    // Only the feed's own rows are rewritten. A row another list contributed
+    // (b-flame:, or a playlist of the viewer's) holds an address the feed knows
+    // nothing about, and patching it by name put the dead link back.
+    if (!String(channel.key || '').startsWith('b:')) continue;
     const live = liveMap[liveKey(channel.name)];
     if (!live) continue;
     if (live.url !== channel.url) patched += 1;
@@ -364,7 +376,7 @@ async function boot() {
   try {
     const bundled = await window.zenk.bundledChannels();
     state.bundled = (bundled.channels || []).map((c, i) => ({
-      key: `b:${c.id ?? i + 1}`,
+      key: `${channelKeyPrefix('b', c)}:${c.id ?? i + 1}`,
       name: c.name || `Channel ${i + 1}`,
       category: c.category || 'Entertainment',
       logo: cleanLogo(c.logo),

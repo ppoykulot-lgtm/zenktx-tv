@@ -749,7 +749,17 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.18 <span class="tagx">latest</span></h3>
+        <h3>1.5.19 <span class="tagx">latest</span></h3>
+        <div class="meta">18 November 2026 · Android mobile · Windows · Android TV stays on 1.5.18</div>
+        <ul>
+          <li><b>The fourteen repaired Filipino channels reach the phone and the desktop.</b> 1.5.18 gave the television a second, working address for the channels whose host had started answering 410; this release brings the phone app and Windows the same fourteen. The published list already carried them, but both apps rewrote a channel's address from the live feed by name on every launch, which put the dead link back within a minute. A row another list contributed is now keyed apart from the feed's own and left alone.</li>
+          <li><b>Windows no longer renames the addresses inside your own playlists.</b> The same guard skips any row that is not one of the feed's: a playlist you added keeps the links you gave it, exactly as the TV and phone apps already did.</li>
+          <li><b>Android TV is untouched at 1.5.18.</b> The fourteen channels, their logos and the retired duplicates were already in that build; only the phone and Windows needed the new numbering.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.18</h3>
         <div class="meta">18 November 2026 · Android TV only · mobile and Windows stay on 1.5.15</div>
         <ul>
           <li><b>The Philippine channels play again.</b> Every Filipino address in the list came from one host, and that host started answering 410 this week — twenty-seven of the twenty-nine failures in a sample were that host — so the guide showed a tile and the player showed the expired-link card. The list now carries a second, working address for fourteen of them: TV5, One PH, One Sports, One Sports+ HD, PBA Rush, Kapatid, IBC13, HGTV HD, NBA TV Philippines, PTV4, Tap Movies, Sony Cine, UAAP Varsity and TV5 Monde. They are ClearKey DASH, the one protection Media3 opens without a licence server. The dead rows they replace are retired, so each channel is one tile, not two.</li>
@@ -798,17 +808,6 @@
           <li><b>Artwork arrives in one burst, not five at a time.</b> A guide of 462 logos walked five requests at a time — the HTTP client's default — so the first rows of every launch waited on DNS, TLS and a queue rather than on the network itself. All three apps now open sixteen requests per host, preconnect to the logo and poster hosts before the grid asks for anything, and keep what arrives in a disk cache that survives a restart.</li>
           <li><b>Posters are fetched at the size they are drawn.</b> A rail card was asking TMDB for the 500-pixel file: three times the pixels a 150-pixel tile shows, and three times the bytes over the same link. Cards now ask for the 342-pixel file, and the shelf preloads the next twenty-eight posters while you are still looking at this one, so the next screenful is already on disk.</li>
           <li><b>Watching a channel no longer empties the logo cache.</b> On Windows each playback cleared the whole HTTP cache to keep a rolled-over token from being replayed, and the channel logos and posters went with it — every trip back from a channel repainted the guide from the network. Only media requests are sent with <i>no-store</i> now; artwork stays on disk.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.13</h3>
-        <div class="meta">15 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-          <li><b>A Movies &amp; Series shelf, on all three apps.</b> One <i>Movies</i> button opens a poster wall built from TMDB metadata — 3,147 films and 3,307 shows, with the year, rating, genres and synopsis on the same screen. Playback runs the publisher's embedded player inside a <i>webview</i> rather than an iframe, which is the only reason the servers answer at all: they send <i>X-Frame-Options</i>. Four mirrors sit behind it (vidlink, vidsrc, vsembed, vidzee), a mirror that never produces a picture is walked past instead, and a mirror that already has one is left strictly alone — a player that is buffering, showing its pre-roll or waiting for a tap is no longer mistaken for a dead server.</li>
-          <li><b>The catalogue arrives in pages, not in one lump.</b> One index file names 44 pages of 150 titles; the shelf shows 28 posters, then adds 28 as you reach the bottom, and pulls the next page before it runs out. Searching fetches the remaining pages first, so a title is never missing from a search just because it sat on page twelve. Building it walks five TMDB feeds sixty pages deep, which is why the shelf grew from the eighty titles of the first cut to the full lists.</li>
-          <li><b>A phone screen that suits a phone.</b> Three columns instead of television-sized cards, tabs on their own row, the season and episode steppers on two lines so all six fit, Play outside the scrolling server chips so its edge cannot fall off the screen, and the whole screen immersive — no clock strip, no navigation bar. The header's two pills are the same size and read on one line. On a television the strip over the picture now leaves after five idle seconds and returns on any direction press.</li>
-          <li><b>Ads and pop-unders are answered with nothing.</b> Forty-four ad networks are refused at the request level on Android and inside the Movies partition on Windows, pop-up windows are denied outright, and a page's own full-screen "confirm you are not a robot" card is dismissed when it matches — that one is the mirror's markup, not a request, so it cannot be blocked the same way.</li>
         </ul>
       </article>
 
@@ -907,8 +906,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.18", mobile: "1.5.15", win: "1.5.15" };
-  const TAGS = { tv: "v1.5.18", mobile: "v1.5.15", win: "v1.5.15" };
+  const VERSIONS = { tv: "1.5.18", mobile: "1.5.19", win: "1.5.19" };
+  const TAGS = { tv: "v1.5.18", mobile: "v1.5.19", win: "v1.5.19" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a
