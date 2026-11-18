@@ -725,7 +725,7 @@
         </details>
         <details>
           <summary>How many channels, and where do they come from?</summary>
-          <p>The bundled list carries 485 channels, and 128 Philippine channels are detected
+          <p>The bundled list carries 456 channels, and 126 Philippine channels are detected
             automatically so they get their own filter chip. You can also point the app at any M3U or
             ZENKTX JSON playlist of your own.</p>
         </details>
@@ -749,7 +749,18 @@
 
       <div class="log">
       <article class="entry">
-        <h3>1.5.17 <span class="tagx">latest</span></h3>
+        <h3>1.5.18 <span class="tagx">latest</span></h3>
+        <div class="meta">18 November 2026 · Android TV only · mobile and Windows stay on 1.5.15</div>
+        <ul>
+          <li><b>The Philippine channels play again.</b> Every Filipino address in the list came from one host, and that host started answering 410 this week — twenty-seven of the twenty-nine failures in a sample were that host — so the guide showed a tile and the player showed the expired-link card. The list now carries a second, working address for fourteen of them: TV5, One PH, One Sports, One Sports+ HD, PBA Rush, Kapatid, IBC13, HGTV HD, NBA TV Philippines, PTV4, Tap Movies, Sony Cine, UAAP Varsity and TV5 Monde. They are ClearKey DASH, the one protection Media3 opens without a licence server. The dead rows they replace are retired, so each channel is one tile, not two.</li>
+          <li><b>A row from another list keeps its own address.</b> The live feed rewrites every bundled address by channel name on each launch, which would have handed these channels back the same dead links within a minute. Rows contributed by another list are keyed apart from the feed's own and left alone.</li>
+          <li><b>The new logos are served from here.</b> Twelve of the fourteen were pulled into this repository under <code>/logos</code>, so a tile is not waiting on a third-party host that may throttle a television. The other two paint their initials.</li>
+          <li><b>GMA 7 and GTV are still dark.</b> Both addresses are dead in our list and in the other one, so there is nothing to merge yet; the row returns the moment a working link exists.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>1.5.17</h3>
         <div class="meta">16 November 2026 · Android TV only · mobile and Windows stay on 1.5.15</div>
         <ul>
           <li><b>A film no longer starts silent.</b> The embeds open muted so a browser will play them without a tap, and the player underneath them was the page itself, so there was nothing to unmute with: the volume keys moved a level the video was not listening to. The page is now asked to unmute and take volume 1 every time it starts, and OK or the media keys on the remote ask again.</li>
@@ -798,15 +809,6 @@
           <li><b>The catalogue arrives in pages, not in one lump.</b> One index file names 44 pages of 150 titles; the shelf shows 28 posters, then adds 28 as you reach the bottom, and pulls the next page before it runs out. Searching fetches the remaining pages first, so a title is never missing from a search just because it sat on page twelve. Building it walks five TMDB feeds sixty pages deep, which is why the shelf grew from the eighty titles of the first cut to the full lists.</li>
           <li><b>A phone screen that suits a phone.</b> Three columns instead of television-sized cards, tabs on their own row, the season and episode steppers on two lines so all six fit, Play outside the scrolling server chips so its edge cannot fall off the screen, and the whole screen immersive — no clock strip, no navigation bar. The header's two pills are the same size and read on one line. On a television the strip over the picture now leaves after five idle seconds and returns on any direction press.</li>
           <li><b>Ads and pop-unders are answered with nothing.</b> Forty-four ad networks are refused at the request level on Android and inside the Movies partition on Windows, pop-up windows are denied outright, and a page's own full-screen "confirm you are not a robot" card is dismissed when it matches — that one is the mirror's markup, not a request, so it cannot be blocked the same way.</li>
-        </ul>
-      </article>
-
-      <article class="entry">
-        <h3>1.5.12</h3>
-        <div class="meta">11 November 2026 · Android TV · Android mobile · Windows</div>
-        <ul>
-          <li><b>A guide that ran dry refills itself.</b> The schedule came from one file from one provider, and this morning that file arrived holding nothing after 07:30 for GMA and only yesterday for TV5, so the channel you were watching showed no listing on the same build that had one the night before. Every build now reads two Philippine guides — <i>epgshare01</i> and <i>iptv-epg</i> — and carries both into the device copy, which from now on only gains listings and never loses them: a half-written file, or one that simply stops early, can no longer wipe a schedule the app already had. 99 channels now carry a schedule where 63 did, and the international shelf (HBO, Animal Planet, Cartoon Network and the rest) has one for the first time. GMA's own listing is still the provider's to publish; the app shows it the moment the file carries it.</li>
-          <li><b>A logo the guide already holds is no longer fetched again.</b> Coming back from a channel, or any refresh of the badges, rebound every tile and asked for its artwork again, then faded it back in — so a grid you had just been looking at rebuilt itself in front of you, one logo at a time. A tile whose address has not changed keeps the picture it is already showing, and the fade is gone. On Windows the tiles also load and decode as they come into view instead of all of them at once.</li>
         </ul>
       </article>
 
@@ -905,8 +907,8 @@
   // fix no longer renames the Android build.
   // Each platform keeps the version of the release that last touched it: the
   // APK signing fix is Android-only, so Windows stays on 1.3.3.
-  const VERSIONS = { tv: "1.5.17", mobile: "1.5.15", win: "1.5.15" };
-  const TAGS = { tv: "v1.5.17", mobile: "v1.5.15", win: "v1.5.15" };
+  const VERSIONS = { tv: "1.5.18", mobile: "1.5.15", win: "1.5.15" };
+  const TAGS = { tv: "v1.5.18", mobile: "v1.5.15", win: "v1.5.15" };
 
   // Never build a download URL out of the numbers written on this page: a card
   // that says v1.3.4 while the release still holds v1.3.3 made every click a

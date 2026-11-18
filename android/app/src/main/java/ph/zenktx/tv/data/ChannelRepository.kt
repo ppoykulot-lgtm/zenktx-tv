@@ -450,8 +450,13 @@ object ChannelRepository {
                 o.optBoolean("tombstone", false)
             ) continue
             val id = o.optInt("id", i + 1)
+            // A row another list contributed keeps its own identity: the live
+            // feed rewrites every "b:" address by channel name, and a channel
+            // we took from somewhere else is not the feed's to rewrite.
+            val origin = o.optString("origin")
+            val keyPrefix = if (origin.isBlank()) prefix else "$prefix-$origin"
             list += Channel(
-                key = "$prefix:$id",
+                key = "$keyPrefix:$id",
                 id = id,
                 name = o.optString("name", "Channel $id"),
                 slug = o.optString("slug"),
