@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updatedAt": "2026-11-19T14:46:45Z",
+ "updatedAt": "2026-11-19T14:47:44Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos. PH rows marked origin:flame come from flameipt3.",
  "channels": [
@@ -34,7 +34,7 @@
    "quality": "HD",
    "isFilipino": false,
    "enabled": true,
-   "drmType": "",
+   "drmType": "widevine",
    "keyId": "",
    "key": "",
    "note": ""
