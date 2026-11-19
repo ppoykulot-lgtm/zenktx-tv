@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updatedAt": "2026-11-18T12:06:17Z",
+ "updatedAt": "2026-11-19T14:46:45Z",
  "source": "https://dcoderztv-server-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json",
  "note": "Logos are served from this repository under /logos. PH rows marked origin:flame come from flameipt3.",
  "channels": [
@@ -29,11 +29,11 @@
    "category": "General",
    "tags": [],
    "logo": "https://i.imgur.com/bZWoDTg.png",
-   "url": "http://202.57.43.60:8443/live/5748aabe4c9d661afbd7f4068248f664/100.m3u8",
-   "streamType": "hls",
+   "url": "http://136.239.173.2:6610/001/2/ch00000090990000001286/manifest.mpd?AuthInfo=v87HD9rEhwHiAdYyrP20Tg5pgSMSITY%2FHYvvCWJRp%2Bqw65FFCygtQMRRIUPF0xuXytokK1MIobcue1ImXa0ZEA%3D%3D&version=v1.0&BreakPoint=0&virtualDomain=001.live_hls.zte.com&programid=ch00000000000000001694&contentid=ch00000000000000001694&videoid=ch00000090990000001286&recommendtype=0&userid=1004802317138&boid=001&stbid=02%3A00%3A00%3A00%3A00%3A00&terminalflag=1&profilecode=&usersessionid=CCJLYZ04O9IXXX&NeedJITP=1&JITPMediaType=DASH&JITPDRMType=NO",
+   "streamType": "mpd",
    "quality": "HD",
    "isFilipino": false,
-   "enabled": false,
+   "enabled": true,
    "drmType": "",
    "keyId": "",
    "key": "",
